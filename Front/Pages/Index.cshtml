@@ -1,0 +1,32 @@
+﻿@page
+@model Front.Pages.IndexModel
+@{
+    ViewData["Title"] = "Usuários";
+}
+
+<h1 class="text-center mb-4">Usuários do Moodle</h1>
+
+@if (Model.Usuarios?.Any() == true)
+{
+    <div class="row row-cols-1 row-cols-md-3 g-4">
+        @foreach (var usuario in Model.Usuarios)
+        {
+            <div class="col">
+                <div class="card shadow-sm border-light">
+                    <div class="card-body">
+                        <h5 class="card-title">@usuario.name</h5>
+                        <p class="card-text"><strong>ID:</strong> @usuario.user_id</p>
+                        <p class="card-text"><strong>Último acesso:</strong> @usuario.user_lastaccess</p>
+                        <a href="@Url.Page("Logs", new { userId = usuario.user_id })" class="btn btn-primary">Ver Logs</a>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </div>
+}
+else
+{
+    <p class="alert alert-warning">Nenhum usuário encontrado ou erro na API.</p>
+}
+
