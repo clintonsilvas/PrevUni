@@ -7,10 +7,12 @@ namespace Backend.Controllers
     public class MoodleController : ControllerBase
     {
         private readonly ApiService _apiService;
+        private readonly MongoService _mongoService;
 
-        public MoodleController(ApiService apiService)
+        public MoodleController(ApiService apiService, MongoService mongoService)
         {
             _apiService = apiService;
+            _mongoService = mongoService;
         }
 
         [HttpGet("usuarios")]
@@ -26,6 +28,46 @@ namespace Backend.Controllers
             var result = await _apiService.GetLogs(userId);
             return Ok(result);
         }
+        [HttpPost("importar")]
+        public async Task<IActionResult> ImportarDados()
+        {
+            try
+            {
+                await _apiService.ProcessarUsuariosAsync();
+                return Ok("Importação concluída com sucesso.");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro durante a importação: {ex.Message}\n\n{ex.StackTrace}");
+            }
+        }
+        [HttpGet("cursos")]
+        public async Task<IActionResult> GetCursos()
+        {
+            try
+            {
+                var cursos = await _mongoService.GetCursosDistintosAsync();
+                return Ok(cursos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao buscar cursos: {ex.Message}");
+            }
+        }
+        [HttpGet("cursos/com-alunos")]
+        public async Task<IActionResult> GetCursosComQtdAlunos()
+        {
+            try
+            {
+                var cursos = await _mongoService.GetCursosComQtdAlunosAsync();
+                return Ok(cursos);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao buscar cursos com alunos: {ex.Message}");
+            }
+        }
+
     }
 
 }

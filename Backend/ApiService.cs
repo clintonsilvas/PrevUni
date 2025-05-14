@@ -7,14 +7,16 @@ namespace Backend
 {
     public class ApiService
     {
+        private readonly MongoService _mongoService;
         private readonly HttpClient _httpClient;
         private string _token;
 
-        public ApiService(HttpClient httpClient)
+        public ApiService(HttpClient httpClient, MongoService mongoService)
         {
             _httpClient = httpClient;
-        }
-        
+            _mongoService = mongoService;
+        }       
+
         public async Task GetToken()
         {
             var content = new StringContent(JsonSerializer.Serialize(new
@@ -46,6 +48,16 @@ namespace Backend
             var response = await _httpClient.SendAsync(request);
             var json = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<List<LogUsuario>>(json);
+        }
+
+        public async Task ProcessarUsuariosAsync()
+        {
+            var usuarios = await GetUsuarios();
+            foreach (var usuario in usuarios)
+            {
+                var logs = await GetLogs(usuario.user_id);
+                await _mongoService.SalvarLogsAsync(usuario.user_id, logs);
+            }
         }
 
 

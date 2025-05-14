@@ -7,9 +7,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-
 builder.Services.AddHttpClient<ApiService>();
 builder.Services.AddScoped<ApiService>();
+builder.Services.AddSingleton<MongoService>();
+
 
 var app = builder.Build();
 
@@ -27,3 +28,5 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
