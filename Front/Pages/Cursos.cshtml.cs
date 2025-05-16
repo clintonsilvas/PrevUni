@@ -7,7 +7,7 @@ namespace Front.Pages
 {
     public class CursosModel : PageModel
     {
-        public List<Cursos> Cursos { get; set; } = new();
+        public List<Curso> Cursos { get; set; } = new();
 
         public async Task OnGetAsync()
         {
@@ -17,7 +17,7 @@ namespace Front.Pages
             if (response.IsSuccessStatusCode)
             {
                 var json = await response.Content.ReadAsStringAsync();
-                Cursos = JsonSerializer.Deserialize<List<Cursos>>(json) ?? new();
+                Cursos = JsonSerializer.Deserialize<List<Curso>>(json) ?? new();
             }
         }
     }

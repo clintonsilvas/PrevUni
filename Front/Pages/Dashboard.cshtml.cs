@@ -7,10 +7,10 @@ namespace Front.Pages
 {
     public class DashboardModel : PageModel
     {
-        public Cursos Cursos { get; set; } = new();
+        public Curso Cursos { get; set; } = new();
         public void OnGet(string nome, int quantidadeAlunos)
         {
-            Cursos = new Cursos()
+            Cursos = new Curso()
             {
                 curso = nome,
                 alunos = quantidadeAlunos
