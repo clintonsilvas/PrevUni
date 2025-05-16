@@ -5,18 +5,19 @@
 }
 
 .QuadroCards_List {
-  height: fit-content;
-  padding: 24px;
-  background-color: var(--Branco);
-  border-left: solid 4px var(--Azul-principal);
-  border-radius: 10px;
+    height: fit-content;
+    padding: 24px;
+    background-color: var(--Branco);
+    border-left: solid 4px var(--Azul-principal);
+    border-radius: 10px;
+    transition: all 0.8s ease-in-out;
 }
 
-.QuadroCards_List:hover {
-  border-left: solid 4px var(--Azul60S);
-  background-color: var(--Azul10S);
-  transform: scale(1.02);
-}
+    .QuadroCards_List:hover {
+        border-left: solid 4px var(--Azul60S);
+        background-color: var(--Azul10S);
+        transform: scale(1.02) translateY(-1.5px);
+    }
 
 .cur_porcVerd {
   background-color: var(--verde_trasparente);
