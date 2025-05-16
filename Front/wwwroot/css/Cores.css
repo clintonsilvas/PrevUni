@@ -1,0 +1,36 @@
+:root {
+  /*Variações de Azul*/
+  --Azul-principal: #2e5ee5;
+  --Azul40B: #001b66;
+  --Azul50B: #002280;
+  --Azul60B: #002899;
+  --Azul70B: #002fb2;
+  --Azul80B: #0036cc;
+  --Azul60S: #668eff;
+  --Azul40S: #99b4ff;
+  --Azul30S: #b2c7ff;
+  --Azul20S: #ccd9ff;
+  --Azul10S: #e5ecff;
+
+  /*Variações de Tons Neutros*/
+  --Preto40B: #363f5e;
+  --Preto50B: #495580;
+  --Cinza60B: #6b7799;
+  --Cinza70B: #8f98b2;
+  --Cinza80B: #abb4cc;
+  --Cinza90B: #cfd5e5;
+  --Cinza100B: #eff2fa;
+  --Branco: #fff;
+
+  /*Cores Secundárias*/
+  --Verde: #00bd55;
+  --Vermelho: #ff6a6a;
+  --verde_trasparente: #e7ffe5;
+  --vermelho_transparenre: #fff0f0;
+}
+
+.linha_azul {
+  height: 2px;
+  width: 100%;
+  background-color: var(--Azul-principal);
+}

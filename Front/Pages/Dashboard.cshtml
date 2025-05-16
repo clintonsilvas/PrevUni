@@ -3,16 +3,274 @@
 @{
     ViewData["Title"] = "Dashboard do Curso";
 }
+<!DOCTYPE html>
+<html lang="pt-BR">
 
-<div class="container mt-4">
-    <h2>Dashboard - </h2>
-    <div class="d-flex justify-content-between align-items-center mb-4">
-        <div>
-            <h5 class="text-muted">Bem Vindo</h5>
-            <h2><strong>Cursos</strong></h2>
+<body>
+    <main class="playground">
+        <div class="sobreposicao_inferior"></div>
+        <div class="scroll-content">
+            <header class="linha welcome"
+                    style="
+            justify-content: space-between;
+            width: 100%;
+            height: fit-content;
+          ">
+                <div class="coluna" style="--gap: 10px">
+                    <span class="SubH1 corAzul">Bem Vindo(a)</span>
+                    <h1 class="corPreta40B">@Model.Cursos.curso</h1>
+                </div>
+                <button class="botaoatualiza">Atualizar</button>
+            </header>
+            <div class="linha Endereco" style="align-items: center">
+                <img src="~/css/icons/casa.svg" alt="ÍconeHome" width="14" height="14" />
+                <span class="SubH3">></span>
+                <a class="SubH3">Cursos</a>
+                <span class="SubH3">></span>
+                <a class="SubH3">Ciênca da Computação</a>
+                <span class="SubH3">></span>
+                <a class="SubH3">Metodologias Ágeis</a>
+            </div>
+            <div class="dashboard coluna" style="--gap: 10px">
+                <div class="ImputIA linha">
+                    <img src="~/css/icons/estrelaIA.svg"
+                         alt="ÍconeHome"
+                         width="18"
+                         height="18" />
+                    <input type="text"
+                           id="IaPergunta"
+                           name="nome"
+                           placeholder="Pergunte a inteligência Artifical!" />
+                    <button>Gerar</button>
+                </div>
+                <div class="linha alt_li" style="flex: 1; height: fit-content">
+                    <div class="linha CardsEngajamento QuadroCards">
+                        <div class="linha engag" style="flex: 1; align-items: center">
+                            <div class="iconVerde">
+                                <img src="~/css/icons/rostofeliz.svg" alt="Icone_Aluno" />
+                            </div>
+                            <div class="coluna" style="--gap: 4px">
+                                <h5 class="corCinza80B">Engajamento Alto</h5>
+                                <h2 class="corVerde">63%</h2>
+                            </div>
+                        </div>
+
+                        <div class="linha engag" style="flex: 1; align-items: center">
+                            <div class="iconAzul">
+                                <img src="~/css/icons/rostosememocao.svg" alt="Icone_Aluno" />
+                            </div>
+                            <div class="coluna" style="--gap: 4px">
+                                <h5 class="corCinza80B">Engajamento Médio</h5>
+                                <h2 class="corAzul">63%</h2>
+                            </div>
+                        </div>
+
+                        <div class="linha engag" style="flex: 1; align-items: center">
+                            <div class="iconVermelho">
+                                <img src="~/css/icons/rostotriste.svg" alt="Icone_Aluno" />
+                            </div>
+                            <div class="coluna" style="--gap: 4px">
+                                <h5 class="corCinza80B">Engajamento Baixo</h5>
+                                <h2 class="corVermelha">63%</h2>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="linha QuantAlunos">
+                        <div class="iconEscuro">
+                            <img src="~/css/icons/formando.svg" alt="Icone_Aluno" />
+                        </div>
+                        <div class="coluna" style="--gap: 4px">
+                            <h4 class="corCinza100B">Alunos</h4>
+                            <h2 class="corCinza100B">@Model.Cursos.alunos</h2>
+                        </div>
+                    </div>
+                </div>
+                <div class="linha alt_li" style="flex: 1">
+                    <div class="QuadroCards GraficoEvolucao linha"
+                         style="flex: 1; --gap: 40px">
+                        <div class="coluna graf_caixa" style="--gap: 16px">
+                            <div class="linha" style="--gap: 10px; align-items: center">
+                                <img src="~/css/icons/graficos.svg" />
+                                <h4 class="corPreta50B">Evolução</h4>
+                            </div>
+
+                            <div class="coluna" id="graf01" style="--gap: 8px">
+                                <div class="linha"
+                                     style="height: 240px; justify-content: space-between">
+                                    <div class="coluna" style="width: 60px">
+                                        <p class="corCinza60B" style="margin-bottom: auto">
+                                            100%
+                                        </p>
+                                        <p class="corCinza60B" style="margin-bottom: auto">80%</p>
+                                        <p class="corCinza60B" style="margin-bottom: auto">60%</p>
+                                        <p class="corCinza60B" style="margin-bottom: auto">40%</p>
+                                        <p class="corCinza60B" style="margin-bottom: auto">20%</p>
+                                        <p class="corCinza60B">0%</p>
+                                    </div>
+                                    <!--Números gráficos-->
+                                    <div class="linha"
+                                         style="flex: 1; justify-content: space-between">
+                                        <div class="grafContainer">
+                                            <div class="grafCinza"></div>
+                                            <div class="grafAzul" style="--Porcentagem: 20%"></div>
+                                        </div>
+
+                                        <div class="grafContainer">
+                                            <div class="grafCinza"></div>
+                                            <div class="grafAzul" style="--Porcentagem: 30%"></div>
+                                        </div>
+
+                                        <div class="grafContainer">
+                                            <div class="grafCinza"></div>
+                                            <div class="grafAzul" style="--Porcentagem: 36%"></div>
+                                        </div>
+
+                                        <div class="grafContainer">
+                                            <div class="grafCinza"></div>
+                                            <div class="grafAzul" style="--Porcentagem: 42%"></div>
+                                        </div>
+
+                                        <div class="grafContainer">
+                                            <div class="grafCinza"></div>
+                                            <div class="grafAzul" style="--Porcentagem: 48%"></div>
+                                        </div>
+
+                                        <div class="grafContainer">
+                                            <div class="grafCinza"></div>
+                                            <div class="grafAzul" style="--Porcentagem: 56%"></div>
+                                        </div>
+
+                                        <div class="grafContainer">
+                                            <div class="grafCinza"></div>
+                                            <div class="grafAzul" style="--Porcentagem: 62%"></div>
+                                        </div>
+
+                                        <div class="grafContainer">
+                                            <div class="grafCinza"></div>
+                                            <div class="grafAzul" style="--Porcentagem: 72%"></div>
+                                        </div>
+
+                                        <div class="grafContainer">
+                                            <div class="grafCinza"></div>
+                                            <div class="grafAzul" style="--Porcentagem: 80%"></div>
+                                        </div>
+
+                                        <div class="grafContainer">
+                                            <div class="grafCinza"></div>
+                                            <div class="grafAzul" style="--Porcentagem: 88%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="linha">
+                                    <p class="corAzul" style="width: 60px">
+                                        <strong>Semanas</strong>
+                                    </p>
+                                    <div class="linha"
+                                         style="flex: 1; justify-content: space-between">
+                                        <p class="corCinza60B">1</p>
+                                        <p class="corCinza60B">2</p>
+                                        <p class="corCinza60B">3</p>
+                                        <p class="corCinza60B">4</p>
+                                        <p class="corCinza60B">5</p>
+                                        <p class="corCinza60B">6</p>
+                                        <p class="corCinza60B">7</p>
+                                        <p class="corCinza60B">8</p>
+                                        <p class="corCinza60B">9</p>
+                                        <p class="corCinza60B">10</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="coluna" style="flex: 1; --gap: 16px">
+                            <div class="linha" style="--gap: 10px; align-items: center">
+                                <img src="~/css/icons/alunosDesistentes.png" />
+                                <h4 class="corPreta50B">Posíveis Desistentes</h4>
+                            </div>
+                            <div class="tabela-card">
+                                <table>
+                                    <tbody>
+                                        <tr>
+                                            <td>1</td>
+                                            <td><a href="">Pedro Henrique</a></td>
+                                            <td>02%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>2</td>
+                                            <td><a href="">Miguel Oliveira</a></td>
+
+                                            <td>02%</td>
+                                        </tr>
+                                        <tr>
+                                            <td>3</td>
+                                            <td><a href="">Vanessa Carvalho</a></td>
+
+                                            <td>03%</td>
+                                        </tr>
+                                        <!-- continue os outros -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="QuadroCards Unidades coluna">
+                        <div class="linha" style="--gap: 10px; align-items: center">
+                            <img src="~/css/icons/caderno.svg" />
+                            <h4 class="corPreta50B">Unidades</h4>
+                        </div>
+                        <div class="coluna" style="width: 100%">
+                            <div class="coluna unid" style="width: 100%">
+                                <div class="linha"
+                                     style="width: 100%; justify-content: space-between">
+                                    <span class="titProgresso">Unidade 01</span>
+                                    <span class="titProgresso">78%</span>
+                                </div>
+                                <div class="caixaProgresso">
+                                    <div class="barraProgresso"
+                                         style="--Porcentagem: 78%"></div>
+                                </div>
+                            </div>
+
+                            <div class="coluna unid" style="width: 100%">
+                                <div class="linha"
+                                     style="width: 100%; justify-content: space-between">
+                                    <span class="titProgresso">Unidade 02</span>
+                                    <span class="titProgresso">53%</span>
+                                </div>
+                                <div class="caixaProgresso">
+                                    <div class="barraProgresso"
+                                         style="--Porcentagem: 53%"></div>
+                                </div>
+                            </div>
+
+                            <div class="coluna unid" style="width: 100%">
+                                <div class="linha"
+                                     style="width: 100%; justify-content: space-between">
+                                    <span class="titProgresso">Unidade 03</span>
+                                    <span class="titProgresso">45%</span>
+                                </div>
+                                <div class="caixaProgresso">
+                                    <div class="barraProgresso"
+                                         style="--Porcentagem: 45%"></div>
+                                </div>
+                            </div>
+
+                            <div class="coluna unid" style="width: 100%">
+                                <div class="linha"
+                                     style="width: 100%; justify-content: space-between">
+                                    <span class="titProgresso">Unidade 04</span>
+                                    <span class="titProgresso">21%</span>
+                                </div>
+                                <div class="caixaProgresso">
+                                    <div class="barraProgresso"
+                                         style="--Porcentagem: 21%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
-        <button class="btn btn-outline-primary" onclick="location.reload()">
-            🔄 Atualizar
-        </button>
-    </div>
-</div>
+    </main>
+</body>
+</html>

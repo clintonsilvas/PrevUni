@@ -1,0 +1,138 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", sans-serif;
+}
+
+/*Propriedades*/
+body {
+  background-color: var(--branco);
+  display: flex;
+  height: 100vh;
+
+  flex-direction: column;
+  gap: 16px;
+  padding: 16px;
+}
+
+h1 {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-size: 24pt;
+  font-weight: bold;
+  font-style: normal;
+}
+
+.SubH1 {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-size: 16pt;
+  font-style: normal;
+  font-weight: 600;
+}
+
+h2 {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-size: 18pt;
+  font-style: normal;
+  font-weight: Bold;
+}
+
+.SubH2 {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-size: 16pt;
+  font-style: normal;
+  font-weight: Medium;
+}
+
+h3 {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-size: 16pt;
+  font-style: normal;
+  font-weight: 680;
+}
+
+.SubH3 {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-size: 12pt;
+  font-style: normal;
+  font-weight: Medium;
+}
+
+h4 {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-size: 14pt;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.SubH4 {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-size: 12pt;
+  font-style: normal;
+  font-weight: Medium;
+}
+
+h5 {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-size: 12pt;
+  font-style: normal;
+  font-weight: 600;
+}
+
+.SubH5 {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-size: 12pt;
+  font-style: normal;
+  font-weight: Medium;
+}
+
+p {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-size: 8pt;
+  font-style: normal;
+  font-weight: 600;
+}
+
+button {
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-size: 10pt;
+  font-style: normal;
+  font-weight: Bold;
+  text-transform: uppercase;
+}
+
+input[type="text"] {
+  color: var(--Preto50B);
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+input[type="text"]::placeholder {
+  color: var(--Cinza80B);
+  font-family: "Inter", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 600;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  /*Propriedades*/
+  body {
+    gap: 08px;
+    padding: 12px 8px 8px 8px;
+  }
+}

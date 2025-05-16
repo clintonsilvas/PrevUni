@@ -1,0 +1,42 @@
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 8px;
+}
+
+.QuadroCards_List {
+  height: fit-content;
+  padding: 24px;
+  background-color: var(--Branco);
+  border-left: solid 4px var(--Azul-principal);
+  border-radius: 10px;
+}
+
+.QuadroCards_List:hover {
+  border-left: solid 4px var(--Azul60S);
+  background-color: var(--Azul10S);
+  transform: scale(1.02);
+}
+
+.cur_porcVerd {
+  background-color: var(--verde_trasparente);
+  border-radius: 20px;
+  padding: 4px 8px 4px 4px;
+}
+.cur_porcVerm {
+  background-color: var(--vermelho_transparenre);
+  border-radius: 20px;
+  padding: 4px 8px 4px 4px;
+}
+
+.cur_porcAzul {
+  background-color: var(--Azul10S);
+  border-radius: 20px;
+  padding: 4px 8px 4px 4px;
+}
+
+.cur_porcFont {
+  font-family: "Inter", sans-serif;
+  font-size: 10pt;
+  font-weight: bold;
+}
