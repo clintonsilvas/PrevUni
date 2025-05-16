@@ -124,7 +124,154 @@ namespace Backend
             return alunos;
         }
 
+        public class AcaoQuantidade
+        {
+            public string acao { get; set; }
+            public int quantidade { get; set; }
+        }
+
+        public class UsuarioAcoes
+        {
+            public string userId { get; set; }
+            public string nome { get; set; }
+            public List<AcaoQuantidade> acoes { get; set; }
+        }
+
+        public class EngajamentoUsuario
+        {
+            public string Nome { get; set; }
+            public string UserId { get; set; }
+            public double Engajamento { get; set; } // 0-100
+        }
+
+        public class EngajamentoService
+        {
+            private readonly Dictionary<string, int> _pesos = new()
+    {
+        { "viewed", 1 },
+        { "submitted", 5 },
+        { "uploaded", 4 },
+        { "graded", 4 },
+        { "created", 3 },
+        { "updated", 2 },
+        { "deleted", 1 },
+        { "started", 3 }
+    };
+
+            public List<EngajamentoUsuario> CalcularEngajamento(List<UsuarioAcoes> usuarios)
+            {
+                // Calcula pontuação bruta para todos
+                var resultado = new List<(UsuarioAcoes usuario, int score)>();
+
+                foreach (var usuario in usuarios)
+                {
+                    int score = 0;
+                    foreach (var acao in usuario.acoes)
+                    {
+                        if (_pesos.TryGetValue(acao.acao, out var peso))
+                        {
+                            score += acao.quantidade * peso;
+                        }
+                    }
+                    resultado.Add((usuario, score));
+                }
+
+                // Normaliza para 0-100
+                int maxScore = resultado.Max(r => r.score);
+                var engajamento = resultado.Select(r => new EngajamentoUsuario
+                {
+                    Nome = r.usuario.nome,
+                    UserId = r.usuario.userId,
+                    Engajamento = maxScore > 0 ? Math.Round((double)r.score / maxScore * 100, 2) : 0
+                }).ToList();
+
+                return engajamento;
+            }
+        }
+
+
+        public async Task<List<UsuarioComAcoes>> GetAcoesPorUsuarioAsync()
+        {
+            var pipeline = new BsonDocument[]
+            {
+        new BsonDocument("$unwind", "$logs"),
+        new BsonDocument("$group", new BsonDocument
+        {
+            { "_id", new BsonDocument
+                {
+                    { "user_id", "$logs.user_id" },
+                    { "nome", "$logs.name" },
+                    { "acao", "$logs.action" }
+                }
+            },
+            { "qtd", new BsonDocument("$sum", 1) }
+        }),
+        new BsonDocument("$group", new BsonDocument
+        {
+            { "_id", new BsonDocument
+                {
+                    { "user_id", "$_id.user_id" },
+                    { "nome", "$_id.nome" }
+                }
+            },
+            { "acoes", new BsonDocument("$push", new BsonDocument
+                {
+                    { "acao", "$_id.acao" },
+                    { "qtd", "$qtd" }
+                })
+            }
+        }),
+        new BsonDocument("$project", new BsonDocument
+        {
+            { "_id", 0 },
+            { "user_id", "$_id.user_id" },
+            { "nome", "$_id.nome" },
+            { "acoes", 1 }
+        })
+            };
+
+            var resultado = await _collection.AggregateAsync<BsonDocument>(pipeline);
+
+            var usuarios = new List<UsuarioComAcoes>();
+            await resultado.ForEachAsync(doc =>
+            {
+                var user = new UsuarioComAcoes
+                {
+                    UserId = doc["user_id"].AsString,
+                    Nome = doc["nome"].AsString,
+                    Acoes = doc["acoes"]
+                        .AsBsonArray
+                        .Select(a => new AcaoQtd
+                        {
+                            Acao = a["acao"].AsString,
+                            Quantidade = a["qtd"].AsInt32
+                        }).ToList()
+                };
+
+                usuarios.Add(user);
+            });
+
+            return usuarios;
+        }
+
+        public class UsuarioComAcoes
+        {
+            public string UserId { get; set; }
+            public string Nome { get; set; }
+            public List<AcaoQtd> Acoes { get; set; }
+        }
+
+        public class AcaoQtd
+        {
+            public string Acao { get; set; }
+            public int Quantidade { get; set; }
+        }
+
+
+
+
 
 
     }
+
 }
