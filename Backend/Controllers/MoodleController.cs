@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using static Backend.MongoService;
 
 namespace Backend.Controllers
 {
@@ -73,6 +74,13 @@ namespace Backend.Controllers
         {
             var alunos = await _mongoService.GetAlunosPorCursoAsync(nomeCurso);
             return Ok(alunos);
+        }
+
+        [HttpGet("acoes-por-usuario")]
+        public async Task<ActionResult<List<UsuarioComAcoes>>> GetAcoesPorUsuario()
+        {
+            var resultado = await _mongoService.GetAcoesPorUsuarioAsync();
+            return Ok(resultado);
         }
 
 
