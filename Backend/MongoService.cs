@@ -96,6 +96,35 @@ namespace Backend
 
             return cursos;
         }
+        public async Task<List<string>> GetAlunosPorCursoAsync(string nomeCurso)
+        {
+            var pipeline = new BsonDocument[]
+            {
+        new BsonDocument("$match", new BsonDocument
+        {
+            { "logs.course_fullname", nomeCurso }
+        }),
+        new BsonDocument("$project", new BsonDocument
+        {
+            { "_id", 0 },
+            { "user_id", "$_id" },  // ou "$logs.user_id" se preferir pegar do log
+            { "nome", new BsonDocument("$arrayElemAt", new BsonArray { "$logs.name", 0 }) }
+        })
+            };
+
+            var resultado = await _collection.AggregateAsync<BsonDocument>(pipeline);
+
+            var alunos = new List<string>();
+            await resultado.ForEachAsync(doc =>
+            {
+                var nome = doc.GetValue("nome", "").AsString;
+                alunos.Add(nome);
+            });
+
+            return alunos;
+        }
+
+
 
     }
 }
