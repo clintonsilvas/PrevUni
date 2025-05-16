@@ -361,3 +361,6 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+/Front/Models/Cursos.cs
+/Front/Pages/Cursos.cshtml
+/Front/Pages/Cursos.cshtml.cs
