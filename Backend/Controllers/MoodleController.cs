@@ -69,8 +69,8 @@ namespace Backend.Controllers
             }
         }
 
-        [HttpGet("alunos-por-curso")]
-        public async Task<IActionResult> GetAlunosPorCurso([FromQuery] string nomeCurso)
+        [HttpGet("alunos-por-curso/{nomeCurso}")]
+        public async Task<IActionResult> GetAlunosPorCurso(string nomeCurso)
         {
             var alunos = await _mongoService.GetAlunosPorCursoAsync(nomeCurso);
             return Ok(alunos);

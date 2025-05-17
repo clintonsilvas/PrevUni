@@ -15,17 +15,15 @@
 <div class="dashboard coluna" style="--gap: 10px">
     <div class="ImputIA linha">
         <img src="~/css/icons/Lupa.svg" width="18" height="18" />
-        <input type="text" name="nome" placeholder="O que você procura?" />
-        <button>Pesquisar</button>
+        <input type="text" id="filtroCursos" onkeyup="filtrarCursos()" class="input-filtro" name="nome" placeholder="O que você procura?" />
+        <button onclick="filtrarCursos()">Pesquisar</button>
     </div>
 
     <div class="flex grid" id="us_cont">
         @foreach (var curso in Model.Cursos)
         {
-            <a asp-page="/Dashboard" asp-route-curso="@curso" asp-route-nome="@curso.curso" asp-route-quantidadeAlunos="@curso.alunos" style="text-decoration: none">
-                <div class="flex QuadroCards_List coluna"
-                     style="gap: 24px"
-                     href="Dashboard.html">
+            <a asp-page="/Dashboard" asp-route-curso="@curso" asp-route-nome="@curso.curso" asp-route-quantidadeAlunos="@curso.alunos" class="card-curso" style="text-decoration: none">
+                <div class="flex QuadroCards_List coluna" style="gap: 24px">
                     <div class="linha" style="align-items: center">
                         <img src="~/css/icons/caderno.svg" height="16px" />
                         <h4 class="corPreta40B">@curso.curso</h4>
@@ -35,31 +33,32 @@
                     </div>
                     <div class="linha">
                         <div class="linha cur_porcVerd" style="gap: 8px">
-                            <img src="~/css/icons/rostofeliz.svg"
-                                 height="16px"
-                                 style="align-items: center; justify-content: center" />
+                            <img src="~/css/icons/rostofeliz.svg" height="16px" />
                             <span class="cur_porcFont corCinza80B">50%</span>
                         </div>
-
                         <div class="linha cur_porcAzul" style="gap: 8px">
-                            <img src="~/css/icons/rostosememocao.svg"
-                                 height="16px"
-                                 style="align-items: center; justify-content: center" />
+                            <img src="~/css/icons/rostosememocao.svg" height="16px" />
                             <span class="cur_porcFont corCinza80B">50%</span>
                         </div>
-
                         <div class="linha cur_porcVerm" style="gap: 8px">
-                            <img src="~/css/icons/rostotriste.svg"
-                                 height="16px"
-                                 style="align-items: center; justify-content: center" />
+                            <img src="~/css/icons/rostotriste.svg" height="16px" />
                             <span class="cur_porcFont corCinza80B">50%</span>
                         </div>
                     </div>
                 </div>
             </a>
-
-
         }
-
     </div>
 </div>
+
+<script>
+    function filtrarCursos() {
+        const filtro = document.getElementById("filtroCursos").value.toLowerCase();
+        const cards = document.querySelectorAll("#us_cont .card-curso");
+
+        cards.forEach(card => {
+            const nomeCurso = card.querySelector("h4").innerText.toLowerCase();
+            card.style.display = nomeCurso.includes(filtro) ? "" : "none";
+        });
+    }
+</script>

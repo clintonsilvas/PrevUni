@@ -135,11 +135,11 @@
   text-align: left;
   font-weight: bold;
 }
-
-.tabela-card td {
-  padding: 8px;
-  width: fit-content;
-}
+    .tabela-card td,
+    .tabela-card th {
+        padding: 8px;
+        width: fit-content;
+    }
 
 .tabela-card tr {
   border-radius: 20px;
@@ -149,15 +149,34 @@
   background-color: var(--Cinza100B);
 }
 
+    .tabela-card th:last-child {
+        align-items:end;
+        text-align: right;
+        font-weight: bold;
+    }
+
 .tabela-card td:last-child {
   text-align: right;
   font-weight: bold;
 }
 
+.bot_tab {
+    border: none;
+    background-color: transparent;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    color: var(--Cinza60B);
+}
+
+
+
 .tabela-card td:first-child {
-  color: var(--Azul-principal);
-  font-weight: 800;
-  width: 10px;
+    color: var(--Azul-principal);
+    font-weight: 800;
+    width: 10px;
 }
 
 .caixaProgresso {
