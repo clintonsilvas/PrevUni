@@ -82,7 +82,19 @@ namespace Backend.Controllers
             var resultado = await _mongoService.GetAcoesPorUsuarioAsync();
             return Ok(resultado);
         }
-
+        [HttpGet("logs-por-curso/{nomeCurso}")]
+        public async Task<IActionResult> GetLogsPorCurso(string nomeCurso)
+        {
+            try
+            {
+                var logs = await _mongoService.GetLogsPorCursoAsync(nomeCurso);
+                return Ok(logs);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao buscar logs: {ex.Message}");
+            }
+        }
 
     }
 

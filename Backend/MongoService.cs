@@ -268,6 +268,39 @@ namespace Backend
         }
 
 
+        public async Task<List<LogUsuario>> GetLogsPorCursoAsync(string nomeCurso)
+        {
+            var pipeline = new BsonDocument[]
+            {
+        new BsonDocument("$unwind", "$logs"),
+        new BsonDocument("$match", new BsonDocument("logs.course_fullname", nomeCurso)),
+        new BsonDocument("$replaceRoot", new BsonDocument("newRoot", "$logs"))
+            };
+
+            var resultado = await _collection.AggregateAsync<BsonDocument>(pipeline);
+
+            var logs = new List<LogUsuario>();
+            await resultado.ForEachAsync(doc =>
+            {
+                var log = new LogUsuario
+                {
+                    // Aqui trata o user_id para evitar erro ou null
+                    user_id = doc.Contains("user_id") && !doc["user_id"].IsBsonNull ? doc["user_id"].AsString : "",
+
+                    name = doc.GetValue("name", "").AsString,
+                    date = doc.GetValue("date", "").AsString,
+                    action = doc.GetValue("action", "").AsString,
+                    target = doc.GetValue("target", "").AsString,
+                    component = doc.GetValue("component", "").AsString,
+                    course_fullname = doc.GetValue("course_fullname", "").AsString,
+                    user_lastaccess = doc.GetValue("user_lastaccess", "").AsString,
+                };
+
+                logs.Add(log);
+            });
+
+            return logs;
+        }
 
 
 
