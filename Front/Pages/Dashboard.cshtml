@@ -104,6 +104,18 @@ style="
                             <div class="linha" style="--gap: 10px; align-items: center">
                                 <img src="~/css/icons/graficos.svg" />
                                 <h4 class="corPreta50B">Evolução</h4>
+                                @{
+                                    var logs = Model.Cursos.Logs;
+                                    if (logs.Any())
+                                    {
+                                        var datas = logs.Select(l => DateTime.Parse(l.date)).ToList();
+                                        var mesAntigo = datas.Min().ToString("MMMM", new System.Globalization.CultureInfo("pt-BR"));
+                                        var mesAtual = datas.Max().ToString("MMMM", new System.Globalization.CultureInfo("pt-BR"));
+                                        <span class="corCinza80B" style="margin-inline-start: auto;">@mesAntigo à @mesAtual</span>
+                                    }
+                                    
+                                }
+                                
                             </div>
 
 
@@ -334,7 +346,7 @@ style="
                                     <button onclick="ordenarTabela(1)" class="bot_tab">Nome<img src="~/css/icons/Ordenar.svg" /></button>
                                 </th>
                                 <th>
-                                    <button onclick="ordenarTabela(2)" class="bot_tab">Presença<img src="~/css/icons/Ordenar.svg" /></button>
+                                    <button onclick="ordenarTabela(2)" class="bot_tab">Engajamento<img src="~/css/icons/Ordenar.svg" /></button>
                                 </th>
                             </tr>
                         </thead>
