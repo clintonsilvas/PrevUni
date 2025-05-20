@@ -252,6 +252,7 @@ style="
                             <div class="linha" style="--gap: 10px; align-items: center">
                                 <img src="~/css/icons/graficos.svg" />
                                 <h4 class="corPreta50B">Ações Realizadas</h4>
+                                <span class="corCinza80B" style="margin-inline-start: auto;">@Model.Cursos.Logs.Count() Ações</span>
                             </div>
                             @{
                                 var acoes = Model.Cursos.Logs
@@ -262,7 +263,7 @@ style="
                                     Quantidade = g.Count()
                                 })
                                 .ToList();
-                                acoes.RemoveAll(l => l.Acao == "viewed");
+                               // acoes.RemoveAll(l => l.Acao == "viewed");
 
                                 var labels = string.Join(",", acoes.Select(a => $"'{a.Acao}'"));
                                 var dados = string.Join(",", acoes.Select(a => a.Quantidade));
@@ -325,6 +326,7 @@ style="
                             <div class="linha" style="--gap: 10px; align-items: center">
                                 <img src="~/css/icons/graficos.svg" />
                                 <h4 class="corPreta50B">Componentes Utilizados</h4>
+
                             </div>
                             @{
                                 var componentes = Model.Cursos.Logs

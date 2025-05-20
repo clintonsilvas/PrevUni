@@ -23,6 +23,7 @@
                     <a asp-area="" asp-page="/Index">Alunos</a>
                 </div>
             </div>
+        <button id="toggleTheme">Alternar tema</button>
             <div>
                 <div class="icon_perfil">
                     <span>CB</span>
@@ -40,6 +41,11 @@
                 @RenderBody()
             </div>
         </main>
+    <script>
+        document.getElementById('toggleTheme').addEventListener('click', function () {
+          document.documentElement.classList.toggle('dark');
+        });
+    </script>
 
 </body>
 </html>

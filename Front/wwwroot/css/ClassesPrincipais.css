@@ -7,7 +7,7 @@
 
 /*Propriedades*/
 body {
-    background-color: var(--branco);
+    background-color: var(--Branco);
     display: flex;
     height: 100vh;
     flex-direction: column;
