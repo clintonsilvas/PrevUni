@@ -10,6 +10,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddHttpClient<ApiService>();
 builder.Services.AddScoped<ApiService>();
 builder.Services.AddSingleton<MongoService>();
+builder.Services.AddHttpClient<GeminiService>();
 
 
 var app = builder.Build();

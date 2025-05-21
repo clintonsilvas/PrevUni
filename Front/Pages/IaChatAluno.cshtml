@@ -1,0 +1,25 @@
+﻿@page
+@model Front.Pages.IaChatAlunoModel
+@{
+    ViewData["Title"] = "Chat com IA";
+}
+
+<h2>Chat com IA sobre evasão escolar</h2>
+
+<form method="post">
+    <div>
+        <label>UserId:</label>
+        <input asp-for="UserId" />
+    </div>
+    <div>
+        <label>Pergunta para IA:</label><br />
+        <textarea asp-for="Prompt" rows="4" cols="50"></textarea>
+    </div>
+    <button type="submit">Enviar</button>
+</form>
+
+@if (Model.Resposta != null)
+{
+    <h3>Resposta da IA:</h3>
+    <pre>@Model.Resposta</pre>
+}
