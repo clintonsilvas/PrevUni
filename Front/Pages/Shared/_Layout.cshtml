@@ -8,6 +8,11 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <link rel=" stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <script>
+        if (localStorage.getItem('theme') === 'dark') {
+            document.documentElement.classList.add('dark');
+        }
+    </script>
 </head>
 
 
@@ -17,18 +22,30 @@
 
         <nav class="linha">
             <div class="linha" style="gap: 52px">
-                <a asp-area="" asp-page="/Index"><img src="~/css/icons/PrevUni.svg" /></a>
+                <a asp-area="" asp-page="/Index">
+                <img id="logoClara" src="~/css/icons/PrevUni.svg" />
+                    <img id="logoEscura" src="~/css/icons/PrevUni_modEscuro.svg" />
+                </a>
                 <div class="linha links_nav" style="gap: 24px">
                     <a asp-area="" asp-page="/Index">Cursos</a>
                     <a asp-area="" asp-page="/Index">Alunos</a>
                 </div>
             </div>
-        <button id="toggleTheme">Alternar tema</button>
+            <div class=" linha" style="align-items:center">
+            <label class="switch">
+                <input type="checkbox" id="toggleTheme" />
+                <span class="slider">
+                    <img id="modClaro" src="~/css/icons/Claro.svg" height="14px" />
+                    <img id="modEscuro" src="~/css/icons/Escuro.svg" height="14px" />
+                </span>
+            </label>
             <div>
                 <div class="icon_perfil">
                     <span>CB</span>
                 </div>
             </div>
+            </div>
+
         </nav>
 
  
@@ -42,10 +59,25 @@
             </div>
         </main>
     <script>
-        document.getElementById('toggleTheme').addEventListener('click', function () {
-          document.documentElement.classList.toggle('dark');
+        const toggle = document.getElementById('toggleTheme');
+
+        // Aplica o tema salvo ao carregar
+        if (localStorage.getItem('theme') === 'dark') {
+          document.documentElement.classList.add('dark');
+          toggle.checked = true;
+        }
+
+        toggle.addEventListener('change', function () {
+          if (this.checked) {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('theme', 'dark');
+          } else {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('theme', 'light');
+          }
         });
     </script>
+
 
 </body>
 </html>
