@@ -15,11 +15,9 @@
     </script>
 </head>
 
-
+@await RenderSectionAsync("Scripts", required: false)
 
 <body>
-
-
         <nav class="linha">
             <div class="linha" style="gap: 52px">
                 <a asp-area="" asp-page="/Index">

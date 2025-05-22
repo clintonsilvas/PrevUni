@@ -1,196 +1,167 @@
-﻿@page "{perfil_aluno?}"
+﻿@page "{userId}"
 @model Front.Pages.PerfilAlunoModel
 @{
 }
 
 
 <header class="linha welcome"
-        style="
-            justify-content: space-between;
-            width: 100%;
-            height: fit-content;
-          ">
-    <div class="coluna" style="--gap: 10px">
-        <span class="SubH1 corAzul">Metodologias Ágeis</span>
-        <h1 class="corPreta40B">Perfil de Aluno</h1>
-    </div>
-    <button class="botaoatualiza">Atualizar</button>
+    	style="
+        	justify-content: space-between;
+        	width: 100%;
+        	height: fit-content;
+      	">
+	<div class="coluna" style="--gap: 10px">
+    	<span class="SubH1 corAzul">Metodologias Ágeis</span>
+    	<h1 class="corPreta40B">Perfil de Aluno</h1>
+	</div>
+	<button class="botaoatualiza">Atualizar</button>
 </header>
 
 <div class="linha Endereco" style="align-items: center">
-    <img src="~/css/icons/casa.svg" alt="ÍconeHome" width="14" height="14" />
-    <span class="SubH3">></span>
-    <a class="SubH3">Cursos</a>
-    <span class="SubH3">></span>
-    <a class="SubH3">Ciênca da Computação</a>
-    <span class="SubH3">></span>
-    <a class="SubH3">Metodologias Ágeis</a>
-    <span class="SubH3">></span>
-    <a class="SubH3">Miguel Oliveira</a>
+	<img src="~/css/icons/casa.svg" alt="ÍconeHome" width="14" height="14" />
+	<span class="SubH3">></span>
+	<a class="SubH3">Cursos</a>
+	<span class="SubH3">></span>
+	<a class="SubH3">Ciênca da Computação</a>
+	<span class="SubH3">></span>
+	<a class="SubH3">Metodologias Ágeis</a>
+	<span class="SubH3">></span>
+	<a class="SubH3">@Model.AlunoDetalhes.nome</a>
 </div>
 
 <div class="dashboard coluna" style="--gap: 16px">
-    <!--Header do Aluno-->
-    <div class="linha alt_li" style="flex: 1; height: fit-content">
-        <div class="linha CardsEngajamento QuadroCards">
-            <div class="linha engag" style="flex: 1; align-items: center">
-                <div class="iconAzul02">
-                    <img src="~/css/icons/formando.svg" alt="Icone_Aluno" />
-                </div>
-                <div class="coluna" style="--gap: 10px">
-                    <h1 class="corPreta40B">Miguel Oliveira</h1>
-                </div>
-            </div>
+	<!--Header do Aluno-->
+	<div class="linha alt_li" style="flex: 1; height: fit-content">
+    	<div class="linha CardsEngajamento QuadroCards">
+        	<div class="linha engag" style="flex: 1; align-items: center">
+            	<div class="iconAzul02">
+                	<img src="~/css/icons/formando.svg" alt="Icone_Aluno" />
+            	</div>
+            	<div class="coluna" style="--gap: 10px">
+                    <h1 class="corPreta40B">@Model.AlunoDetalhes.nome</h1>
+            	</div>
+        	</div>
 
-            <div class="linha" style="gap: 24px">
-                <div class="linha engag" style="flex: 1; align-items: center">
-                    <div class="iconAzul">
-                        <img src="~/css/icons/rostosememocao.svg" alt="Icone_Aluno" />
-                    </div>
-                    <div class="coluna" style="--gap: 4px">
-                        <h5 class="corCinza80B">Engajamento Médio</h5>
-                        <h2 class="corAzul">63%</h2>
-                    </div>
-                </div>
-                <div class="coluna">
-                    <h5 class="corCinza60B">
-                        Último Acesso: Dia 02 de Abril às 15:32
-                    </h5>
-                    <h5 class="corCinza60B">
-                        Último Acesso: Dia 02 de Abril às 15:32
-                    </h5>
-                </div>
-            </div>
-        </div>
-    </div>
+        	<div class="linha" style="gap: 24px">
+            	<div class="linha engag" style="flex: 1; align-items: center">
+                	<div class="iconAzul">
+                    	<img src="~/css/icons/rostosememocao.svg" alt="Icone_Aluno" />
+                	</div>
+                	<div class="coluna" style="--gap: 4px">
+                    	<h5 class="corCinza80B">Engajamento Médio</h5>
+                    	<h2 class="corAzul">63%</h2>
+                	</div>
+            	</div>
+            	<div class="coluna">
+                	<h5 class="corCinza60B">
+                        Último Acesso: @(string.IsNullOrEmpty(Model.AlunoDetalhes.ultimo_acesso) ? "N/A" : DateTime.Parse(Model.AlunoDetalhes.ultimo_acesso).ToString("dd 'de' MMMM 'às' HH:mm", new System.Globalization.CultureInfo("pt-BR")))
+                	</h5>
+                	<h5 class="corCinza60B">
+                        Total de Acessos: @Model.AlunoDetalhes.total_acessos
+                	</h5>
+            	</div>
+        	</div>
+    	</div>
+	</div>
 
-    <!--Chat IA-->
-    <div class="ImputIA linha">
-        <img src="~/css/icons/estrelaIA.svg"
-             alt="ÍconeHome"
-             width="18"
-             height="18" />
-        <input type="text"
-               id="IaPergunta"
-               name="nome"
-               placeholder="Pergunte a inteligência Artifical!" />
-        <button>Gerar</button>
-    </div>
+	<!--Chat IA-->
+	<div class="ImputIA linha">
+    	<img src="~/css/icons/estrelaIA.svg"
+         	alt="ÍconeHome"
+         	width="18"
+         	height="18" />
+    	<input type="text"
+           	id="IaPergunta"
+           	name="nome"
+           	placeholder="Pergunte a inteligência Artifical!" />
+    	<button>Gerar</button>
+	</div>
 
-    <div class="abas">
-        <input type="radio" name="aba" id="aba1" checked />
-        <input type="radio" name="aba" id="aba2" />
-        <input type="radio" name="aba" id="aba3" />
+	<div class="abas">
+    	<input type="radio" name="aba" id="aba1" checked />
+    	<input type="radio" name="aba" id="aba2" />
+    	<input type="radio" name="aba" id="aba3" />
 
-        <div class="botoes">
-            <label for="aba1">Dashboard</label>
-            <label for="aba2">Calendário</label>
-            <label for="aba3">Relatórios</label>
-            <div class="underline"></div>
-        </div>
+    	<div class="botoes">
+        	<label for="aba1">Dashboard</label>
+        	<label for="aba2">Calendário</label>
+        	<label for="aba3">Relatórios</label>
+        	<div class="underline"></div>
+    	</div>
 
-        <div class="conteudos">
-            <div class="conteudo" id="conteudo1">
-                <div class="QuadroCards GraficoEvolucao linha"
-                     style="flex: 1; --gap: 40px">
-                    <div class="coluna graf_caixa" style="--gap: 16px">
-                        <div class="linha" style="--gap: 10px; align-items: center">
-                            <img src="~/css/icons/graficos.svg" />
-                            <h4 class="corPreta50B">Evolução</h4>
+    	<div class="conteudos">
+        	<div class="conteudo" id="conteudo1">
+            	<div class="QuadroCards GraficoEvolucao linha"
+                 	style="flex: 1; --gap: 40px">
+                	<div class="coluna graf_caixa" style="--gap: 16px">
+                    	<div class="linha" style="--gap: 10px; align-items: center">
+                        	<img src="~/css/icons/graficos.svg" />
+                        	<h4 class="corPreta50B">Evolução</h4>
+                    	
+
+                            @{
+                                var logs = Model.AlunoLogs;
+                                if (logs.Any())
+                                {
+                                    var datas = logs.Select(l => DateTime.Parse(l.date)).ToList();
+                                    var mesAntigo = datas.Min().ToString("MMMM", new System.Globalization.CultureInfo("pt-BR"));
+                                    var mesAtual = datas.Max().ToString("MMMM", new System.Globalization.CultureInfo("pt-BR"));
+                                    <span class="corCinza80B" style="margin-inline-start: auto;">@mesAntigo à @mesAtual</span>
+                                }
+
+                            }
                         </div>
 
-                        <div class="coluna" id="graf01" style="--gap: 8px">
-                            <div class="linha"
-                                 style="height: 240px; justify-content: space-between">
-                                <div class="coluna" style="width: 60px">
-                                    <p class="corCinza60B" style="margin-bottom: auto">100%</p>
-                                    <p class="corCinza60B" style="margin-bottom: auto">80%</p>
-                                    <p class="corCinza60B" style="margin-bottom: auto">60%</p>
-                                    <p class="corCinza60B" style="margin-bottom: auto">40%</p>
-                                    <p class="corCinza60B" style="margin-bottom: auto">20%</p>
-                                    <p class="corCinza60B">0%</p>
+
+                        @{
+                            var semanas = Model.SemanasAcessoAluno;
+                            int total = semanas.Any() ? semanas.Max() : 0;
+                        }
+
+                    	<div class="coluna" id="graf01" style="--gap: 8px">
+                        	<div class="linha"
+                             	style="height: 240px; justify-content: space-between">
+                            	<div class="coluna" style="width: 60px">
+                                	<p class="corCinza60B" style="margin-bottom: auto">100%</p>
+                                	<p class="corCinza60B" style="margin-bottom: auto">80%</p>
+                                	<p class="corCinza60B" style="margin-bottom: auto">60%</p>
+                                	<p class="corCinza60B" style="margin-bottom: auto">40%</p>
+                                	<p class="corCinza60B" style="margin-bottom: auto">20%</p>
+                                	<p class="corCinza60B">0%</p>
+                            	</div>
+                            	<!--Números gráficos-->
+                                <div class="linha" style="flex: 1; justify-content: space-between">
+                                    @foreach (var s in semanas)
+                                    {
+                                        var porcentagem = total > 0 ? (int)Math.Round((s * 100.0) / total) : 0;
+                                        <div class="grafContainer">
+                                            <div class="grafCinza"></div>
+                                            <div class="grafAzul" style="--Porcentagem: @porcentagem%"></div>
+                                        </div>
+                                    }
                                 </div>
-                                <!--Números gráficos-->
-                                <div class="linha"
-                                     style="flex: 1; justify-content: space-between">
-                                    <div class="grafContainer">
-                                        <div class="grafCinza"></div>
-                                        <div class="grafAzul" style="--Porcentagem: 20%"></div>
-                                    </div>
+                        	</div>
+                        	<div class="linha">
+                            	<p class="corAzul" style="width: 60px">
+                                	<strong>Semanas</strong>
+                            	</p>
+                            	<div class="linha"
+                                 	style="flex: 1; justify-content: space-between">
+                                    @for (int i2 = 1; i2 <= semanas.Count; i2++)
+                                    {
+                                        <p class="corCinza60B">@i2</p>
+                                    }
+                            	</div>
+                        	</div>
+                    	</div>
+                	</div>
+            	</div>
+        	</div>
+        	<div class="conteudo" id="conteudo2"></div>
+        	<div class="conteudo" id="conteudo2"></div>
 
-                                    <div class="grafContainer">
-                                        <div class="grafCinza"></div>
-                                        <div class="grafAzul" style="--Porcentagem: 30%"></div>
-                                    </div>
-
-                                    <div class="grafContainer">
-                                        <div class="grafCinza"></div>
-                                        <div class="grafAzul" style="--Porcentagem: 36%"></div>
-                                    </div>
-
-                                    <div class="grafContainer">
-                                        <div class="grafCinza"></div>
-                                        <div class="grafAzul" style="--Porcentagem: 42%"></div>
-                                    </div>
-
-                                    <div class="grafContainer">
-                                        <div class="grafCinza"></div>
-                                        <div class="grafAzul" style="--Porcentagem: 48%"></div>
-                                    </div>
-
-                                    <div class="grafContainer">
-                                        <div class="grafCinza"></div>
-                                        <div class="grafAzul" style="--Porcentagem: 56%"></div>
-                                    </div>
-
-                                    <div class="grafContainer">
-                                        <div class="grafCinza"></div>
-                                        <div class="grafAzul" style="--Porcentagem: 62%"></div>
-                                    </div>
-
-                                    <div class="grafContainer">
-                                        <div class="grafCinza"></div>
-                                        <div class="grafAzul" style="--Porcentagem: 72%"></div>
-                                    </div>
-
-                                    <div class="grafContainer">
-                                        <div class="grafCinza"></div>
-                                        <div class="grafAzul" style="--Porcentagem: 80%"></div>
-                                    </div>
-
-                                    <div class="grafContainer">
-                                        <div class="grafCinza"></div>
-                                        <div class="grafAzul" style="--Porcentagem: 88%"></div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="linha">
-                                <p class="corAzul" style="width: 60px">
-                                    <strong>Semanas</strong>
-                                </p>
-                                <div class="linha"
-                                     style="flex: 1; justify-content: space-between">
-                                    <p class="corCinza60B">1</p>
-                                    <p class="corCinza60B">2</p>
-                                    <p class="corCinza60B">3</p>
-                                    <p class="corCinza60B">4</p>
-                                    <p class="corCinza60B">5</p>
-                                    <p class="corCinza60B">6</p>
-                                    <p class="corCinza60B">7</p>
-                                    <p class="corCinza60B">8</p>
-                                    <p class="corCinza60B">9</p>
-                                    <p class="corCinza60B">10</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="conteudo" id="conteudo2"></div>
-            <div class="conteudo" id="conteudo2"></div>
-
-        </div>
-    </div>
+    	</div>
+	</div>
 
 
 </div>
