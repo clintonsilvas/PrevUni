@@ -5,99 +5,96 @@
 
 
 <header class="linha welcome"
-    	style="
-        	justify-content: space-between;
-        	width: 100%;
-        	height: fit-content;
-      	">
-	<div class="coluna" style="--gap: 10px">
-    	<span class="SubH1 corAzul">Metodologias Ágeis</span>
-    	<h1 class="corPreta40B">Perfil de Aluno</h1>
-	</div>
-	<button class="botaoatualiza">Atualizar</button>
+        style="
+            justify-content: space-between;
+            width: 100%;
+            height: fit-content;
+        ">
+    <div class="coluna" style="--gap: 10px">
+        <span class="SubH1 corAzul">Metodologias Ágeis</span>
+        <h1 class="corPreta40B">Perfil de Aluno</h1>
+    </div>
+    <button class="botaoatualiza">Atualizar</button>
 </header>
 
 <div class="linha Endereco" style="align-items: center">
-	<img src="~/css/icons/casa.svg" alt="ÍconeHome" width="14" height="14" />
-	<span class="SubH3">></span>
-	<a class="SubH3">Cursos</a>
-	<span class="SubH3">></span>
-	<a class="SubH3">Ciênca da Computação</a>
-	<span class="SubH3">></span>
-	<a class="SubH3">Metodologias Ágeis</a>
-	<span class="SubH3">></span>
-	<a class="SubH3">@Model.AlunoDetalhes.nome</a>
+    <img src="~/css/icons/casa.svg" alt="ÍconeHome" width="14" height="14" />
+    <span class="SubH3">></span>
+    <a class="SubH3">Cursos</a>
+    <span class="SubH3">></span>
+    <a class="SubH3">Ciênca da Computação</a>
+    <span class="SubH3">></span>
+    <a class="SubH3">Metodologias Ágeis</a>
+    <span class="SubH3">></span>
+    <a class="SubH3">@Model.AlunoDetalhes.nome</a>
 </div>
 
 <div class="dashboard coluna" style="--gap: 16px">
-	<!--Header do Aluno-->
-	<div class="linha alt_li" style="flex: 1; height: fit-content">
-    	<div class="linha CardsEngajamento QuadroCards">
-        	<div class="linha engag" style="flex: 1; align-items: center">
-            	<div class="iconAzul02">
-                	<img src="~/css/icons/formando.svg" alt="Icone_Aluno" />
-            	</div>
-            	<div class="coluna" style="--gap: 10px">
+    <div class="linha alt_li" style="flex: 1; height: fit-content">
+        <div class="linha CardsEngajamento QuadroCards">
+            <div class="linha engag" style="flex: 1; align-items: center">
+                <div class="iconAzul02">
+                    <img src="~/css/icons/formando.svg" alt="Icone_Aluno" />
+                </div>
+                <div class="coluna" style="--gap: 10px">
                     <h1 class="corPreta40B">@Model.AlunoDetalhes.nome</h1>
-            	</div>
-        	</div>
+                </div>
+            </div>
 
-        	<div class="linha" style="gap: 24px">
-            	<div class="linha engag" style="flex: 1; align-items: center">
-                	<div class="iconAzul">
-                    	<img src="~/css/icons/rostosememocao.svg" alt="Icone_Aluno" />
-                	</div>
-                	<div class="coluna" style="--gap: 4px">
-                    	<h5 class="corCinza80B">Engajamento Médio</h5>
-                    	<h2 class="corAzul">63%</h2>
-                	</div>
-            	</div>
-            	<div class="coluna">
-                	<h5 class="corCinza60B">
+            <div class="linha" style="gap: 24px">
+                <div class="linha engag" style="flex: 1; align-items: center">
+                    <div class="iconAzul">
+                        <img src="~/css/icons/rostosememocao.svg" alt="Icone_Aluno" />
+                    </div>
+                    <div class="coluna" style="--gap: 4px">
+                        <h5 class="corCinza80B">Engajamento Médio</h5>
+                        <h2 class="corAzul">63%</h2>
+                    </div>
+                </div>
+                <div class="coluna">
+                    <h5 class="corCinza60B">
                         Último Acesso: @(string.IsNullOrEmpty(Model.AlunoDetalhes.ultimo_acesso) ? "N/A" : DateTime.Parse(Model.AlunoDetalhes.ultimo_acesso).ToString("dd 'de' MMMM 'às' HH:mm", new System.Globalization.CultureInfo("pt-BR")))
-                	</h5>
-                	<h5 class="corCinza60B">
+                    </h5>
+                    <h5 class="corCinza60B">
                         Total de Acessos: @Model.AlunoDetalhes.total_acessos
-                	</h5>
-            	</div>
-        	</div>
-    	</div>
-	</div>
+                    </h5>
+                </div>
+            </div>
+        </div>
+    </div>
 
-	<!--Chat IA-->
-	<div class="ImputIA linha">
-    	<img src="~/css/icons/estrelaIA.svg"
-         	alt="ÍconeHome"
-         	width="18"
-         	height="18" />
-    	<input type="text"
-           	id="IaPergunta"
-           	name="nome"
-           	placeholder="Pergunte a inteligência Artifical!" />
-    	<button>Gerar</button>
-	</div>
+    <div class="ImputIA linha">
+        <img src="~/css/icons/estrelaIA.svg"
+             alt="ÍconeHome"
+             width="18"
+             height="18" />
+        <input type="text"
+               id="IaPergunta"
+               name="nome"
+               placeholder="Pergunte a inteligência Artifical!" />
+        <button>Gerar</button>
+    </div>
 
-	<div class="abas">
-    	<input type="radio" name="aba" id="aba1" checked />
-    	<input type="radio" name="aba" id="aba2" />
-    	<input type="radio" name="aba" id="aba3" />
+    <div class="abas">
+        <input type="radio" name="aba" id="aba1" checked />
+        <input type="radio" name="aba" id="aba2" />
+        <input type="radio" name="aba" id="aba3" />
 
-    	<div class="botoes">
-        	<label for="aba1">Dashboard</label>
-        	<label for="aba2">Calendário</label>
-        	<label for="aba3">Relatórios</label>
-        	<div class="underline"></div>
-    	</div>
+        <div class="botoes">
+            <label for="aba1">Dashboard</label>
+            <label for="aba2">Calendário</label>
+            <label for="aba3">Relatórios</label>
+            <div class="underline"></div>
+        </div>
 
-    	<div class="conteudos">
-        	<div class="conteudo" id="conteudo1">
-            	<div class="QuadroCards GraficoEvolucao linha"
-                 	style="flex: 1; --gap: 40px">
-                	<div class="coluna graf_caixa" style="--gap: 16px">
-                    	<div class="linha" style="--gap: 10px; align-items: center">
-                        	<img src="~/css/icons/graficos.svg" />
-                        	<h4 class="corPreta50B">Evolução</h4>
-                    	
+        <div class="conteudos">
+            <div class="conteudo" id="conteudo1">
+                <div class="QuadroCards GraficoEvolucao linha"
+                     style="flex: 1; --gap: 40px; **flex-wrap: wrap;**">
+                    <div class="coluna graf_caixa" style="--gap: 16px; **flex: 1; min-width: 300px;**">
+                        <div class="linha" style="--gap: 10px; align-items: center">
+                            <img src="~/css/icons/graficos.svg" />
+                            <h4 class="corPreta50B">Evolução</h4>
 
                             @{
                                 var logs = Model.AlunoLogs;
@@ -118,18 +115,17 @@
                             int total = semanas.Any() ? semanas.Max() : 0;
                         }
 
-                    	<div class="coluna" id="graf01" style="--gap: 8px">
-                        	<div class="linha"
-                             	style="height: 240px; justify-content: space-between">
-                            	<div class="coluna" style="width: 60px">
-                                	<p class="corCinza60B" style="margin-bottom: auto">100%</p>
-                                	<p class="corCinza60B" style="margin-bottom: auto">80%</p>
-                                	<p class="corCinza60B" style="margin-bottom: auto">60%</p>
-                                	<p class="corCinza60B" style="margin-bottom: auto">40%</p>
-                                	<p class="corCinza60B" style="margin-bottom: auto">20%</p>
-                                	<p class="corCinza60B">0%</p>
-                            	</div>
-                            	<!--Números gráficos-->
+                        <div class="coluna" id="graf01" style="--gap: 8px">
+                            <div class="linha"
+                                 style="height: 240px; justify-content: space-between">
+                                <div class="coluna" style="width: 60px">
+                                    <p class="corCinza60B" style="margin-bottom: auto">100%</p>
+                                    <p class="corCinza60B" style="margin-bottom: auto">80%</p>
+                                    <p class="corCinza60B" style="margin-bottom: auto">60%</p>
+                                    <p class="corCinza60B" style="margin-bottom: auto">40%</p>
+                                    <p class="corCinza60B" style="margin-bottom: auto">20%</p>
+                                    <p class="corCinza60B">0%</p>
+                                </div>
                                 <div class="linha" style="flex: 1; justify-content: space-between">
                                     @foreach (var s in semanas)
                                     {
@@ -140,28 +136,95 @@
                                         </div>
                                     }
                                 </div>
-                        	</div>
-                        	<div class="linha">
-                            	<p class="corAzul" style="width: 60px">
-                                	<strong>Semanas</strong>
-                            	</p>
-                            	<div class="linha"
-                                 	style="flex: 1; justify-content: space-between">
+                            </div>
+                            <div class="linha">
+                                <p class="corAzul" style="width: 60px">
+                                    <strong>Semanas</strong>
+                                </p>
+                                <div class="linha"
+                                     style="flex: 1; justify-content: space-between">
                                     @for (int i2 = 1; i2 <= semanas.Count; i2++)
                                     {
                                         <p class="corCinza60B">@i2</p>
                                     }
-                            	</div>
-                        	</div>
-                    	</div>
-                	</div>
-            	</div>
-        	</div>
-        	<div class="conteudo" id="conteudo2"></div>
-        	<div class="conteudo" id="conteudo2"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
 
-    	</div>
-	</div>
+                    <div class="coluna graf_caixa" style="--gap: 16px; **flex: 1; min-width: 300px;**">
+                        <div class="linha" style="--gap: 10px; align-items: center">
+                            <img src="~/css/icons/graficos.svg" />
+                            <h4 class="corPreta50B">Ações Realizadas</h4>
+                            <span class="corCinza80B" style="margin-inline-start: auto;">@Model.AlunoLogs.Count() Ações</span>
+                        </div>
+                        @{
+                            var acoes = Model.AlunoLogs
+                            .GroupBy(l => l.action)
+                            .Select(g => new
+                            {
+                                Acao = g.Key,
+                                Quantidade = g.Count()
+                            })
+                            .ToList();
 
+                            var labels = string.Join(",", acoes.Select(a => $"'{a.Acao}'"));
+                            var dados = string.Join(",", acoes.Select(a => a.Quantidade));
+                        }
+                        <div id="graficoContainer" style="max-width: 400px; margin: auto; position: relative; height: 100%">
+                            <canvas id="graficoPizza" width="240" height="240"></canvas>
+                            <div id="legenda" style="display:none; position: absolute; bottom: 0; width: 100%; background: #fff;"></div>
+                        </div>
 
+                        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+                        <script>
+                            const ctx = document.getElementById('graficoPizza').getContext('2d');
+                            const chart = new Chart(ctx, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: [@Html.Raw(labels)],
+                                    datasets: [{
+                                        data: [@dados],
+                                        backgroundColor: [
+                                            '#2e5ee5', // Azul-principal
+                                            '#001b66', // Azul40B
+                                            '#002280', // Azul50B
+                                            '#002899', // Azul60B
+                                            '#002fb2', // Azul70B
+                                            '#0036cc', // Azul80B
+                                            '#668eff'  // Azul60S
+                                        ],
+
+                                        borderWidth: 1
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    plugins: {
+                                        legend: {
+                                            display: false
+                                        }
+                                    }
+                                }
+                            });
+
+                            document.getElementById('legenda').innerHTML = chart.generateLegend();
+
+                            const container = document.getElementById('graficoContainer');
+                            const legenda = document.getElementById('legenda');
+
+                            container.addEventListener('mouseenter', () => {
+                                legenda.style.display = 'block';
+                            });
+                            container.addEventListener('mouseleave', () => {
+                                legenda.style.display = 'none';
+                            });
+                        </script>
+                    </div>
+                </div>
+            </div>
+            <div class="conteudo" id="conteudo2"></div>
+            <div class="conteudo" id="conteudo3"></div>
+        </div>
+    </div>
 </div>
