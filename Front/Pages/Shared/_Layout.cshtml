@@ -6,7 +6,7 @@
     <title>@ViewData["Title"] - Front</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel=" stylesheet" href="~/css/site.css" asp-append-version="true" />
     <script>
         if (localStorage.getItem('theme') === 'dark') {
@@ -53,7 +53,11 @@
 
     
         <main class="playground">
+        @if (ViewData["OcultarSombra"] == null)
+        {
             <div class="sobreposicao_inferior"></div>
+        }
+
             <div class="scroll-content">
                 @RenderBody()
             </div>

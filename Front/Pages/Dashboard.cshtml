@@ -38,7 +38,7 @@ style="
         id="IaPergunta"
         name="nome"
         placeholder="Pergunte a inteligência Artifical!" />
-        <button>Gerar</button>
+        <a asp-page="/IaChatAluno">Gerar</a>
     </div>
 
     <div class="abas">
@@ -152,99 +152,11 @@ style="
                                     <div class="linha" style="flex: 1; justify-content: space-between">
                                         @for (int i2 = 1; i2 <= semanas.Count; i2++)
                                         {
-                                            <p class="corCinza60B">@i2</p>
+                                            <p class="corCinza60B" style="text-align: center; width: 10px">@i2</p>
                                         }
                                     </div>
                                 </div>
                             </div>
-
-                            <!--
-                                    <div class="coluna" id="graf01" style="--gap: 8px">
-                                        <div class="linha"
-                                        style="height: 240px; justify-content: space-between">
-                                            <div class="coluna" style="width: 60px">
-                                                <p class="corCinza60B" style="margin-bottom: auto">
-                                                    100%
-                                                </p>
-                                                <p class="corCinza60B" style="margin-bottom: auto">80%</p>
-                                                <p class="corCinza60B" style="margin-bottom: auto">60%</p>
-                                                <p class="corCinza60B" style="margin-bottom: auto">40%</p>
-                                                <p class="corCinza60B" style="margin-bottom: auto">20%</p>
-                                                <p class="corCinza60B">0%</p>
-                                            </div>
-
-                                            <div class="linha"
-                                            style="flex: 1; justify-content: space-between">
-                                                <div class="grafContainer">
-                                                    <div class="grafCinza"></div>
-                                                    <div class="grafAzul" style="--Porcentagem: 20%"></div>
-                                                </div>
-
-                                                <div class="grafContainer">
-                                                    <div class="grafCinza"></div>
-                                                    <div class="grafAzul" style="--Porcentagem: 30%"></div>
-                                                </div>
-
-                                                <div class="grafContainer">
-                                                    <div class="grafCinza"></div>
-                                                    <div class="grafAzul" style="--Porcentagem: 36%"></div>
-                                                </div>
-
-                                                <div class="grafContainer">
-                                                    <div class="grafCinza"></div>
-                                                    <div class="grafAzul" style="--Porcentagem: 42%"></div>
-                                                </div>
-
-                                                <div class="grafContainer">
-                                                    <div class="grafCinza"></div>
-                                                    <div class="grafAzul" style="--Porcentagem: 48%"></div>
-                                                </div>
-
-                                                <div class="grafContainer">
-                                                    <div class="grafCinza"></div>
-                                                    <div class="grafAzul" style="--Porcentagem: 56%"></div>
-                                                </div>
-
-                                                <div class="grafContainer">
-                                                    <div class="grafCinza"></div>
-                                                    <div class="grafAzul" style="--Porcentagem: 62%"></div>
-                                                </div>
-
-                                                <div class="grafContainer">
-                                                    <div class="grafCinza"></div>
-                                                    <div class="grafAzul" style="--Porcentagem: 72%"></div>
-                                                </div>
-
-                                                <div class="grafContainer">
-                                                    <div class="grafCinza"></div>
-                                                    <div class="grafAzul" style="--Porcentagem: 80%"></div>
-                                                </div>
-
-                                                <div class="grafContainer">
-                                                    <div class="grafCinza"></div>
-                                                    <div class="grafAzul" style="--Porcentagem: 88%"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="linha">
-                                            <p class="corAzul" style="width: 60px">
-                                                <strong>Semanas</strong>
-                                            </p>
-                                            <div class="linha"
-                                            style="flex: 1; justify-content: space-between">
-                                                <p class="corCinza60B">1</p>
-                                                <p class="corCinza60B">2</p>
-                                                <p class="corCinza60B">3</p>
-                                                <p class="corCinza60B">4</p>
-                                                <p class="corCinza60B">5</p>
-                                                <p class="corCinza60B">6</p>
-                                                <p class="corCinza60B">7</p>
-                                                <p class="corCinza60B">8</p>
-                                                <p class="corCinza60B">9</p>
-                                                <p class="corCinza60B">10</p>
-                                            </div>
-                                        </div>
-                            </div>-->
                         </div>
 
 
@@ -268,9 +180,9 @@ style="
                                 var labels = string.Join(",", acoes.Select(a => $"'{a.Acao}'"));
                                 var dados = string.Join(",", acoes.Select(a => a.Quantidade));
                             }
-                            <div id="graficoContainer" style="max-width: 400px; margin: auto; position: relative; height: 100%">
-                                <canvas id="graficoPizza" width="240" height="240"></canvas>
-                                <div id="legenda" style="display:none; position: absolute; bottom: 0; width: 100%; background: #fff;"></div>
+                            <div id="graficoContainer" style="max-width: 400px; margin: auto; position: relative; height: 100%; overflow:visible">
+                                <canvas id="graficoPizza" width="240" height="240" style="overflow:visible"></canvas>
+                                <div id="legenda" style="display:none; position: absolute; bottom: 0; width: 100%; overflow:visible;"></div>
                             </div>
 
                             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -283,23 +195,28 @@ style="
                                         datasets: [{
                                             data: [@dados],
                                 backgroundColor: [
-                                  '#2e5ee5', // Azul-principal
-                                  '#001b66', // Azul40B
-                                  '#002280', // Azul50B
-                                  '#002899', // Azul60B
-                                  '#002fb2', // Azul70B
-                                  '#0036cc', // Azul80B
-                                  '#668eff'  // Azul60S
+                                                 '#001b66',
+                                                 '#002280',
+                                                 '#002899',
+                                                 '#002fb2',
+                                                 '#0036cc',
+                                                 '#668eff',
+                                                 '#99b4ff',
+                                                 '#b2c7ff',
+                                                 '#ccd9ff',
+                                                 '#e5ecff'
                                 ],
 
-                                            borderWidth: 1
+                                            borderWidth: 0
                                         }]
                                     },
-                                    options: {
+                                   options: {
+                                        cutout: '50%',
+                                        
                                         responsive: true,
                                         plugins: {
                                             legend: {
-                                                display: false // esconde legenda padrão
+                                                display: false
                                             }
                                         }
                                     }
@@ -343,8 +260,8 @@ style="
                                 var dadosComponentes = string.Join(",", componentes.Select(c => c.Quantidade));
                             }
                             <div id="graficoComponentesContainer" style="max-width: 400px; margin: auto; position: relative; height: 100%">
-                                <canvas id="graficoPizzaComponentes" width="240" height="240"></canvas>
-                                <div id="legendaComponentes" style="display:none; position: absolute; bottom: 0; width: 100%; background: #fff;"></div>
+                                <canvas id="graficoPizzaComponentes" width="240" height="240" style=""></canvas>
+                                <div id="legendaComponentes" style="display:none; position: absolute; bottom: 0; width: 100%;"></div>
                             </div>
 
                             <script>
@@ -356,18 +273,23 @@ style="
                                         datasets: [{
                                             data: [@dadosComponentes],
                                             backgroundColor: [
-                                                '#2e5ee5',
-                                                '#001b66',
-                                                '#002280',
-                                                '#002899',
-                                                '#002fb2',
-                                                '#0036cc',
-                                                '#668eff'
+                                                 '#001b66',
+                                                 '#002280',
+                                                 '#002899',
+                                                 '#002fb2',
+                                                 '#0036cc',
+                                                 '#668eff',
+                                                 '#99b4ff',
+                                                 '#b2c7ff',
+                                                 '#ccd9ff',
+                                                 '#e5ecff'
                                             ],
-                                            borderWidth: 1
+                                            borderWidth: 0
                                         }]
                                     },
                                     options: {
+                                        cutout: '50%',
+                                        
                                         responsive: true,
                                         plugins: {
                                             legend: {
