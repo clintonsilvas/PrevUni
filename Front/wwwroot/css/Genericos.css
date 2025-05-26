@@ -119,6 +119,10 @@ nav {
   align-items: center;
 }
 
+    .ImputIA:hover {
+        border: solid 1px var(--Azul-principal);
+    }
+
 .ImputIA input {
   background-color: transparent;
   border: none;
@@ -131,20 +135,28 @@ nav {
   border: solid 1px var(--Azul-principal);
 }
 
-.ImputIA button {
-  color: var(--Branco);
-  background: linear-gradient(to right, var(--Azul-principal), var(--Azul40S));
-  background-size: 200% 100%;
-  background-position: 0% 0%;
-  border: none;
-  padding: 12px 32px;
-  display: flex;
-  flex-direction: row;
-  height: fit-content;
-  border-radius: 42px;
-  transition: background-position 0.3s ease;
-  animation: pulsarAzul 1.5s infinite alternate;
-}
+    .ImputIA a, .ImputIA button {
+        color: var(--Branco);
+        background: linear-gradient(to right, var(--Azul-principal), var(--Azul40S));
+        background-size: 200% 100%;
+        background-position: 0% 0%;
+        border: none;
+        padding: 12px 32px;
+        display: flex;
+        flex-direction: row;
+        height: fit-content;
+        border-radius: 42px;
+        transition: background-position 0.3s ease;
+        animation: pulsarAzul 1.5s infinite alternate;
+        font-family: "Inter", sans-serif;
+        font-optical-sizing: auto;
+        font-size: 10pt;
+        font-style: normal;
+        font-weight: Bold;
+        text-transform: uppercase;
+        text-decoration: none;
+    }
+
 
 .ImputIA:hover button {
   animation: pulsarAzul 1.5s infinite alternate;
@@ -189,3 +201,4 @@ nav {
     display: none;
   }
 }
+
