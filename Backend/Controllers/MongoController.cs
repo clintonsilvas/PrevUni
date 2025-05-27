@@ -21,5 +21,15 @@ namespace Backend.Controllers
 
             return Ok(resumo.ToJson()); // Retorna em formato JSON direto
         }
+
+        [HttpGet("resumo-aluno-ia/{userId}")]
+        public async Task<IActionResult> GetResumoAlunoIA(string userId)
+        {
+            var resumo = await _mongoService.GerarResumoAlunoIAAsync(userId);
+            if (resumo == null)
+                return NotFound("Usuário não encontrado.");
+
+            return Ok(resumo.ToJson()); // Retorna em formato JSON direto
+        }
     }
 }

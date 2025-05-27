@@ -32,7 +32,7 @@ namespace Front.Pages
             var client = _httpClientFactory.CreateClient();
 
             // 1. Buscar resumo do aluno
-            var resumoResponse = await client.GetAsync($"https://localhost:7232/resumo-aluno/{UserId}");
+            var resumoResponse = await client.GetAsync($"https://localhost:7232/resumo-aluno-ia/{UserId}");
             if (!resumoResponse.IsSuccessStatusCode)
             {
                 ModelState.AddModelError("", "Aluno não encontrado.");
