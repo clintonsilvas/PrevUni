@@ -348,16 +348,5 @@ namespace Backend
             return resumoStr;
         }
 
-
-
-
-
-    
-
-
-
-
-
-}
-
+    }
 }
