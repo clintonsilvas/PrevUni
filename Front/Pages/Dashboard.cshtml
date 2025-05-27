@@ -366,13 +366,13 @@ style="
                         <tbody>
                             @{
                                 int i = 0;
-                                foreach (var al in Model.Alunos)
+                                foreach (var al in Model.Alunos) // ALTERAR
                                 {
                                     i++;
                                     <tr>
                                         <td>@i</td>
                                         <td>
-                                            <a asp-page="/PerfilAluno">@al</a>
+                                            <a asp-page="/PerfilAluno/@Model.Alunos">@al</a> 
                                         </td>
                                         <td>02%</td>
                                     </tr>
