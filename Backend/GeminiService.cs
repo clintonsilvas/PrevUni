@@ -25,9 +25,22 @@ namespace Backend
                 new
                 {
                     parts = new object[]
-                    {
-                        new { text = $"{prompt}\n\nDados do aluno:\n{dadosAluno}" }
-                    }
+            {
+                new
+                {
+                    //text = @$"
+                    //        Você é um assistente especializado em análise de desempenho de alunos no ensino a distância. Sempre responda de forma clara, objetiva e baseada apenas nos dados fornecidos.
+
+                    //        Abaixo estão os dados do aluno:
+                    //        {dadosAluno}
+
+                    //        Pergunta:
+                    //        {prompt}
+
+                    //        Responda com base nos dados acima. Caso a pergunta não tenha relação com os dados fornecidos, responda: 'Os dados fornecidos não permitem responder a essa pergunta com precisão.'"
+                                            
+                text=$@"{dadosAluno},\n {prompt}"}
+                                        }
                 }
             }
             };

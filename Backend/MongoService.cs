@@ -302,7 +302,7 @@ namespace Backend
             return logs;
         }
 
-        public async Task<BsonDocument> GerarResumoAlunoAsync(string userId)
+        public async Task<string> GerarResumoAlunoAsync(string userId)
         {
             var pipeline = new[]
             {
@@ -324,26 +324,30 @@ namespace Backend
             var result = await _collection.AggregateAsync<BsonDocument>(pipeline);
             var doc = await result.FirstOrDefaultAsync();
 
-            if (doc == null) return null;
+            if (doc == null) return "Usuário não encontrado";
 
             // Agrupando contagem de componentes
             var componentes = doc["interacoes_por_componente"].AsBsonArray
                 .GroupBy(x => x.AsString)
                 .ToDictionary(g => g.Key, g => g.Count());
 
-            var resumo = new BsonDocument
-    {
-        { "user_id", doc["_id"] },
-        { "nome", doc["nome"] },
-        { "ultimo_acesso", doc["ultimo_acesso"] },
-        { "total_acessos", doc["total_acessos"] },
-        { "dias_ativos", doc["dias_ativos"].AsBsonArray.Count },
-        { "interacoes_por_componente", new BsonDocument(componentes) },
-        { "cursos_acessados", doc["cursos"].AsBsonArray }
-    };
+            var componentesStr = string.Join(",", componentes.Select(kv => $"{kv.Key}:{kv.Value}"));
+            var cursosStr = string.Join(",", doc["cursos"].AsBsonArray.Select(c => c.AsString));
 
-            return resumo;
+            var resumoStr = string.Join(" / ", new[]
+            {
+        $"ID: {doc["_id"]}",
+        $"Nome: {doc["nome"]}",
+        $"Último Acesso: {doc["ultimo_acesso"]}",
+        $"Total de Acessos: {doc["total_acessos"]}",
+        $"Dias Ativos: {doc["dias_ativos"].AsBsonArray.Count}",
+        $"Interações por Componente: {componentesStr}",
+        $"Cursos Acessados: {cursosStr}"
+    });
+
+            return resumoStr;
         }
+
 
 
 
