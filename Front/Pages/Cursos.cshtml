@@ -22,7 +22,7 @@
     <div class="flex grid" id="us_cont">
         @foreach (var curso in Model.Cursos)
         {
-            <a asp-page="/Dashboard" asp-route-curso="@curso" asp-route-nome="@curso.curso" asp-route-quantidadeAlunos="@curso.alunos" class="card-curso" style="text-decoration: none">
+            <a asp-page="/Dashboard" asp-route-curso="@curso.curso" class="card-curso" style="text-decoration: none">
                 <div class="flex QuadroCards_List coluna" style="gap: 24px">
                     <div class="linha" style="align-items: center">
                         <img src="~/css/icons/caderno.svg" height="16px" />

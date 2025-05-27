@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text;
 
-namespace Backend
+namespace Backend.Services
 {
     public class GeminiService
     {

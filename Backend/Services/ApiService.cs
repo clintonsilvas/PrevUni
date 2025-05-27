@@ -3,7 +3,7 @@ using System.Text.Json;
 using System.Text;
 using Backend.Models;
 
-namespace Backend
+namespace Backend.Services
 {
     public class ApiService
     {

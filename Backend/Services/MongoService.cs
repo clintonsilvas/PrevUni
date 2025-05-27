@@ -2,7 +2,7 @@
 using MongoDB.Bson;
 using MongoDB.Driver;
 
-namespace Backend
+namespace Backend.Services
 {
     public class MongoService
     {
@@ -96,33 +96,52 @@ namespace Backend
 
             return cursos;
         }
-        public async Task<List<string>> GetAlunosPorCursoAsync(string nomeCurso)
+        public async Task<List<AlunoResumo>> GetAlunosPorCursoAsync(string nomeCurso)
         {
             var pipeline = new BsonDocument[]
             {
-        new BsonDocument("$match", new BsonDocument
+        new BsonDocument("$unwind", "$logs"),
+        new BsonDocument("$match", new BsonDocument("logs.course_fullname", nomeCurso)),
+        new BsonDocument("$group", new BsonDocument
         {
-            { "logs.course_fullname", nomeCurso }
+            { "_id", "$logs.user_id" },
+            { "nome", new BsonDocument("$first", "$logs.name") },
+            { "ultimo_acesso", new BsonDocument("$max", "$logs.user_lastaccess") }
         }),
         new BsonDocument("$project", new BsonDocument
         {
             { "_id", 0 },
-            { "user_id", "$_id" },  // ou "$logs.user_id" se preferir pegar do log
-            { "nome", new BsonDocument("$arrayElemAt", new BsonArray { "$logs.name", 0 }) }
+            { "user_id", "$_id" },
+            { "nome", 1 },
+            { "ultimo_acesso", 1 }
         })
             };
 
             var resultado = await _collection.AggregateAsync<BsonDocument>(pipeline);
 
-            var alunos = new List<string>();
+            var alunos = new List<AlunoResumo>();
             await resultado.ForEachAsync(doc =>
             {
-                var nome = doc.GetValue("nome", "").AsString;
-                alunos.Add(nome);
+                var aluno = new AlunoResumo
+                {
+                    user_id = doc.GetValue("user_id", "").AsString,
+                    nome = doc.GetValue("nome", "").AsString,
+                    ultimo_acesso = doc.GetValue("ultimo_acesso").BsonType == BsonType.DateTime
+    ? doc.GetValue("ultimo_acesso").ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")
+    : doc.GetValue("ultimo_acesso").ToString(),
+
+                    total_acessos = 0,
+                    dias_ativos = 0,
+                    interacoes_por_componente = new Dictionary<string, int>(),
+                    cursos_acessados = new List<string>()
+                };
+
+                alunos.Add(aluno);
             });
 
             return alunos;
         }
+
 
         public class AcaoQuantidade
         {

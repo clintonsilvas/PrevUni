@@ -355,36 +355,40 @@ style="
                                     <button onclick="ordenarTabela(0)" class="bot_tab">#</button>
                                 </th>
                                 <th>
-
-                                    <button onclick="ordenarTabela(1)" class="bot_tab">Nome<img src="~/css/icons/Ordenar.svg" /></button>
+                                    <button onclick="ordenarTabela(1)" class="bot_tab">Nome <img src="~/css/icons/Ordenar.svg" /></button>
                                 </th>
                                 <th>
-                                    <button onclick="ordenarTabela(2)" class="bot_tab">Engajamento<img src="~/css/icons/Ordenar.svg" /></button>
+                                    Último Acesso
+                                </th>
+                                <th>
+                                    Engajamento
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
                             @{
                                 int i = 0;
-                                foreach (var al in Model.Alunos) // ALTERAR
+                                foreach (var al in Model.Alunos)
                                 {
                                     i++;
                                     <tr>
                                         <td>@i</td>
                                         <td>
-                                            <a asp-page="/PerfilAluno/@Model.Alunos">@al</a> 
+                                            <a asp-page="/PerfilAluno" asp-route-userId="@al.user_id">@al.nome</a>
                                         </td>
-                                        <td>02%</td>
+                                        <td>@al.ultimo_acesso</td>
+                                        <td>
+                                            @* Exemplo estático — você pode ajustar depois *@
+                                            @(al.total_acessos > 0 ? $"{Math.Min(al.total_acessos, 100)}%" : "0%")
+                                        </td>
                                     </tr>
                                 }
                             }
                         </tbody>
-
-
-
                     </table>
                 </div>
             </div>
+
             <div class="conteudo" id="conteudo3">
                 
                     @foreach(var l in Model.Cursos.Logs)
