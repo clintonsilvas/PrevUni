@@ -171,6 +171,10 @@ nav {
   }
 }
 
+ul, ol {
+    padding-left: 2rem; /* Equivale a um tab */
+}
+
 @media (max-width: 768px) {
   .Endereco {
     display: none;
