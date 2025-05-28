@@ -26,7 +26,6 @@ namespace Front.Pages
         {
             var client = _httpClientFactory.CreateClient();
 
-            //GABRIEL : Aqui você pode usar o nome do curso para buscar o resumo 
             var resumoResponse = await client.GetAsync($"https://localhost:7232/resumo-curso/{CursoNome}");
 
             var resumoJson = await resumoResponse.Content.ReadAsStringAsync();
@@ -45,28 +44,37 @@ namespace Front.Pages
 
         public async Task<IActionResult> OnPostAsync()
         {
-            var client = _httpClientFactory.CreateClient();            
-            var resumoResponse = await client.GetAsync($"https://localhost:7232/resumo-curso/ {CursoNome}");
+            var client = _httpClientFactory.CreateClient();
 
+            var resumoResponse = await client.GetAsync($"https://localhost:7232/resumo-curso/{CursoNome}");
             var resumoJson = await resumoResponse.Content.ReadAsStringAsync();
-            var resumoObjeto = JsonSerializer.Deserialize<object>(resumoJson); // deserializa para envio
 
-            // 2. Enviar prompt + dadosAluno para o endpoint do BACKEND (que chama o Gemini)
+            var resumoObjeto = JsonSerializer.Deserialize<object>(resumoJson);
+
             var requestBody = JsonSerializer.Serialize(new
             {
                 Prompt = Prompt,
-                DadosCurso = resumoObjeto
+                DadosCurso = resumoObjeto?.ToString() ?? ""
             });
+
 
             var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
 
-            var iaResponse = await client.PostAsync("https://localhost:7232/pergunte-ia", content);
+            var iaResponse = await client.PostAsync("https://localhost:7232/pergunte-ia-curso", content);
 
             var iaResult = await iaResponse.Content.ReadAsStringAsync();
+
+            if (!iaResponse.IsSuccessStatusCode)
+            {
+                Resposta = $"Erro: {iaResponse.StatusCode} - {iaResult}";
+                return Page();
+            }
+
             using var doc = JsonDocument.Parse(iaResult);
             Resposta = doc.RootElement.GetProperty("respostaIA").GetString();
 
             return Page();
         }
+
     }
 }

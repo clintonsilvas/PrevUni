@@ -55,5 +55,46 @@ namespace Backend.Services
 
             return result;
         }
+
+        public async Task<string> EnviarPromptCursoAsync(string prompt, string dadosCurso)
+        {
+            var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={_apiKey}";
+
+            var requestBody = new
+            {
+                contents = new[]
+                {
+            new
+            {
+                parts = new object[]
+                {
+                    new { text = $@"{dadosCurso},\n {prompt}" }
+                }
+            }
+        }
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+
+            var response = await _httpClient.PostAsync(url, content);
+            var json = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
+            {
+                Console.WriteLine($"Erro na IA: {response.StatusCode} - {json}");
+                return null;
+            }
+
+            using var doc = JsonDocument.Parse(json);
+            var result = doc.RootElement.GetProperty("candidates")[0]
+                                        .GetProperty("content")
+                                        .GetProperty("parts")[0]
+                                        .GetProperty("text")
+                                        .GetString();
+
+            return result;
+
+        }
+
     }
 }

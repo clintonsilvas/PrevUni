@@ -410,5 +410,169 @@ namespace Backend.Services
             return resumo;
         }
 
+        public async Task<string> GerarResumoCursoIAAsync(string nomeCurso)
+        {
+            var logs = await GetLogsPorCursoAsync(nomeCurso);
+            if (logs == null || logs.Count == 0)
+                return "Curso não encontrado ou sem atividades.";
+
+            var totalAcessos = logs.Count;
+            var alunosUnicos = logs.Select(l => l.user_id).Distinct().Count();
+
+            var interacoesPorComponente = logs
+                .GroupBy(l => l.component)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            double mediaAcessosPorAluno = alunosUnicos > 0 ? (double)totalAcessos / alunosUnicos : 0;
+
+            var datasDistintas = logs
+                .Select(l => l.date.Length >= 10 ? l.date.Substring(0, 10) : l.date)
+                .Distinct()
+                .ToList();
+
+            int diasAtivos = datasDistintas.Count;
+
+            // Estimativa de tempo de uso: intervalo entre primeiro e último acesso
+            DateTime? primeiroAcesso = logs
+                .Select(l => DateTime.TryParse(l.date, out var d) ? d : (DateTime?)null)
+                .Where(d => d.HasValue)
+                .OrderBy(d => d.Value)
+                .FirstOrDefault();
+
+            DateTime? ultimoAcesso = logs
+                .Select(l => DateTime.TryParse(l.date, out var d) ? d : (DateTime?)null)
+                .Where(d => d.HasValue)
+                .OrderByDescending(d => d.Value)
+                .FirstOrDefault();
+
+            int duracaoDias = 0;
+            if (primeiroAcesso.HasValue && ultimoAcesso.HasValue)
+                duracaoDias = (ultimoAcesso.Value - primeiroAcesso.Value).Days + 1;
+
+            DateTime limite30dias = DateTime.UtcNow.AddDays(-30);
+            var alunosAtivos30Dias = logs
+                .GroupBy(l => l.user_id)
+                .Where(g => g.Max(l => DateTime.TryParse(l.date, out var d) ? d : DateTime.MinValue) >= limite30dias)
+                .Select(g => g.Key)
+                .Count();
+
+            var alunosComMaisDe5Acessos = logs
+                .GroupBy(l => l.user_id)
+                .Count(g => g.Count() > 5);
+
+            double percentualAlunosEngajados = alunosUnicos > 0 ? (double)alunosComMaisDe5Acessos / alunosUnicos * 100 : 0;
+
+            var acoesMaisComuns = logs
+                .GroupBy(l => l.action)
+                .OrderByDescending(g => g.Count())
+                .Take(3)
+                .Select(g => $"{g.Key}:{g.Count()}")
+                .ToList();
+
+            var acoesEngajamento = new[] { "submitted", "uploaded", "graded", "created" };
+            var acoesEngajamentoTop = logs
+                .Where(l => acoesEngajamento.Contains(l.action))
+                .GroupBy(l => l.action)
+                .OrderByDescending(g => g.Count())
+                .Take(3)
+                .Select(g => $"{g.Key}:{g.Count()}")
+                .ToList();
+
+            var alunosMultiplosDias = logs
+                .GroupBy(l => l.user_id)
+                .Count(g => g.Select(l => l.date.Substring(0, 10)).Distinct().Count() > 1);
+
+            var totalInteracoes = interacoesPorComponente.Values.Sum();
+            var percentualPorComponente = interacoesPorComponente
+                .Select(kv => $"{kv.Key}:{(kv.Value * 100.0 / totalInteracoes):F2}%")
+                .ToList();
+
+            var topUsuarios = logs
+                .GroupBy(l => new { l.user_id, l.name })
+                .OrderByDescending(g => g.Count())
+                .Take(3)
+                .Select(g => $"{g.Key.name} ({g.Count()})")
+                .ToList();
+
+            // NOVOS INSIGHTS
+
+            // Top 10 piores alunos (menos acessos)
+            var pioresUsuarios = logs
+                .GroupBy(l => new { l.user_id, l.name })
+                .OrderBy(g => g.Count())
+                .Take(10)
+                .Select(g => $"{g.Key.name} ({g.Count()})")
+                .ToList();
+
+            // Alunos com apenas 1 acesso
+            var alunos1Acesso = logs
+                .GroupBy(l => l.user_id)
+                .Count(g => g.Count() == 1);
+
+            // Alunos inativos há mais de 30 dias
+            var alunosInativos = logs
+                .GroupBy(l => l.user_id)
+                .Where(g => g.Max(l => DateTime.TryParse(l.date, out var d) ? d : DateTime.MinValue) < limite30dias)
+                .Select(g => g.Key)
+                .Count();
+
+            // Alunos que nunca realizaram ações de engajamento
+            var alunosSemEngajamento = logs
+                .GroupBy(l => l.user_id)
+                .Count(g => !g.Any(l => acoesEngajamento.Contains(l.action)));
+
+            // Ações passivas x ativas
+            var acoesPassivas = new[] { "viewed", "read", "accessed" };
+            var totalAtivas = logs.Count(l => acoesEngajamento.Contains(l.action));
+            var totalPassivas = logs.Count(l => acoesPassivas.Contains(l.action));
+
+            // Média de dias entre 1º e último acesso por aluno
+            var mediasDiasPorAluno = logs
+                .GroupBy(l => l.user_id)
+                .Select(g =>
+                {
+                    var datas = g
+                        .Select(l => DateTime.TryParse(l.date, out var d) ? d : (DateTime?)null)
+                        .Where(d => d.HasValue)
+                        .Select(d => d.Value)
+                        .OrderBy(d => d)
+                        .ToList();
+
+                    return datas.Count > 1 ? (datas.Last() - datas.First()).Days : 0;
+                })
+                .ToList();
+
+            double mediaDiasPermanencia = mediasDiasPorAluno.Count > 0 ? mediasDiasPorAluno.Average() : 0;
+
+            var resumoStr = string.Join(" / ", new[]
+            {
+        $"Curso: {nomeCurso}",
+        $"Total de Alunos: {alunosUnicos}",
+        $"Total de Acessos: {totalAcessos}",
+        $"Média de Acessos por Aluno: {mediaAcessosPorAluno:F2}",
+        $"Dias Ativos: {diasAtivos}",
+        $"Duração Estimada do Uso: {duracaoDias} dias",
+        $"Alunos Ativos nos Últimos 30 dias: {alunosAtivos30Dias}",
+        $"Alunos Inativos >30 dias: {alunosInativos}",
+        $"% Alunos com >5 Acessos: {percentualAlunosEngajados:F2}%",
+        $"Alunos com apenas 1 acesso: {alunos1Acesso}",
+        $"Alunos sem Engajamento: {alunosSemEngajamento}",
+        $"Interações por Componente: {string.Join(", ", percentualPorComponente)}",
+        $"Ações Mais Comuns: {string.Join(", ", acoesMaisComuns)}",
+        $"Top Ações de Engajamento: {string.Join(", ", acoesEngajamentoTop)}",
+        $"Ações Passivas: {totalPassivas}, Ativas: {totalAtivas}",
+        $"Alunos com acesso em >1 dia: {alunosMultiplosDias}",
+        $"Top 3 Usuários com Mais Acessos: {string.Join(", ", topUsuarios)}",
+        $"Top 10 Piores Usuários (menos acessos): {string.Join(", ", pioresUsuarios)}",
+        $"Média de dias entre 1º e último acesso por aluno: {mediaDiasPermanencia:F2} dias"
+    });
+
+            return resumoStr;
+        }
+
+
+
+
+
     }
 }
