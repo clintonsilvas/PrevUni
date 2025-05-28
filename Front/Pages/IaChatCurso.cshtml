@@ -19,6 +19,22 @@
         <h1 class="corPreta40B">Inteligência Artificial</h1>
     </div>
 </header>
+
+@if (Model.DadosCurso != null)
+{
+    <div class="card-curso" style="padding: 20px; background-color: #f9f9f9; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;">
+        <h3 style="margin-bottom: 10px;">📄 Dados do Curso</h3>
+        <ul style="list-style: none; padding: 0;">
+            @foreach (var item in Model.DadosCurso)
+            {
+                <li style="margin-bottom: 6px;">
+                    <strong>@item.Key:</strong> @item.Value
+                </li>
+            }
+        </ul>
+    </div>
+}
+
 @* 
 @if (Model.DadosAluno != null)
 {
