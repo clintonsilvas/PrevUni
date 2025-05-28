@@ -32,11 +32,10 @@ namespace Front.Pages
             else
             {
                 Alunos = new List<AlunoResumo>();
-                Cursos.alunos = 0; // Define como zero se não conseguir buscar os alunos
+                Cursos.alunos = 0;
             }
 
-            // 2. Chamar o método AtualizaSemanas do objeto Cursos (que já está inicializado com o nome do curso)
-            await Cursos.AtualizaSemanas();
+           await Cursos.AtualizaSemanas();
 
         }
 

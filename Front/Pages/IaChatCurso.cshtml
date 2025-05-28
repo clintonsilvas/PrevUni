@@ -1,5 +1,5 @@
-﻿@page "{userId}"
-@model Front.Pages.IaChatAlunoModel
+﻿@page "{cursoNome}"
+@model Front.Pages.IaChatCursoModel
 @{
     ViewData["Title"] = "Chat com IA";
 }
@@ -19,7 +19,7 @@
         <h1 class="corPreta40B">Inteligência Artificial</h1>
     </div>
 </header>
-
+@* 
 @if (Model.DadosAluno != null)
 {
     <div class="card-aluno" style="padding: 20px; background-color: #f9f9f9; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;">
@@ -33,11 +33,11 @@
             }
         </ul>
     </div>
-}
+} *@
 
 <div class="dashboard coluna"
-     style="--gap: 10px; height: 100%; flex-direction: column-reverse; z-index:1">     
-}
+     style="--gap: 10px; height: 100%; flex-direction: column-reverse; z-index:1">
+    }
     @if (Model.Resposta != null)
     {
         <div class="resposta">

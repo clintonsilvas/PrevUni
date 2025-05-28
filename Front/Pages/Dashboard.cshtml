@@ -15,7 +15,7 @@ style="
         <span class="SubH1 corAzul">Bem Vindo(a)</span>
         <h1 class="corPreta40B">@Model.Cursos.curso</h1>
     </div>
-    <button class="botaoatualiza">Atualizar</button>
+    <button onclick="location.reload()" class="botaoatualiza">Atualizar</button>
 </header>
 <!--
 <div class="linha Endereco" style="align-items: center">
@@ -38,7 +38,7 @@ style="
         id="IaPergunta"
         name="nome"
         placeholder="Pergunte a inteligência Artifical!" />
-        <a asp-page="/IaChatAluno">Gerar</a>
+        <a asp-page="/IaChatCurso" asp-route-cursoNome="@Model.Cursos.curso">Gerar</a>
     </div>
 
     <div class="abas">

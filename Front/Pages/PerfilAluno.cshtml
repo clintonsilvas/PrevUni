@@ -1,6 +1,7 @@
 ﻿@page "{userId}"
 @model Front.Pages.PerfilAlunoModel
 @{
+    
 }
 
 
@@ -10,25 +11,10 @@
             width: 100%;
             height: fit-content;
         ">
-    <div class="coluna" style="--gap: 10px">
-        <span class="SubH1 corAzul">Metodologias Ágeis</span>
+    <div class="coluna" style="--gap: 10px">        
         <h1 class="corPreta40B">Perfil de Aluno</h1>
-    </div>
-    <button class="botaoatualiza">Atualizar</button>
+    </div>   
 </header>
-
-<div class="linha Endereco" style="align-items: center">
-    <img src="~/css/icons/casa.svg" alt="ÍconeHome" width="14" height="14" />
-    <span class="SubH3">></span>
-    <a class="SubH3">Cursos</a>
-    <span class="SubH3">></span>
-    <a class="SubH3">Ciênca da Computação</a>
-    <span class="SubH3">></span>
-    <a class="SubH3">Metodologias Ágeis</a>
-    <span class="SubH3">></span>
-    <a class="SubH3">@Model.AlunoDetalhes.nome</a>
-</div>
-
 <div class="dashboard coluna" style="--gap: 16px">
     <div class="linha alt_li" style="flex: 1; height: fit-content">
         <div class="linha CardsEngajamento QuadroCards">
@@ -72,7 +58,7 @@
                id="IaPergunta"
                name="nome"
                placeholder="Pergunte a inteligência Artifical!" />
-        <button>Gerar</button>
+        <a asp-page="/IaChatAluno" asp-route-userId="@Model.AlunoDetalhes.user_id">Gerar</a>        
     </div>
 
     <div class="abas">

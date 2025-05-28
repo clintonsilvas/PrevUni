@@ -1,9 +1,9 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="pt-br">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Front</title>
+    <title>@ViewData["Title"] PrevUni</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -25,8 +25,7 @@
                     <img id="logoEscura" src="~/css/icons/PrevUni_modEscuro.svg" />
                 </a>
                 <div class="linha links_nav" style="gap: 24px">
-                    <a asp-area="" asp-page="/Index">Cursos</a>
-                    <a asp-area="" asp-page="/Index">Alunos</a>
+                    <a asp-area="" asp-page="/Cursos">Cursos</a>                    
                 </div>
             </div>
             <div class=" linha" style="align-items:center">
@@ -37,19 +36,8 @@
                     <img id="modEscuro" src="~/css/icons/Escuro.svg" height="14px" />
                 </span>
             </label>
-            <div>
-                <div class="icon_perfil">
-                    <span>CB</span>
-                </div>
             </div>
-            </div>
-
-        </nav>
-
- 
-
-
-    
+        </nav>    
         <main class="playground">
         @if (ViewData["OcultarSombra"] == null)
         {
