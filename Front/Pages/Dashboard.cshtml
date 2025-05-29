@@ -358,10 +358,10 @@ style="
                                     <button onclick="ordenarTabela(1)" class="bot_tab">Nome <img src="~/css/icons/Ordenar.svg" /></button>
                                 </th>
                                 <th>
-                                    Último Acesso
+                                    <button onclick="ordenarTabela(2)" class="bot_tab">Último Acesso <img src="~/css/icons/Ordenar.svg" /></button>
                                 </th>
                                 <th>
-                                    Engajamento
+                                    <button onclick="ordenarTabela(3)" class="bot_tab">Engajamento <img src="~/css/icons/Ordenar.svg" /></button>
                                 </th>
                             </tr>
                         </thead>
@@ -408,31 +408,35 @@ style="
             2: true
         };
 
-        function ordenarTabela(coluna) {
-            const tabela = document.getElementById("tabelaAlunos");
-            const tbody = tabela.querySelector("tbody");
-            const linhas = Array.from(tbody.querySelectorAll("tr"));
-            const crescente = estadoOrdenacao[coluna];
+    function ordenarTabela(coluna) {
+        const tabela = document.getElementById("tabelaAlunos");
+        const tbody = tabela.querySelector("tbody");
+        const linhas = Array.from(tbody.querySelectorAll("tr"));
+        const crescente = estadoOrdenacao[coluna];
 
-            linhas.sort((a, b) => {
-                let valA = a.children[coluna].innerText.trim();
-                let valB = b.children[coluna].innerText.trim();
+        linhas.sort((a, b) => {
+            let valA = a.children[coluna].innerText.trim();
+            let valB = b.children[coluna].innerText.trim();
 
-                if (coluna === 2) { // % presença
-                    valA = parseFloat(valA.replace('%', '')) || 0;
-                    valB = parseFloat(valB.replace('%', '')) || 0;
-                }
+            if (coluna === 2) { // Data
+                valA = new Date(valA).getTime();
+                valB = new Date(valB).getTime();
+            } else if (coluna === 3) { // % presença
+                valA = parseFloat(valA.replace('%', '')) || 0;
+                valB = parseFloat(valB.replace('%', '')) || 0;
+            }
 
-                if (!isNaN(valA) && !isNaN(valB)) {
-                    return crescente ? valA - valB : valB - valA;
-                }
+            if (!isNaN(valA) && !isNaN(valB)) {
+                return crescente ? valA - valB : valB - valA;
+            }
 
-                return crescente
-                    ? valA.localeCompare(valB)
-                    : valB.localeCompare(valA);
-            });
+            return crescente
+                ? valA.localeCompare(valB)
+                : valB.localeCompare(valA);
+        });
 
-            linhas.forEach(linha => tbody.appendChild(linha));
-            estadoOrdenacao[coluna] = !crescente; // alterna ordem
-        }
+        linhas.forEach(linha => tbody.appendChild(linha));
+        estadoOrdenacao[coluna] = !crescente; // alterna ordem
+    }
+
     </script>
