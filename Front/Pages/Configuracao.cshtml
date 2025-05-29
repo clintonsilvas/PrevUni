@@ -1,0 +1,131 @@
+﻿@page
+@model Front.Pages.ConfiguracaoModel
+@{
+    ViewData["Title"] = "Configuração de Importação";
+}
+
+<style>
+    /* Estilos básicos para a página de carregamento */
+    .container-importacao {
+        max-width: 800px;
+        margin: 50px auto;
+        padding: 30px;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        text-align: center;
+    }
+
+    h1 {
+        color: #333;
+        margin-bottom: 25px;
+    }
+
+    button {
+        padding: 12px 25px;
+        font-size: 1.1em;
+        cursor: pointer;
+        background-color: #007bff;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        transition: background-color 0.3s ease;
+        margin-bottom: 20px;
+    }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+    .progress-container {
+        width: 100%;
+        background-color: #e0e0e0;
+        border-radius: 5px;
+        overflow: hidden;
+        margin-top: 25px;
+        height: 30px;
+        box-shadow: inset 0 1px 3px rgba(0,0,0,0.2);
+    }
+
+    .progress-bar {
+        height: 100%;
+        background-color: #28a745;
+        color: white;
+        text-align: center;
+        line-height: 30px;
+        font-weight: bold;
+    }
+
+    .status-message {
+        margin-top: 20px;
+        font-size: 1.1em;
+        font-weight: bold;
+    }
+
+    .error-message {
+        color: #dc3545;
+    }
+
+    .success-message {
+        color: #28a745;
+    }
+
+    .info-message {
+        color: #007bff;
+    }
+</style>
+
+<div class="container-importacao">
+    <h1>Configuração de Importação do Moodle</h1>
+
+    @if (!string.IsNullOrEmpty(Model.Message))
+    {
+        <div class="status-message @(Model.MessageType)-message">
+            @Model.Message
+        </div>
+    }
+
+    <form method="post" asp-page-handler="IniciarImportacao">
+        <button type="submit">Iniciar Importação</button>
+    </form>
+
+    @if (Model.CurrentStatus != null && Model.CurrentStatus.TotalUsuarios > 0)
+    {
+        <div id="progressBarContainer" class="progress-container">
+            @{
+                var progressPercentage = (Model.CurrentStatus.ProgressoAtual / (double)Model.CurrentStatus.TotalUsuarios) * 100;
+                if (double.IsNaN(progressPercentage) || double.IsInfinity(progressPercentage))
+                {
+                    progressPercentage = 0;
+                }
+                else if (progressPercentage > 100)
+                {
+                    progressPercentage = 100;
+                }
+                else if (progressPercentage < 0)
+                {
+                    progressPercentage = 0;
+                }
+            }
+            <div id="progressBar" class="progress-bar" style="width: @(progressPercentage.ToString("F0"))%;">
+                @(progressPercentage.ToString("F0"))%
+            </div>
+        </div>
+    }
+    else if (Model.CurrentStatus != null && !string.IsNullOrEmpty(Model.CurrentStatus.Status))
+    {
+        <p>Status inicial: @Model.CurrentStatus.Status - @Model.CurrentStatus.Mensagem</p>
+    }
+</div>
+
+@section Scripts {
+    @if (Model.CurrentStatus != null && Model.CurrentStatus.Status != "Concluída" && Model.CurrentStatus.Status != "Erro")
+    {
+        <script>
+            // Recarrega a página a cada 5 segundos para obter o status atualizado
+            setTimeout(function() {
+                window.location.reload();
+            }, 5000);
+        </script>
+    }
+}
