@@ -54,7 +54,7 @@ namespace Front.Pages
             var requestBody = JsonSerializer.Serialize(new
             {
                 Prompt = Prompt,
-                DadosCurso = resumoObjeto?.ToString() ?? ""
+                DadosCurso = resumoObjeto?.ToString() ?? "" // isso vai pegar os dados do curso
             });
 
 
