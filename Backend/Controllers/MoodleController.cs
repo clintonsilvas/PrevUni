@@ -31,17 +31,39 @@ namespace Backend.Controllers
             return Ok(result);
         }
         [HttpPost("importar")]
-        public async Task<IActionResult> ImportarDados()
+        public IActionResult IniciarImportacao() // Note que não é mais async Task<IActionResult>
         {
             try
             {
-                await _apiService.ProcessarUsuariosAsync();
-                return Ok("Importação concluída com sucesso.");
+                // Inicia o registro da importação e obtém o ID
+                var statusInicial = _apiService.IniciarNovaImportacao();
+
+                // Inicia a tarefa de processamento em background, passando o ID
+                // O underscore é para "descartar" o resultado da Task, indicando "fire and forget".
+                // Isso não significa que a Task não será executada, apenas que não estamos esperando por ela aqui.
+                _ = Task.Run(() => _apiService.ProcessarUsuariosInBackgroundAsync(statusInicial.Id));
+
+                // Retorna imediatamente um status 202 Accepted (Processando)
+                return Accepted(new { importacaoId = statusInicial.Id, status = statusInicial.Status, message = statusInicial.Mensagem });
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erro durante a importação: {ex.Message}\n\n{ex.StackTrace}");
+                // Retornar um erro genérico se a inicialização falhar
+                return StatusCode(500, $"Erro ao iniciar a importação: {ex.Message}");
             }
+        }
+
+        [HttpGet("importar-status/{importacaoId}")]
+        public IActionResult GetStatusImportacao(string importacaoId)
+        {
+            var status = _apiService.GetImportacaoStatus(importacaoId);
+
+            if (status == null)
+            {
+                return NotFound($"Importação com ID '{importacaoId}' não encontrada.");
+            }
+
+            return Ok(status);
         }
         [HttpGet("cursos")]
         public async Task<IActionResult> GetCursos()
