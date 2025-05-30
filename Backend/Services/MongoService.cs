@@ -327,7 +327,18 @@ namespace Backend.Services
             {
         new BsonDocument("$unwind", "$logs"),
         new BsonDocument("$match", new BsonDocument("logs.user_id", userId)),
+
+        // Adiciona campo com ano-semana para agrupar depois
+        new BsonDocument("$addFields", new BsonDocument("ano_semana", new BsonDocument(
+            "$concat", new BsonArray {
+                new BsonDocument("$toString", new BsonDocument("$year", "$logs.date")),
+                "-",
+                new BsonDocument("$toString", new BsonDocument("$isoWeek", "$logs.date"))
+            }
+        ))),
+
         new BsonDocument("$replaceRoot", new BsonDocument("newRoot", "$logs")),
+
         new BsonDocument("$group", new BsonDocument
         {
             { "_id", "$user_id" },
@@ -336,6 +347,7 @@ namespace Backend.Services
             { "total_acessos", new BsonDocument("$sum", 1) },
             { "dias_ativos", new BsonDocument("$addToSet", new BsonDocument("$substr", new BsonArray { "$date", 0, 10 })) },
             { "interacoes_por_componente", new BsonDocument("$push", "$component") },
+            { "interacoes_por_semana", new BsonDocument("$push", "$ano_semana") },
             { "cursos", new BsonDocument("$addToSet", "$course_fullname") }
         })
     };
@@ -343,16 +355,27 @@ namespace Backend.Services
             var result = await _collection.AggregateAsync<BsonDocument>(pipeline);
             var doc = await result.FirstOrDefaultAsync();
 
-            if (doc == null) return "Usuário não encontrado";
+            if (doc == null)
+                return "Usuário não encontrado";
 
-            // Agrupando contagem de componentes
+            // Agrupando interações por componente
             var componentes = doc["interacoes_por_componente"].AsBsonArray
                 .GroupBy(x => x.AsString)
                 .ToDictionary(g => g.Key, g => g.Count());
 
-            var componentesStr = string.Join(",", componentes.Select(kv => $"{kv.Key}:{kv.Value}"));
-            var cursosStr = string.Join(",", doc["cursos"].AsBsonArray.Select(c => c.AsString));
+            var componentesStr = string.Join(", ", componentes.Select(kv => $"{kv.Key}: {kv.Value}"));
 
+            // Agrupando interações por semana
+            var interacoesPorSemana = doc["interacoes_por_semana"].AsBsonArray
+                .GroupBy(x => x.AsString)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            var semanasStr = string.Join(", ", interacoesPorSemana.Select(kv => $"{kv.Key}: {kv.Value}"));
+
+            // Cursos acessados
+            var cursosStr = string.Join(", ", doc["cursos"].AsBsonArray.Select(c => c.AsString));
+
+            // Resumo final
             var resumoStr = string.Join(" / ", new[]
             {
         $"ID: {doc["_id"]}",
@@ -361,11 +384,13 @@ namespace Backend.Services
         $"Total de Acessos: {doc["total_acessos"]}",
         $"Dias Ativos: {doc["dias_ativos"].AsBsonArray.Count}",
         $"Interações por Componente: {componentesStr}",
+        $"Interações por Semana: {semanasStr}",
         $"Cursos Acessados: {cursosStr}"
     });
 
             return resumoStr;
         }
+
 
         public async Task<BsonDocument> GerarResumoAlunoAsync(string userId)
         {
