@@ -60,17 +60,19 @@ nav {
 }
 
 .sobreposicao_inferior {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 100px;
-  background: linear-gradient(
-    to top,
-    rgba(239, 242, 250, 0.8),
-    rgba(239, 242, 250, 0)
-  );
-  z-index: 2;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient( to top, rgba(239, 242, 250, 0.8), rgba(239, 242, 250, 0) );
+    z-index: 2;
+    pointer-events: none;
+}
+.ellipsis {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .QuadroCards {

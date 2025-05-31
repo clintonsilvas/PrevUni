@@ -1,5 +1,10 @@
 @import url("Cores.css");
 
+
+:root{
+    --colunaDireita: 350px;
+}
+
 .CardsEngajamento {
   flex: 1;
   align-items: center;
@@ -7,7 +12,7 @@
 
 .QuantAlunos {
   height: fit-content;
-  width: 260px;
+  width: var(--colunaDireita);
   padding: 24px;
   background-color: var(--Preto40B);
   border-radius: 8px;
@@ -64,7 +69,7 @@
 }
 
 .Unidades {
-  width: 260px;
+  width: var(--colunaDireita);
   height: 100%;
   overflow: hidden;
 }
@@ -108,76 +113,71 @@
     height: var(--Porcentagem, 50%);
   }
 }
-
 .tabela-card {
-  font-family: "Inter";
-  font-size: 12pt;
-  font-weight: 600;
-  color: var(--Cinza70B);
-  text-decoration: none;
+    font-family: "Inter";
+    font-size: 10pt;
+    font-weight: 600;
+    color: var(--Cinza70B);
 }
 
-.tabela-card a {
-  color: var(--Cinza70B);
-  text-decoration: none;
-}
+    .tabela-card a {
+        color: var(--Cinza70B);
+        text-decoration: none;
+    }
 
-.tabela-card tr:hover a {
-  color: var(--Azul-principal);
-}
+    .tabela-card tr:hover a {
+        color: var(--Azul-principal);
+    }
 
-.tabela-card table {
-  width: 100%;
-  border-collapse: collapse;
-}
+    .tabela-card table {
+        width: 100%;
+        border-collapse: collapse;
+    }
 
-.tabela-card thead th {
-  text-align: left;
-  font-weight: bold;
-}
+    .tabela-card thead th {
+        text-align: left;
+        font-weight: bold;
+        align-items: end;
+    }
+
     .tabela-card td,
     .tabela-card th {
         padding: 8px;
         width: fit-content;
     }
 
-.tabela-card tr {
-  border-radius: 20px;
-}
-
-.tabela-card tr:hover {
-  background-color: var(--Cinza100B);
-}
-
-    .tabela-card th:last-child {
-        align-items:end;
-        text-align: right;
-        font-weight: bold;
+    .tabela-card tr:hover {
+        background-color: var(--Cinza100B);
     }
 
-.tabela-card td:last-child {
-  text-align: right;
-  font-weight: bold;
-}
+    .tabela-card th:last-child,
+    .tabela-card td:last-child {
+        text-align: right;
+    }
 
+    .tabela-card td:first-child {
+        color: var(--Azul-principal);
+        font-weight: 800;
+        width: 10px;
+    }
+
+/* Botão de ordenação */
 .bot_tab {
     border: none;
     background-color: transparent;
     display: flex;
-    flex-direction: row;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
+    justify-content: flex-end;
+    gap: 6px;
     color: var(--Cinza60B);
+    cursor: pointer;
 }
 
-
-
-.tabela-card td:first-child {
-    color: var(--Azul-principal);
-    font-weight: 800;
-    width: 10px;
+/* Inverter texto e ícone no último botão (Engajamento) */
+th:last-child .bot_tab {
+    flex-direction: row-reverse;
 }
+
 
 .caixaProgresso {
   display: flex;
@@ -244,4 +244,9 @@
   #graf01 {
     width: 100%;
   }
+}
+
+
+.escondido {
+    display: none;
 }

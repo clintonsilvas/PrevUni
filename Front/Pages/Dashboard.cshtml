@@ -99,7 +99,7 @@ style="
                 </div>
                 <div class="linha alt_li" style="flex: 1">
                     <div class="QuadroCards GraficoEvolucao linha"
-                         style="flex: 1; --gap: 40px">
+                    style="flex: 1; --gap: 40px">
 
 
                         <div class="coluna" style="--gap: 16px; height: 100%;">
@@ -175,7 +175,7 @@ style="
                                     Quantidade = g.Count()
                                 })
                                 .ToList();
-                               // acoes.RemoveAll(l => l.Acao == "viewed");
+                                // acoes.RemoveAll(l => l.Acao == "viewed");
 
                                 var labels = string.Join(",", acoes.Select(a => $"'{a.Acao}'"));
                                 var dados = string.Join(",", acoes.Select(a => a.Quantidade));
@@ -187,39 +187,39 @@ style="
 
                             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
                             <script>
-                                                               const ctx = document.getElementById('graficoPizza').getContext('2d');
+                                const ctx = document.getElementById('graficoPizza').getContext('2d');
                                 const chart = new Chart(ctx, {
-                                    type: 'doughnut',
-                                    data: {
-                                        labels: [@Html.Raw(labels)],
-                                        datasets: [{
-                                            data: [@dados],
+                                type: 'doughnut',
+                                data: {
+                                labels: [@Html.Raw(labels)],
+                                datasets: [{
+                                data: [@dados],
                                 backgroundColor: [
-                                                 '#001b66',
-                                                 '#002280',
-                                                 '#002899',
-                                                 '#002fb2',
-                                                 '#0036cc',
-                                                 '#668eff',
-                                                 '#99b4ff',
-                                                 '#b2c7ff',
-                                                 '#ccd9ff',
-                                                 '#e5ecff'
+                                '#001b66',
+                                '#002280',
+                                '#002899',
+                                '#002fb2',
+                                '#0036cc',
+                                '#668eff',
+                                '#99b4ff',
+                                '#b2c7ff',
+                                '#ccd9ff',
+                                '#e5ecff'
                                 ],
 
-                                            borderWidth: 0
-                                        }]
-                                    },
-                                   options: {
-                                        cutout: '50%',
-                                        
-                                        responsive: true,
-                                        plugins: {
-                                            legend: {
-                                                display: false
-                                            }
-                                        }
-                                    }
+                                borderWidth: 0
+                                }]
+                                },
+                                options: {
+                                cutout: '50%',
+
+                                responsive: true,
+                                plugins: {
+                                legend: {
+                                display: false
+                                }
+                                }
+                                }
                                 });
 
                                 // Gera legenda customizada
@@ -230,10 +230,10 @@ style="
                                 const legenda = document.getElementById('legenda');
 
                                 container.addEventListener('mouseenter', () => {
-                                    legenda.style.display = 'block';
+                                legenda.style.display = 'block';
                                 });
                                 container.addEventListener('mouseleave', () => {
-                                    legenda.style.display = 'none';
+                                legenda.style.display = 'none';
                                 });
                             </script>
                         </div>
@@ -267,36 +267,36 @@ style="
                             <script>
                                 const ctxComponentes = document.getElementById('graficoPizzaComponentes').getContext('2d');
                                 const chartComponentes = new Chart(ctxComponentes, {
-                                    type: 'doughnut',
-                                    data: {
-                                        labels: [@Html.Raw(labelsComponentes)],
-                                        datasets: [{
-                                            data: [@dadosComponentes],
-                                            backgroundColor: [
-                                                 '#001b66',
-                                                 '#002280',
-                                                 '#002899',
-                                                 '#002fb2',
-                                                 '#0036cc',
-                                                 '#668eff',
-                                                 '#99b4ff',
-                                                 '#b2c7ff',
-                                                 '#ccd9ff',
-                                                 '#e5ecff'
-                                            ],
-                                            borderWidth: 0
-                                        }]
-                                    },
-                                    options: {
-                                        cutout: '50%',
-                                        
-                                        responsive: true,
-                                        plugins: {
-                                            legend: {
-                                                display: false
-                                            }
-                                        }
-                                    }
+                                type: 'doughnut',
+                                data: {
+                                labels: [@Html.Raw(labelsComponentes)],
+                                datasets: [{
+                                data: [@dadosComponentes],
+                                backgroundColor: [
+                                '#001b66',
+                                '#002280',
+                                '#002899',
+                                '#002fb2',
+                                '#0036cc',
+                                '#668eff',
+                                '#99b4ff',
+                                '#b2c7ff',
+                                '#ccd9ff',
+                                '#e5ecff'
+                                ],
+                                borderWidth: 0
+                                }]
+                                },
+                                options: {
+                                cutout: '50%',
+
+                                responsive: true,
+                                plugins: {
+                                legend: {
+                                display: false
+                                }
+                                }
+                                }
                                 });
 
                                 document.getElementById('legendaComponentes').innerHTML = chartComponentes.generateLegend();
@@ -305,10 +305,10 @@ style="
                                 const legendaComponentes = document.getElementById('legendaComponentes');
 
                                 containerComponentes.addEventListener('mouseenter', () => {
-                                    legendaComponentes.style.display = 'block';
+                                legendaComponentes.style.display = 'block';
                                 });
                                 containerComponentes.addEventListener('mouseleave', () => {
-                                    legendaComponentes.style.display = 'none';
+                                legendaComponentes.style.display = 'none';
                                 });
                             </script>
                         </div>
@@ -319,30 +319,47 @@ style="
                             <img src="~/css/icons/alunosDesistentes.png" />
                             <h4 class="corPreta50B">Posíveis Desistentes</h4>
                         </div>
-                        <div class="tabela-card">
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <td>1</td>
-                                        <td><a href="">Pedro Henrique</a></td>
-                                        <td>02%</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2</td>
-                                        <td><a href="">Miguel Oliveira</a></td>
+                        <div class="tabela-card" > 
+                            <table >
+                                <tbody id="tabela-alunos" >
+                                    @{
+                                        var gruposLogs = Model.Cursos.Logs
+                                        .GroupBy(l => l.user_id)
+                                        .Select(g => new
+                                        {
+                                            UserId = g.Key,
+                                            Name = g.First().name,
+                                            QuantidadeLogs = g.Count()
+                                        })
+                                        .ToList();
 
-                                        <td>02%</td>
-                                    </tr>
-                                    <tr>
-                                        <td>3</td>
-                                        <td><a href="">Vanessa Carvalho</a></td>
+                                        double mediaLogs = gruposLogs.Any() ? gruposLogs.Average(g => g.QuantidadeLogs) : 0;
 
-                                        <td>03%</td>
-                                    </tr>
-                                    <!-- continue os outros -->
+                                        var alunosMenosAtivos = gruposLogs
+                                        .Where(g => g.QuantidadeLogs < mediaLogs)
+                                        .OrderBy(g => g.QuantidadeLogs)
+                                        .ToList();
+
+                                        int posicao = 1;
+                                    }
+
+                                    @foreach (var l in alunosMenosAtivos)
+                                    {
+                                        <tr class="linha @(posicao > 10 ? "escondido" : "")" >
+                                            <td style="width 14px">@posicao</td>
+                                            <td style="flex: 1"><a href="#">@l.Name</a></td>
+                                            <td>@l.QuantidadeLogs</td>
+                                        </tr>
+                                        posicao++;
+                                    }
                                 </tbody>
                             </table>
+                            @if (alunosMenosAtivos.Count > 10)
+                            {
+                                <button id="btn-carregar" onclick="carregarMais()">Carregar mais</button>
+                            }
                         </div>
+
                     </div>
                 </div>
             </div>
@@ -355,18 +372,25 @@ style="
                                     <button onclick="ordenarTabela(0)" class="bot_tab">#</button>
                                 </th>
                                 <th>
-                                    <button onclick="ordenarTabela(1)" class="bot_tab">Nome <img src="~/css/icons/Ordenar.svg" /></button>
+                                    <button onclick="ordenarTabela(1)" class="bot_tab">
+                                        Nome <img src="~/css/icons/Ordenar.svg" />
+                                    </button>
                                 </th>
                                 <th>
-                                    <button onclick="ordenarTabela(2)" class="bot_tab">Último Acesso <img src="~/css/icons/Ordenar.svg" /></button>
+                                    <button onclick="ordenarTabela(2)" class="bot_tab">
+                                        Último Acesso <img src="~/css/icons/Ordenar.svg" />
+                                    </button>
                                 </th>
                                 <th>
-                                    <button onclick="ordenarTabela(3)" class="bot_tab">Engajamento <img src="~/css/icons/Ordenar.svg" /></button>
+                                    <button onclick="ordenarTabela(3)" class="bot_tab">
+                                        Engajamento <img src="~/css/icons/Ordenar.svg" />
+                                    </button>
                                 </th>
                             </tr>
                         </thead>
                         <tbody>
                             @{
+                                System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("pt-BR");
                                 int i = 0;
                                 foreach (var al in Model.Alunos)
                                 {
@@ -376,10 +400,15 @@ style="
                                         <td>
                                             <a asp-page="/PerfilAluno" asp-route-userId="@al.user_id">@al.nome</a>
                                         </td>
-                                        <td>@al.ultimo_acesso</td>
                                         <td>
-                                            @* Exemplo estático — você pode ajustar depois *@
-                                            @(al.total_acessos > 0 ? $"{Math.Min(al.total_acessos, 100)}%" : "0%")
+                                            @{
+                                                var data = DateTime.Parse(al.ultimo_acesso);
+                                                var dataFormatada = $"Dia {data:dd} do mês de {data:MMMM} de {data:yyyy} às {data:HH:mm}";
+                                            }
+                                            @dataFormatada
+                                        </td>
+                                        <td>
+                                            @Model.Cursos.Logs.Where(l => l.name == al.nome).Count()
                                         </td>
                                     </tr>
                                 }
@@ -387,6 +416,7 @@ style="
                         </tbody>
                     </table>
                 </div>
+
             </div>
 
             <div class="conteudo" id="conteudo3">
@@ -407,7 +437,6 @@ style="
             1: true,
             2: true
         };
-
     function ordenarTabela(coluna) {
         const tabela = document.getElementById("tabelaAlunos");
         const tbody = tabela.querySelector("tbody");
@@ -419,8 +448,8 @@ style="
             let valB = b.children[coluna].innerText.trim();
 
             if (coluna === 2) { // Data
-                valA = new Date(valA).getTime();
-                valB = new Date(valB).getTime();
+                valA = parseDataPersonalizada(valA);
+                valB = parseDataPersonalizada(valB);
             } else if (coluna === 3) { // % presença
                 valA = parseFloat(valA.replace('%', '')) || 0;
                 valB = parseFloat(valB.replace('%', '')) || 0;
@@ -436,7 +465,38 @@ style="
         });
 
         linhas.forEach(linha => tbody.appendChild(linha));
-        estadoOrdenacao[coluna] = !crescente; // alterna ordem
+        estadoOrdenacao[coluna] = !crescente;
+    }
+
+    function parseDataPersonalizada(texto) {
+        const regex = /Dia (\d{1,2}) do mês de (\w+) de (\d{4}) às (\d{2}):(\d{2})/;
+        const meses = {
+            'janeiro': 0, 'fevereiro': 1, 'março': 2, 'abril': 3,
+            'maio': 4, 'junho': 5, 'julho': 6, 'agosto': 7,
+            'setembro': 8, 'outubro': 9, 'novembro': 10, 'dezembro': 11
+        };
+
+        const match = texto.match(regex);
+        if (!match) return 0;
+
+        const dia = parseInt(match[1]);
+        const mes = meses[match[2].toLowerCase()] ?? 0;
+        const ano = parseInt(match[3]);
+        const hora = parseInt(match[4]);
+        const minuto = parseInt(match[5]);
+
+        return new Date(ano, mes, dia, hora, minuto).getTime();
+    }
+    let exibidos = 10;
+    function carregarMais() {
+        const linhas = document.querySelectorAll('.linha.escondido');
+        for (let i = 0; i < 10 && i < linhas.length; i++) {
+            linhas[i].classList.remove('escondido');
+            exibidos++;
+        }
+        if (document.querySelectorAll('.linha.escondido').length === 0) {
+            document.getElementById('btn-carregar').style.display = 'none';
+        }
     }
 
     </script>
