@@ -159,159 +159,151 @@ style="
                             </div>
                         </div>
 
+                        @{
+                            var acoes = Model.Cursos.Logs
+                            .Select(l =>
+                            {
+                                if (l.action == "graded" && l.target == "user" && l.component == "core")
+                                    return "Atividade Concluída";
+
+                                if (l.action == "uploaded" && l.target == "assessable" && l.component == "mod_forum")
+                                    return "Postagem no Fórum";
+
+                                // if(l.action == "viewed")
+                                // {
+                                //     return "Visualização";
+                                // }
+
+                                return null; // Ignora outros
+                            })
+                            .Where(a => a != null) // Filtra nulos (não considerados)
+                            .GroupBy(a => a)
+                            .Select(g => new
+                            {
+                                Acao = g.Key,
+                                Quantidade = g.Count()
+                            })
+                            .ToList();
+
+                            var labels = string.Join(",", acoes.Select(a => $"'{a.Acao}'"));
+                            var dados = string.Join(",", acoes.Select(a => a.Quantidade));
+                        }
 
                         <div class="coluna graf_caixa" style="--gap: 16px">
                             <div class="linha" style="--gap: 10px; align-items: center">
                                 <img src="~/css/icons/graficos.svg" />
                                 <h4 class="corPreta50B">Ações Realizadas</h4>
-                                <span class="corCinza80B" style="margin-inline-start: auto;">@Model.Cursos.Logs.Count() Ações</span>
+                                @* <span class="corCinza80B" style="margin-inline-start: auto;">
+                                    @acoes.Sum(a => a.Quantidade) Ações
+                                </span> *@
                             </div>
-                            @{
-                                var acoes = Model.Cursos.Logs
-                                .GroupBy(l => l.action)
-                                .Select(g => new
-                                {
-                                    Acao = g.Key,
-                                    Quantidade = g.Count()
-                                })
-                                .ToList();
-                                // acoes.RemoveAll(l => l.Acao == "viewed");
 
-                                var labels = string.Join(",", acoes.Select(a => $"'{a.Acao}'"));
-                                var dados = string.Join(",", acoes.Select(a => a.Quantidade));
-                            }
-                            <div id="graficoContainer" style="max-width: 400px; margin: auto; position: relative; height: 100%; overflow:visible">
-                                <canvas id="graficoPizza" width="240" height="240" style="overflow:visible"></canvas>
-                                <div id="legenda" style="display:none; position: absolute; bottom: 0; width: 100%; overflow:visible;"></div>
+
+
+
+                            <div style="max-width: 400px; margin: auto; position: relative;">
+                                <canvas id="graficoPizza" width="900" height="240"></canvas>
                             </div>
 
                             <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
                             <script>
+                                const toggle = document.getElementById('toggleTheme');
                                 const ctx = document.getElementById('graficoPizza').getContext('2d');
-                                const chart = new Chart(ctx, {
+                                let chart; // variável global pro gráfico
+
+                                function criarGrafico() {
+                                const isDarkMode = document.documentElement.classList.contains('dark');
+
+                                const coresClaro = ['#003DE5', '#22C55E', '#FF6A6A',  '#EAB308',];
+                                const coresEscuro = ['#7AAEFF', '#5A8BDD', '#3A69BB', '#1A4799'];
+
+                                const corTexto = isDarkMode ? '#8F98B2' : '#8F98B2';
+                                const cores = isDarkMode ? coresEscuro : coresClaro;
+
+                                // Se já existe um gráfico, destrói ele
+                                if (chart) chart.destroy();
+
+                                chart = new Chart(ctx, {
                                 type: 'doughnut',
                                 data: {
                                 labels: [@Html.Raw(labels)],
                                 datasets: [{
                                 data: [@dados],
-                                backgroundColor: [
-                                '#001b66',
-                                '#002280',
-                                '#002899',
-                                '#002fb2',
-                                '#0036cc',
-                                '#668eff',
-                                '#99b4ff',
-                                '#b2c7ff',
-                                '#ccd9ff',
-                                '#e5ecff'
-                                ],
+                                backgroundColor: cores,
+                                borderWidth: 0,
 
-                                borderWidth: 0
                                 }]
                                 },
                                 options: {
-                                cutout: '50%',
-
                                 responsive: true,
+                                maintainAspectRatio: false,
+                                rotation: 270,
+                                circumference: 360,
+                                cutout: '70%',
                                 plugins: {
                                 legend: {
-                                display: false
+                                display: true,
+                                position: 'right',
+                                labels: {
+                                boxWidth: 12,
+                                usePointStyle: true,
+                                pointStyle: 'rectRounded',
+                                color: corTexto,
+                                font: { size: 14, family: 'Inter' },
+                                padding: 20
                                 }
                                 }
                                 }
-                                });
 
-                                // Gera legenda customizada
-                                document.getElementById('legenda').innerHTML = chart.generateLegend();
-
-                                // Mostra a legenda só no hover do container
-                                const container = document.getElementById('graficoContainer');
-                                const legenda = document.getElementById('legenda');
-
-                                container.addEventListener('mouseenter', () => {
-                                legenda.style.display = 'block';
-                                });
-                                container.addEventListener('mouseleave', () => {
-                                legenda.style.display = 'none';
-                                });
-                            </script>
-                        </div>
-
-
-                        <div class="coluna graf_caixa" style="--gap: 16px">
-                            <div class="linha" style="--gap: 10px; align-items: center">
-                                <img src="~/css/icons/graficos.svg" />
-                                <h4 class="corPreta50B">Componentes Utilizados</h4>
-
-                            </div>
-                            @{
-                                var componentes = Model.Cursos.Logs
-                                .GroupBy(l => l.component)
-                                .Select(g => new
-                                {
-                                    Componente = g.Key,
-                                    Quantidade = g.Count()
-                                })
-                                .ToList();
-                                componentes.RemoveAll(c => string.IsNullOrEmpty(c.Componente));
-
-                                var labelsComponentes = string.Join(",", componentes.Select(c => $"'{c.Componente}'"));
-                                var dadosComponentes = string.Join(",", componentes.Select(c => c.Quantidade));
-                            }
-                            <div id="graficoComponentesContainer" style="max-width: 400px; margin: auto; position: relative; height: 100%">
-                                <canvas id="graficoPizzaComponentes" width="240" height="240" style=""></canvas>
-                                <div id="legendaComponentes" style="display:none; position: absolute; bottom: 0; width: 100%;"></div>
-                            </div>
-
-                            <script>
-                                const ctxComponentes = document.getElementById('graficoPizzaComponentes').getContext('2d');
-                                const chartComponentes = new Chart(ctxComponentes, {
-                                type: 'doughnut',
-                                data: {
-                                labels: [@Html.Raw(labelsComponentes)],
-                                datasets: [{
-                                data: [@dadosComponentes],
-                                backgroundColor: [
-                                '#001b66',
-                                '#002280',
-                                '#002899',
-                                '#002fb2',
-                                '#0036cc',
-                                '#668eff',
-                                '#99b4ff',
-                                '#b2c7ff',
-                                '#ccd9ff',
-                                '#e5ecff'
-                                ],
-                                borderWidth: 0
-                                }]
                                 },
-                                options: {
-                                cutout: '50%',
+                                plugins: [{
+                                id: 'centerText',
+                                beforeDraw(chart) {
+                                const {ctx, chartArea: {left, right, top, bottom}} = chart;
+                                const x = (left + right) / 2;
+                                const y = (top + bottom) / 2;
 
-                                responsive: true,
-                                plugins: {
-                                legend: {
-                                display: false
+                                ctx.save();
+                                ctx.font = 'bold 16px Inter';
+                                ctx.fillStyle = corTexto;
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
+
+                                const texto = '@acoes.Sum(a => a.Quantidade) Ações';
+                                ctx.fillText(texto, x, y);
+                                ctx.restore();
                                 }
-                                }
-                                }
+                                }]
                                 });
+                                }
 
-                                document.getElementById('legendaComponentes').innerHTML = chartComponentes.generateLegend();
+                                // Aplica o tema salvo ao carregar
+                                if (localStorage.getItem('theme') === 'dark') {
+                                document.documentElement.classList.add('dark');
+                                toggle.checked = true;
+                                }
 
-                                const containerComponentes = document.getElementById('graficoComponentesContainer');
-                                const legendaComponentes = document.getElementById('legendaComponentes');
+                                criarGrafico(); // Cria o gráfico inicialmente
 
-                                containerComponentes.addEventListener('mouseenter', () => {
-                                legendaComponentes.style.display = 'block';
-                                });
-                                containerComponentes.addEventListener('mouseleave', () => {
-                                legendaComponentes.style.display = 'none';
+                                toggle.addEventListener('change', function () {
+                                if (this.checked) {
+                                document.documentElement.classList.add('dark');
+                                localStorage.setItem('theme', 'dark');
+                                } else {
+                                document.documentElement.classList.remove('dark');
+                                localStorage.setItem('theme', 'light');
+                                }
+                                criarGrafico(); // Atualiza o gráfico quando muda o tema
                                 });
                             </script>
+
+
                         </div>
+
+
+
+
+
 
                     </div>
                     <div class="QuadroCards Unidades coluna">
@@ -345,9 +337,10 @@ style="
 
                                     @foreach (var l in alunosMenosAtivos)
                                     {
-                                        <tr class="linha @(posicao > 10 ? "escondido" : "")" >
+
+                                        <tr class="linha @(posicao > 5 ? "escondido" : "")" >
                                             <td style="width 14px">@posicao</td>
-                                            <td style="flex: 1"><a href="#">@l.Name</a></td>
+                                            <td style="flex: 1"><a asp-page="/PerfilAluno" asp-route-userId="@l.UserId">@l.Name</a></td>
                                             <td>@l.QuantidadeLogs</td>
                                         </tr>
                                         posicao++;
@@ -356,7 +349,7 @@ style="
                             </table>
                             @if (alunosMenosAtivos.Count > 10)
                             {
-                                <button id="btn-carregar" onclick="carregarMais()">Carregar mais</button>
+                                <div class="linha" style="flex-direction: row-reverse; margin-top: 16px"><button id="btn-carregar" onclick="carregarMais()">Ver mais</button></div>
                             }
                         </div>
 

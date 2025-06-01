@@ -250,3 +250,22 @@ th:last-child .bot_tab {
 .escondido {
     display: none;
 }
+
+
+#btn-carregar {
+    color: var(--Branco);
+    background-color: var(--Azul40S);
+    border: none;
+    padding: 8px 16px;
+    display: flex;
+    flex-direction: row;
+    height: fit-content;
+    border-radius: 42px;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-size: 10pt;
+    font-style: normal;
+    font-weight: Bold;
+    text-transform: uppercase;
+    text-decoration: none;
+}
