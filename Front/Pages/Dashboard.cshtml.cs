@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Front.Models;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace Front.Pages
 {
@@ -11,12 +12,28 @@ namespace Front.Pages
         public List<AlunoResumo> Alunos { get; set; } = new();
 
         public List<AlunoDesistente> PossiveisDesistentes { get; set; } = new();
+        public List<AlunoEngajamento> AlunosEngajamento { get; set; } = new();
+
 
         public class AlunoDesistente
         {
             public string UserId { get; set; }
             public string Nome { get; set; }
+
+            public double Engajamento { get; set; }
             public int QuantidadeLogs { get; set; }
+        }
+
+        public class AlunoEngajamento
+        {
+            [JsonPropertyName("userId")]
+            public string UserId { get; set; }
+
+            [JsonPropertyName("nome")]
+            public string Nome { get; set; }
+
+            [JsonPropertyName("engajamento")]
+            public double Engajamento { get; set; }
         }
 
         public async Task OnGetAsync(string curso)
@@ -28,6 +45,7 @@ namespace Front.Pages
 
             using var httpClient = new HttpClient();
 
+            // Buscar alunos do curso
             var responseAlunos = await httpClient.GetAsync($"https://localhost:7232/api/Moodle/alunos-por-curso/{curso}");
             if (responseAlunos.IsSuccessStatusCode)
             {
@@ -41,39 +59,41 @@ namespace Front.Pages
                 Cursos.alunos = 0;
             }
 
-            // Aguarda os dados de semanas (suponho que também carrega logs)
             await Cursos.AtualizaSemanas();
 
-            // Agora calcula possíveis desistentes pela média de logs:
-            var contadorLogs = new Dictionary<string, int>();
-            var nomes = new Dictionary<string, string>();
-
-            // Percorre os logs do curso
-            foreach (var log in Cursos.Logs)
+            // Buscar dados de engajamento
+            var responseEngajamento = await httpClient.GetAsync("https://localhost:7232/api/Mongo/engajamento-alunos");
+            if (responseEngajamento.IsSuccessStatusCode)
             {
-                if (!contadorLogs.ContainsKey(log.user_id))
-                {
-                    contadorLogs[log.user_id] = 0;
-                    nomes[log.user_id] = log.name; // ou log.nome, conforme sua propriedade
-                }
-                contadorLogs[log.user_id]++;
+                var jsonEngajamento = await responseEngajamento.Content.ReadAsStringAsync();
+                var todosAlunosEngajamento = JsonSerializer.Deserialize<List<AlunoEngajamento>>(jsonEngajamento) ?? new();
+
+                AlunosEngajamento = todosAlunosEngajamento
+                .Where(a => Alunos.Any(al => al.user_id == a.UserId))
+                .ToList();
+
+
+
+            }
+            else
+            {
+                AlunosEngajamento = new List<AlunoEngajamento>();
             }
 
-            // Calcula média dos logs por aluno
-            double mediaLogs = 0;
-            if (contadorLogs.Count > 0)
-                mediaLogs = contadorLogs.Values.Average();
+            //  limiar de engajamento para considerar como desistente (30%)
+            double limiarEngajamento = 30.0;
 
-            // Filtra os alunos com menos logs que a média
-            PossiveisDesistentes = contadorLogs
-                .Where(x => x.Value < mediaLogs)
-                .Select(x => new AlunoDesistente
+            // Filtra alunos com engajamento abaixo do limiar
+            PossiveisDesistentes = AlunosEngajamento
+                .Where(a => a.Engajamento < limiarEngajamento)
+                .Select(a => new AlunoDesistente
                 {
-                    UserId = x.Key,
-                    Nome = nomes[x.Key],
-                    QuantidadeLogs = x.Value
+                    UserId = a.UserId,
+                    Nome = a.Nome,
+                    Engajamento = a.Engajamento
                 })
                 .ToList();
         }
+
     }
 }

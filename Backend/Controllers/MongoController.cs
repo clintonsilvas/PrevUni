@@ -1,16 +1,23 @@
 ﻿using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson; 
+using MongoDB.Bson;
+using System.Threading.Tasks;
+using System.Collections.Generic;
+using static Backend.Services.MongoService;
 
 namespace Backend.Controllers
 {
-    public class MongoController : Controller
+    [ApiController]
+    [Route("api/[controller]")]
+    public class MongoController : ControllerBase
     {
         private readonly MongoService _mongoService;
+        private readonly EngajamentoService _engajamentoService;
 
-        public MongoController(MongoService mongoService)
+        public MongoController(MongoService mongoService, EngajamentoService engajamentoService)
         {
             _mongoService = mongoService;
+            _engajamentoService = engajamentoService;
         }
 
         [HttpGet("resumo-aluno/{userId}")]
@@ -20,7 +27,7 @@ namespace Backend.Controllers
             if (resumo == null)
                 return NotFound("Usuário não encontrado.");
 
-            return Ok(resumo.ToJson()); // Retorna em formato JSON direto
+            return Ok(resumo.ToJson());
         }
 
         [HttpGet("resumo-aluno-ia/{userId}")]
@@ -30,7 +37,7 @@ namespace Backend.Controllers
             if (resumo == null)
                 return NotFound("Usuário não encontrado.");
 
-            return Ok(resumo.ToJson()); // Retorna em formato JSON direto
+            return Ok(resumo.ToJson());
         }
 
         [HttpGet("resumo-curso/{nomeCurso}")]
@@ -40,5 +47,12 @@ namespace Backend.Controllers
             return Ok(new { resumo });
         }
 
+        // Engajamento de todos os alunos
+        [HttpGet("engajamento-alunos")]
+        public async Task<IActionResult> GetEngajamentoAlunos()
+        {
+            var lista = await _engajamentoService.CalcularEngajamentoAlunosAsync();
+            return Ok(lista);
+        }
     }
 }
