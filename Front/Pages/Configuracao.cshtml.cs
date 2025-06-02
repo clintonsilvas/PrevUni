@@ -102,5 +102,11 @@ namespace Front.Pages
                 return Page();
             }
         }
+
+
+        public JsonResult OnGetStatusImportacao()
+        {
+            return new JsonResult(CurrentStatus);
+        }
     }
 }

@@ -269,3 +269,74 @@ th:last-child .bot_tab {
     text-transform: uppercase;
     text-decoration: none;
 }
+
+
+.btn_config_azul {
+    color: var(--Branco);
+    background-color: var(--Azul-principal);
+    border: none;
+    padding: 8px 16px;
+    display: flex;
+    flex-direction: row;
+    height: fit-content;
+    width: fit-content;
+    border-radius: 42px;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-size: 10pt;
+    font-style: normal;
+    font-weight: 500;
+    text-transform: uppercase;
+    text-decoration: none;
+    margin: 0px
+}
+
+.dark .btn_config_azul
+{
+    color: #fff
+}
+
+.btn_config_branco {
+    color: var(--Azul-principal);
+    background-color: transparent;
+    border: 1px solid var(--Azul-principal);
+    padding: 8px 16px;
+    display: flex;
+    flex-direction: row;
+    height: fit-content;
+    width: fit-content;
+    border-radius: 42px;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-size: 10pt;
+    font-style: normal;
+    font-weight: 500;
+    text-transform: uppercase;
+    text-decoration: none;
+    margin: 0px
+}
+
+.hr_trac {
+    border: none;
+    border-top: 1px solid var(--Cinza90B);
+    opacity: 50%;
+}
+
+.progress-container {
+    width: 400px;
+    background-color: var(--Cinza100B);
+    border-radius: 20px;
+    overflow: hidden;
+    height: 30px;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: var(--Verde);
+    color: var(--Cinza80B);
+    text-align: center;
+    line-height: 30px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
