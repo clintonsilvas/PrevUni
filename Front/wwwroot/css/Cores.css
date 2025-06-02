@@ -21,7 +21,7 @@
     --Cinza100B: #eff2fa;
     --Branco: #fff;
     /*Cores Secundárias*/
-    --Verde: #00bd55;
+    --Verde: #22C55E;
     --Vermelho: #ff6a6a;
     --verde_trasparente: #e7ffe5;
     --vermelho_transparenre: #fff0f0;
@@ -139,7 +139,7 @@
 }
 
     .card-resposta span {
-        font-size: 12pt;
+        font-size: 10pt;
         font-weight: 400;
         color: var(--Branco);
         line-height: 1.4;
@@ -159,7 +159,7 @@
 
 
     .card-pergunta span {
-        font-size: 12pt;
+        font-size: 10pt;
         font-weight: 400;
         color: var(--Cinza60B);
         line-height: 1.4;

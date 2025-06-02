@@ -1,4 +1,5 @@
 using Backend.Services;
+using Backend.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,8 +8,14 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddHttpClient<ApiService>();
-builder.Services.AddScoped<ApiService>();
+// Configure IHttpClientFactory e defina um timeout para o cliente nomeado
+builder.Services.AddHttpClient("MoodleApiClient", client =>
+{
+    client.Timeout = TimeSpan.FromMinutes(25); // Defina um timeout generoso aqui
+});
+
+// Injete IHttpClientFactory no ApiService
+builder.Services.AddSingleton<ApiService>(); 
 builder.Services.AddSingleton<MongoService>();
 builder.Services.AddHttpClient<GeminiService>();
 
