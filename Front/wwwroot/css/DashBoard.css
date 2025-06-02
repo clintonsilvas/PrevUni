@@ -325,7 +325,7 @@ th:last-child .bot_tab {
 .progress-container {
     width: 400px;
     background-color: var(--Cinza100B);
-    border-radius: 20px;
+    border-radius: 16px;
     overflow: hidden;
     height: 30px;
 }
@@ -333,10 +333,21 @@ th:last-child .bot_tab {
 .progress-bar {
     height: 100%;
     background-color: var(--Verde);
-    color: var(--Cinza80B);
+    
     text-align: center;
     line-height: 30px;
     border-radius: 20px;
     font-weight: bold;
 }
+
+    .progress-bar span {
+        color: #fff;
+        font-family: "Inter", sans-serif;
+        
+        font-size: 10pt;
+        font-style: normal;
+        font-weight: 500;
+        text-transform: uppercase;
+        text-decoration: none;
+    }
 
