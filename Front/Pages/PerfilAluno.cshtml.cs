@@ -8,6 +8,17 @@ using System;
 
 namespace Front.Pages
 {
+    public static class DateTimeExtensions
+    {
+        public static int WeekOfYear(this DateTime date)
+        {
+            var culture = System.Globalization.CultureInfo.CurrentCulture;
+            return culture.Calendar.GetWeekOfYear(
+                date,
+                System.Globalization.CalendarWeekRule.FirstFourDayWeek,
+                DayOfWeek.Monday);
+        }
+    }
     public class PerfilAlunoModel : PageModel
     {
         private readonly HttpClient _httpClient;
@@ -63,7 +74,7 @@ namespace Front.Pages
 
             CalcularSemanasAcessoAluno();
 
-            CalcularInteracoesPorComponente();
+           // CalcularInteracoesPorComponente();
 
             return Page();
         }
@@ -92,6 +103,8 @@ namespace Front.Pages
                 EngajamentoBaixo = 100;
             }
         }
+
+
 
         private void CalcularSemanasAcessoAluno()
         {
@@ -124,30 +137,30 @@ namespace Front.Pages
                 }
             }
         }
-        private void CalcularInteracoesPorComponente()
-        {
-            InteracoesPorComponente = new Dictionary<string, int>();
-            if (AlunoDetalhes?.interacoes_por_componente != null)
-            {
-                InteracoesPorComponente = AlunoDetalhes.interacoes_por_componente;
-            }
-            else if (AlunoLogs != null && AlunoLogs.Any())
-            {
-                foreach (var log in AlunoLogs)
-                {
-                    if (!string.IsNullOrEmpty(log.component))
-                    {
-                        if (InteracoesPorComponente.ContainsKey(log.component))
-                        {
-                            InteracoesPorComponente[log.component]++;
-                        }
-                        else
-                        {
-                            InteracoesPorComponente.Add(log.component, 1);
-                        }
-                    }
-                }
-            }
-        }
+        //private void CalcularInteracoesPorComponente()
+        //{
+        //    InteracoesPorComponente = new Dictionary<string, int>();
+        //    if (AlunoDetalhes?.interacoes_por_componente != null)
+        //    {
+        //        InteracoesPorComponente = AlunoDetalhes.interacoes_por_componente;
+        //    }
+        //    else if (AlunoLogs != null && AlunoLogs.Any())
+        //    {
+        //        foreach (var log in AlunoLogs)
+        //        {
+        //            if (!string.IsNullOrEmpty(log.component))
+        //            {
+        //                if (InteracoesPorComponente.ContainsKey(log.component))
+        //                {
+        //                    InteracoesPorComponente[log.component]++;
+        //                }
+        //                else
+        //                {
+        //                    InteracoesPorComponente.Add(log.component, 1);
+        //                }
+        //            }
+        //        }
+        //    }
+        //}
     }
 }
