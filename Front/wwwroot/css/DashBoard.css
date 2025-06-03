@@ -419,3 +419,35 @@ th:last-child .bot_tab {
     .conteudoResumo.aberto {
         max-height: 500px; /* Define um m�ximo grande o suficiente */
     }
+
+
+
+
+
+
+.grid-calendario {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+
+.item-log
+{
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background-color: transparent;
+    padding:0px;
+    flex: 1
+}
+
+    .item-log .acao {
+        font-weight: bold;
+        color: var(--Azul-principal);
+    }
+
+    .item-log .curso {
+        font-size: 0.9em;
+        color: var(--Preto50B);
+    }

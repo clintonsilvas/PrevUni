@@ -327,37 +327,50 @@ style="
 
             <div class="conteudo" id="conteudo2">
                 <div class="calendario-logs">
-                    <h4 class="corPreta50B">Atividades por Dia</h4>
+                    <div class="grid-calendario">
+                        @if (Model.AlunoLogs != null)
+                        {
+                            var gruposFiltrados = Model.AlunoLogs
+                            .Where(log =>
+                            (log.action == "graded" && log.target == "user" && log.component == "core") ||
+                            (log.action == "uploaded" && log.target == "assessable" && log.component == "mod_forum"))
+                            .GroupBy(l => DateTime.Parse(l.date).Date) // <- força só a data
+                            .OrderByDescending(g => g.Key);
 
-                    @if(Model.AlunoLogs!= null)
-                    foreach (var grupo in Model.AlunoLogs
-                    .GroupBy(l => DateTime.Parse(l.date).ToString("dd/MM/yyyy"))
-                    .OrderByDescending(g => g.Key))
-                    {
-                        <div class="data-grupo">
-                            <h5>@grupo.Key</h5>
-
-                            @foreach (var log in grupo)
+                            foreach (var grupo in gruposFiltrados)
                             {
-                                string acao = null;
-
-                                if (log.action == "graded" && log.target == "user" && log.component == "core")
-                                    acao = "Atividade Concluída";
-
-                                if (log.action == "uploaded" && log.target == "assessable" && log.component == "mod_forum")
-                                    acao = "Postagem no Fórum";
-
-                                if (acao != null)
-                                {
-                                    <div class="item-log">
-                                        <span class="acao">@acao</span>
-                                        <span class="curso">@log.course_fullname</span>
+                                <div class="QuadroCards coluna" style="gap: 16px;">
+                                    
+                                    <div class="linha" style="--gap: 10px; align-items: center; margin-bottom: 16px">
+                                        <img src="~/css/icons/calendario.svg" height="17"/>
+                                        <h4 class="corPreta50B">@grupo.Key.ToString("dd/MM/yyyy")</h4>
                                     </div>
-                                }
+                                    @foreach (var log in grupo)
+                                    {
+                                        string acao = null;
+
+                                        if (log.action == "graded" && log.target == "user" && log.component == "core")
+                                            acao = "Atividade Concluída";
+
+                                        if (log.action == "uploaded" && log.target == "assessable" && log.component == "mod_forum")
+                                            acao = "Postagem no Fórum";
+
+                                        if (acao != null)
+                                        {
+                                            <div class="item-log">
+                                                <span class="acao">@acao</span>
+                                                <span class="curso">@log.course_fullname</span>
+                                            </div>
+                                        }
+                                    }
+                                </div>
                             }
-                        </div>
-                    }
+                        }
+                    </div>
+
+
                 </div>
+
             </div>
             <div class="conteudo" id="conteudo3"></div>
         </div>
