@@ -6,7 +6,7 @@
 
 
 <header class="linha welcome"
-style="
+        style="
             justify-content: space-between;
             width: 100%;
             height: fit-content;
@@ -31,13 +31,13 @@ style="
 <div class="dashboard coluna" style="--gap: 10px">
     <div class="ImputIA linha">
         <img src="~/css/icons/estrelaIA.svg"
-        alt="ÍconeHome"
-        width="18"
-        height="18" />
+             alt="ÍconeHome"
+             width="18"
+             height="18" />
         <input type="text"
-        id="IaPergunta"
-        name="nome"
-        placeholder="Pergunte a inteligência Artifical!" />
+               id="IaPergunta"
+               name="nome"
+               placeholder="Pergunte a inteligência Artifical!" />
         <a asp-page="/IaChatCurso" asp-route-cursoNome="@Model.Cursos.curso">Gerar</a>
     </div>
 
@@ -99,7 +99,7 @@ style="
                 </div>
                 <div class="linha alt_li" style="flex: 1">
                     <div class="QuadroCards GraficoEvolucao linha"
-                    style="flex: 1; --gap: 40px">
+                         style="flex: 1; --gap: 40px">
 
 
                         <div class="coluna" style="--gap: 16px; height: 100%;">
@@ -311,25 +311,17 @@ style="
                             <img src="~/css/icons/alunosDesistentes.png" />
                             <h4 class="corPreta50B">Posíveis Desistentes</h4>
                         </div>
-                        <div class="tabela-card" > 
-                            <table >
-                                <tbody id="tabela-alunos" >
+                        <div class="tabela-card">
+                            <table>
+                                <tbody id="tabela-alunos">
                                     @{
-                                        var gruposLogs = Model.Cursos.Logs
-                                        .GroupBy(l => l.user_id)
-                                        .Select(g => new
-                                        {
-                                            UserId = g.Key,
-                                            Name = g.First().name,
-                                            QuantidadeLogs = g.Count()
-                                        })
-                                        .ToList();
+                                        // Define o limiar de engajamento para considerar alunos menos ativos
+                                        double limiarEngajamento = 30.0;
 
-                                        double mediaLogs = gruposLogs.Any() ? gruposLogs.Average(g => g.QuantidadeLogs) : 0;
-
-                                        var alunosMenosAtivos = gruposLogs
-                                        .Where(g => g.QuantidadeLogs < mediaLogs)
-                                        .OrderBy(g => g.QuantidadeLogs)
+                                        // Filtra alunos do curso com engajamento abaixo do limiar
+                                        var alunosMenosAtivos = Model.AlunosEngajamento
+                                        .Where(a => a.Engajamento < limiarEngajamento)
+                                        .OrderBy(a => a.Engajamento)  // ordem crescente pelo engajamento
                                         .ToList();
 
                                         int posicao = 1;
@@ -337,15 +329,15 @@ style="
 
                                     @foreach (var l in alunosMenosAtivos)
                                     {
-
-                                        <tr class="linha @(posicao > 5 ? "escondido" : "")" >
-                                            <td style="width 14px">@posicao</td>
-                                            <td style="flex: 1"><a asp-page="/PerfilAluno" asp-route-userId="@l.UserId">@l.Name</a></td>
-                                            <td>@l.QuantidadeLogs</td>
+                                        <tr class="linha @(posicao > 5 ? "escondido" : "")">
+                                            <td style="width: 14px">@posicao</td>
+                                            <td style="flex: 1"><a asp-page="/PerfilAluno" asp-route-userId="@l.UserId">@l.Nome</a></td>
+                                            <td>@l.Engajamento.ToString("0.00")%</td>
                                         </tr>
                                         posicao++;
                                     }
                                 </tbody>
+
                             </table>
                             @if (alunosMenosAtivos.Count > 10)
                             {
@@ -401,7 +393,15 @@ style="
                                             @dataFormatada
                                         </td>
                                         <td>
-                                            @Model.Cursos.Logs.Where(l => l.name == al.nome).Count()
+                                            @{
+                                                var engajamento = Model.AlunosEngajamento
+                                                .FirstOrDefault(e => e.UserId == al.user_id)?.Engajamento;
+
+                                                string engajamentoFormatado = engajamento.HasValue
+                                                ? $"{engajamento.Value.ToString("0.00")}%"
+                                                : "N/A";
+                                            }
+                                            @engajamentoFormatado
                                         </td>
                                     </tr>
                                 }
@@ -413,18 +413,18 @@ style="
             </div>
 
             <div class="conteudo" id="conteudo3">
-                
-                    @foreach(var l in Model.Cursos.Logs)
-                    {
-                        <span>@l.date</span>
-                    }
-                    
+
+                @foreach (var l in Model.Cursos.Logs)
+                {
+                    <span>@l.date</span>
+                }
+
             </div>
         </div>
     </div>
 
 </div>
-    <script>
+<script>
         const estadoOrdenacao = {
             0: true,
             1: true,
@@ -492,4 +492,4 @@ style="
         }
     }
 
-    </script>
+</script>

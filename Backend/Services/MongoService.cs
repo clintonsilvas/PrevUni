@@ -1,6 +1,8 @@
 ﻿using Backend.Models;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using Backend.Services;
+
 
 namespace Backend.Services
 {
@@ -143,68 +145,109 @@ namespace Backend.Services
         }
 
 
+        public class AlunoEngajamento
+        {
+            public string UserId { get; set; }
+            public string Nome { get; set; }
+            public double Engajamento { get; set; } // 0 a 100
+        }
+
         public class AcaoQuantidade
         {
-            public string acao { get; set; }
-            public int quantidade { get; set; }
-        }
-
-        public class UsuarioAcoes
-        {
-            public string userId { get; set; }
-            public string nome { get; set; }
-            public List<AcaoQuantidade> acoes { get; set; }
-        }
-
-        public class EngajamentoUsuario
-        {
-            public string Nome { get; set; }
-            public string UserId { get; set; }
-            public double Engajamento { get; set; } // 0-100
+            public string Acao { get; set; }
+            public int Quantidade { get; set; }
         }
 
         public class EngajamentoService
         {
-            private readonly Dictionary<string, int> _pesos = new()
-    {
-        { "viewed", 1 },
-        { "submitted", 5 },
-        { "uploaded", 4 },
-        { "graded", 4 },
-        { "created", 3 },
-        { "updated", 2 },
-        { "deleted", 1 },
-        { "started", 3 }
+            private readonly IMongoCollection<BsonDocument> _logs;
+
+            public EngajamentoService(IMongoDatabase database)
+            {
+                _logs = database.GetCollection<BsonDocument>("logs");
+            }
+
+            public async Task<List<AlunoEngajamento>> CalcularEngajamentoAlunosAsync()
+            {
+                var pipeline = new[]
+                {
+        new BsonDocument("$unwind", "$logs"),
+        new BsonDocument("$group", new BsonDocument
+        {
+            { "_id", new BsonDocument
+                {
+                    { "user_id", "$logs.user_id" },
+                    { "nome", "$logs.name" },
+                    { "acao", "$logs.action" }
+                }
+            },
+            { "qtd", new BsonDocument("$sum", 1) }
+        })
     };
 
-            public List<EngajamentoUsuario> CalcularEngajamento(List<UsuarioAcoes> usuarios)
-            {
-                // Calcula pontuação bruta para todos
-                var resultado = new List<(UsuarioAcoes usuario, int score)>();
+                using var cursor = await _logs.AggregateAsync<BsonDocument>(pipeline);
 
-                foreach (var usuario in usuarios)
-                {
-                    int score = 0;
-                    foreach (var acao in usuario.acoes)
+                var resultados = await cursor.ToListAsync();
+
+                var agrupados = resultados
+                    .GroupBy(d => new
                     {
-                        if (_pesos.TryGetValue(acao.acao, out var peso))
+                        UserId = d["_id"].AsBsonDocument.TryGetValue("user_id", out var userId) ? userId.AsString : "undefined",
+                        Nome = d["_id"].AsBsonDocument.TryGetValue("nome", out var nome) ? nome.AsString : "undefined"
+                    })
+                    .Select(g => new AlunoEngajamento
+                    {
+                        UserId = g.Key.UserId,
+                        Nome = g.Key.Nome,
+                        Engajamento = CalcularLES(g.Select(x => new AcaoQuantidade
                         {
-                            score += acao.quantidade * peso;
-                        }
-                    }
-                    resultado.Add((usuario, score));
-                }
+                            Acao = x["_id"].AsBsonDocument.TryGetValue("acao", out var acao) ? acao.AsString : "undefined",
+                            Quantidade = x["qtd"].ToInt32()
+                        }).ToList())
+                    })
+                    .ToList();
 
-                // Normaliza para 0-100
-                int maxScore = resultado.Max(r => r.score);
-                var engajamento = resultado.Select(r => new EngajamentoUsuario
-                {
-                    Nome = r.usuario.nome,
-                    UserId = r.usuario.userId,
-                    Engajamento = maxScore > 0 ? Math.Round((double)r.score / maxScore * 100, 2) : 0
-                }).ToList();
+                return agrupados;
+            }
 
-                return engajamento;
+
+
+            private double CalcularLES(List<AcaoQuantidade> acoes)
+            {
+                int totalVisualizacao = Soma(acoes, new List<string> { "viewed" });
+                int totalEntrega = Soma(acoes, new List<string> { "submitted", "uploaded" });
+                int totalForum = Soma(acoes, new List<string> { "created", "uploaded", "viewed" });
+                int totalAcesso = Soma(acoes, new List<string> { "viewed" });
+                int totalAvaliacao = Soma(acoes, new List<string> { "graded", "reviewed" });
+                int totalTempo = totalVisualizacao;
+
+                double notaVisualizacao = NotaPorFaixa(totalVisualizacao, 500);
+                double notaEntrega = NotaPorFaixa(totalEntrega, 20);
+                double notaForum = NotaPorFaixa(totalForum, 30);
+                double notaAcesso = NotaPorFaixa(totalAcesso, 100);
+                double notaAvaliacao = NotaPorFaixa(totalAvaliacao, 20);
+                double notaTempo = NotaPorFaixa(totalTempo, 500);
+
+                double les =
+                    notaEntrega * 0.30 +
+                    notaVisualizacao * 0.20 +
+                    notaForum * 0.15 +
+                    notaTempo * 0.15 +
+                    notaAcesso * 0.10 +
+                    notaAvaliacao * 0.10;
+
+                return Math.Round(les * 10, 2);
+            }
+
+            private int Soma(List<AcaoQuantidade> acoes, List<string> nomes)
+            {
+                return acoes.Where(a => nomes.Contains(a.Acao)).Sum(a => a.Quantidade);
+            }
+
+            private double NotaPorFaixa(int valor, int maxEsperado)
+            {
+                double nota = (double)valor / maxEsperado * 10;
+                return Math.Min(nota, 10);
             }
         }
 
