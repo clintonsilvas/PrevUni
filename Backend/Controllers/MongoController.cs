@@ -55,6 +55,13 @@ namespace Backend.Controllers
             return Ok(lista);
         }
 
+        [HttpGet("usuarios-com-ultimo-acesso")]
+        public async Task<IActionResult> GetUsuariosComUltimoAcesso()
+        {
+            var usuarios = await _mongoService.GetUsuariosComUltimoAcessoAsync();
+            return Ok(usuarios);
+        }
+
 
     }
 }

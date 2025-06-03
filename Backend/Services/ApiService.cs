@@ -53,11 +53,23 @@ namespace Backend.Services
             _token = JsonSerializer.Deserialize<TokenResponse>(json)?.access_token;
         }
 
+        private DateTime _tokenExpiration;
+
+        public async Task EnsureTokenAsync()
+        {
+            if (string.IsNullOrEmpty(_token) || DateTime.UtcNow >= _tokenExpiration)
+            {
+                await GetToken();
+                _tokenExpiration = DateTime.UtcNow.AddMinutes(55); // exemplo, depende da validade real
+            }
+        }
+
         public async Task<List<Usuario>> GetUsuarios()
         {
-            await GetToken(); // GetToken já cria e usa seu próprio HttpClient temporário
-            using var client = CreateHttpClient(); // Cria uma nova instância para esta operação
+            await EnsureTokenAsync(); // garante token válido antes
+            using var client = CreateHttpClient();
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+
             var response = await client.GetAsync("https://api.unifenas.br/v1/moodle/usuarios");
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
@@ -66,77 +78,147 @@ namespace Backend.Services
 
         public async Task<List<LogUsuario>> GetLogs(string userId)
         {
-            await GetToken(); // GetToken já cria e usa seu próprio HttpClient temporário
-            using var client = CreateHttpClient(); // Cria uma nova instância para esta operação
+            await EnsureTokenAsync(); // garante token válido antes
+            using var client = CreateHttpClient();
+
             var url = $"https://api.unifenas.br/v1/moodle/logs-usuario?user_id={userId}";
             var request = new HttpRequestMessage(HttpMethod.Get, url);
             request.Headers.Add("Accept", "application/json");
-            request.Headers.Add("Authorization", $"Bearer {_token}");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _token);
+
             var response = await client.SendAsync(request);
             response.EnsureSuccessStatusCode();
             var json = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<List<LogUsuario>>(json);
         }
-
         public async Task ProcessarUsuariosInBackgroundAsync(string importacaoId)
         {
             if (!_importacaoStatuses.TryGetValue(importacaoId, out var status))
             {
-                status = new ImportacaoStatus { Id = importacaoId, Status = "Erro Interno", Mensagem = "Status da importação não encontrado." };
-                _importacaoStatuses[importacaoId] = status;
+                _importacaoStatuses[importacaoId] = new ImportacaoStatus { Id = importacaoId, Status = "Erro Interno", Mensagem = "Status da importação não encontrado." };
                 return;
             }
 
             try
             {
                 Console.WriteLine($"[{DateTime.Now}] Importação {importacaoId}: Iniciando GetUsuarios().");
-                var usuarios = await GetUsuarios(); // GetUsuarios já está usando a factory
+                var usuarios = await GetUsuarios();
                 Console.WriteLine($"[{DateTime.Now}] Importação {importacaoId}: {usuarios.Count} usuários obtidos.");
 
                 status.TotalUsuarios = usuarios.Count;
                 status.Status = "Em Andamento";
                 status.Mensagem = "Processando usuários...";
 
-                for (int i = 0; i < usuarios.Count; i++)
-                {
-                    var usuario = usuarios[i];
-                    Console.WriteLine($"[{DateTime.Now}] Importação {importacaoId}: Obtendo logs para usuário {usuario.user_id} ({i + 1} de {usuarios.Count}).");
-                    var logs = await GetLogs(usuario.user_id); // GetLogs já está usando a factory
-                    Console.WriteLine($"[{DateTime.Now}] Importação {importacaoId}: Salvando logs para usuário {usuario.user_id}.");
-                    await _mongoService.SalvarLogsAsync(usuario.user_id, logs);
+                int maxDegreeOfParallelism = 5; // Ajuste conforme sua capacidade/API
+                var semaphore = new SemaphoreSlim(maxDegreeOfParallelism);
 
-                    status.ProgressoAtual = i + 1;
-                    status.Mensagem = $"Processando logs do usuário: {usuario.user_id} ({status.ProgressoAtual} de {status.TotalUsuarios})";
-                    Console.WriteLine(status.Mensagem);
-                }
+                var tasks = usuarios.Select(async (usuario, index) =>
+                {
+                    await semaphore.WaitAsync();
+                    try
+                    {
+                        Console.WriteLine($"[{DateTime.Now}] Importação {importacaoId}: Obtendo logs para usuário {usuario.user_id} ({index + 1} de {usuarios.Count}).");
+                        var logs = await GetLogs(usuario.user_id);
+                        Console.WriteLine($"[{DateTime.Now}] Importação {importacaoId}: Salvando logs para usuário {usuario.user_id}.");
+                        await _mongoService.SalvarLogsAsync(usuario.user_id, logs);
+
+                        status.ProgressoAtual++;
+                        status.Mensagem = $"Processando logs do usuário: {usuario.user_id} ({status.ProgressoAtual} de {status.TotalUsuarios})";
+                        Console.WriteLine(status.Mensagem);
+                    }
+                    finally
+                    {
+                        semaphore.Release();
+                    }
+                }).ToList();
+
+                await Task.WhenAll(tasks);
 
                 status.Status = "Concluída";
                 status.Mensagem = "Importação concluída com sucesso.";
                 status.Fim = DateTime.UtcNow;
                 Console.WriteLine($"[{DateTime.Now}] Importação {importacaoId}: Concluída com sucesso.");
             }
-            catch (HttpRequestException httpEx)
+            catch (Exception ex)
             {
                 status.Status = "Erro";
-                status.Mensagem = $"Erro de HTTP durante a importação: {httpEx.Message}. Status Code: {httpEx.StatusCode}";
+                status.Mensagem = $"Erro durante a importação: {ex.Message}";
                 status.Fim = DateTime.UtcNow;
-                Console.WriteLine($"[{DateTime.Now}] Erro HTTP na importação {importacaoId}: {httpEx.Message}\n{httpEx.StackTrace}");
+                Console.WriteLine($"[{DateTime.Now}] Erro na importação {importacaoId}: {ex.Message}\n{ex.StackTrace}");
             }
-            catch (TaskCanceledException tce)
+        }
+
+
+        public async Task ProcessarUsuariosSomenteComMudancaAsync(string importacaoId)
+        {
+            if (!_importacaoStatuses.TryGetValue(importacaoId, out var status))
             {
-                status.Status = "Erro";
-                status.Mensagem = $"Importação cancelada (timeout ou interrupção): {tce.Message}";
+                _importacaoStatuses[importacaoId] = new ImportacaoStatus
+                {
+                    Id = importacaoId,
+                    Status = "Erro Interno",
+                    Mensagem = "Status da importação não encontrado."
+                };
+                return;
+            }
+
+            try
+            {
+                Console.WriteLine($"[{DateTime.Now}] Importação {importacaoId}: Iniciando...");
+
+                var usuariosApi = await GetUsuarios();
+                var usuariosMongo = await _mongoService.GetUsuariosComUltimoAcessoAsync();
+
+                var usuariosParaImportar = usuariosApi
+                    .Where(apiUser =>
+                    {
+                        var mongoUser = usuariosMongo.FirstOrDefault(m => m.user_id == apiUser.user_id);
+                        return mongoUser == null || mongoUser.user_lastaccess != apiUser.user_lastaccess;
+                    })
+                    .ToList();
+
+                Console.WriteLine($"[{DateTime.Now}] {usuariosParaImportar.Count} usuários com alteração encontrados.");
+
+                status.TotalUsuarios = usuariosParaImportar.Count;
+                status.Status = "Em Andamento";
+                status.Mensagem = "Processando usuários...";
+
+                int maxParallel = 5;
+                var semaphore = new SemaphoreSlim(maxParallel);
+
+                var tasks = usuariosParaImportar.Select(async (usuario, index) =>
+                {
+                    await semaphore.WaitAsync();
+                    try
+                    {
+                        Console.WriteLine($"[{DateTime.Now}] Processando usuário {usuario.user_id} ({index + 1}/{usuariosParaImportar.Count})");
+                        var logs = await GetLogs(usuario.user_id);
+                        await _mongoService.SalvarLogsAsync(usuario.user_id, logs);
+
+                        status.ProgressoAtual++;
+                        status.Mensagem = $"Processando usuário {usuario.user_id} ({status.ProgressoAtual}/{status.TotalUsuarios})";
+                    }
+                    finally
+                    {
+                        semaphore.Release();
+                    }
+                }).ToList();
+
+                await Task.WhenAll(tasks);
+
+                status.Status = "Concluída";
+                status.Mensagem = "Importação concluída com sucesso.";
                 status.Fim = DateTime.UtcNow;
-                Console.WriteLine($"[{DateTime.Now}] Task Cancelled na importação {importacaoId}: {tce.Message}\n{tce.StackTrace}");
             }
             catch (Exception ex)
             {
                 status.Status = "Erro";
-                status.Mensagem = $"Erro geral durante a importação: {ex.Message}";
+                status.Mensagem = $"Erro: {ex.Message}";
                 status.Fim = DateTime.UtcNow;
-                Console.WriteLine($"[{DateTime.Now}] Erro geral na importação {importacaoId}: {ex.Message}\n{ex.StackTrace}");
             }
         }
+
+
 
         public ImportacaoStatus IniciarNovaImportacao()
         {

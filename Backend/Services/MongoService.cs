@@ -638,7 +638,47 @@ namespace Backend.Services
             return resumoStr;
         }
 
+        public async Task<List<Usuario>> GetUsuariosComUltimoAcessoAsync()
+        {
+            var pipeline = new BsonDocument[]
+            {
+        new BsonDocument("$unwind", "$logs"),
+        new BsonDocument("$group", new BsonDocument
+        {
+            { "_id", "$logs.user_id" },
+            { "nome", new BsonDocument("$first", "$logs.name") },
+            { "ultimo_acesso", new BsonDocument("$max", "$logs.user_lastaccess") }
+        }),
+        new BsonDocument("$project", new BsonDocument
+        {
+            { "_id", 0 },
+            { "user_id", "$_id" },
+            { "nome", 1 },
+            { "ultimo_acesso", 1 }
+        })
+            };
 
+            var resultado = await _collection.AggregateAsync<BsonDocument>(pipeline);
+
+            var usuarios = new List<Usuario>();
+            await resultado.ForEachAsync(doc =>
+            {
+                var userIdVal = doc.GetValue("user_id", BsonNull.Value);
+                var nomeVal = doc.GetValue("nome", BsonNull.Value);
+                var ultimoAcessoVal = doc.GetValue("ultimo_acesso", BsonNull.Value);
+
+                usuarios.Add(new Usuario
+                {
+                    user_id = userIdVal.IsBsonNull ? "" : userIdVal.AsString,
+                    name = nomeVal.IsBsonNull ? "" : nomeVal.AsString,
+                    user_lastaccess = ultimoAcessoVal.BsonType == BsonType.DateTime
+                        ? ultimoAcessoVal.ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")
+                        : (ultimoAcessoVal.IsBsonNull ? "" : ultimoAcessoVal.ToString()),
+                });
+            });
+
+            return usuarios;
+        }
 
 
 

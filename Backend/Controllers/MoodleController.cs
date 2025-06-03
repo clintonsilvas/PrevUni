@@ -41,7 +41,7 @@ namespace Backend.Controllers
                 // Inicia a tarefa de processamento em background, passando o ID
                 // O underscore é para "descartar" o resultado da Task, indicando "fire and forget".
                 // Isso não significa que a Task não será executada, apenas que não estamos esperando por ela aqui.
-                _ = Task.Run(() => _apiService.ProcessarUsuariosInBackgroundAsync(statusInicial.Id));
+                _ = Task.Run(() => _apiService.ProcessarUsuariosSomenteComMudancaAsync(statusInicial.Id));
 
                 // Retorna imediatamente um status 202 Accepted (Processando)
                 return Accepted(new { importacaoId = statusInicial.Id, status = statusInicial.Status, message = statusInicial.Mensagem });
