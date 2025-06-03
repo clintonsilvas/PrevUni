@@ -6,7 +6,7 @@
 
 
 <header class="linha welcome"
-        style="
+style="
             justify-content: space-between;
             width: 100%;
             height: fit-content;
@@ -31,13 +31,13 @@
 <div class="dashboard coluna" style="--gap: 10px">
     <div class="ImputIA linha">
         <img src="~/css/icons/estrelaIA.svg"
-             alt="ÍconeHome"
-             width="18"
-             height="18" />
+        alt="ÍconeHome"
+        width="18"
+        height="18" />
         <input type="text"
-               id="IaPergunta"
-               name="nome"
-               placeholder="Pergunte a inteligência Artifical!" />
+        id="IaPergunta"
+        name="nome"
+        placeholder="Pergunte a inteligência Artifical!" />
         <a asp-page="/IaChatCurso" asp-route-cursoNome="@Model.Cursos.curso">Gerar</a>
     </div>
 
@@ -99,7 +99,7 @@
                 </div>
                 <div class="linha alt_li" style="flex: 1">
                     <div class="QuadroCards GraficoEvolucao linha"
-                         style="flex: 1; --gap: 40px">
+                    style="flex: 1; --gap: 40px">
 
 
                         <div class="coluna" style="--gap: 16px; height: 100%;">
@@ -315,13 +315,9 @@
                             <table>
                                 <tbody id="tabela-alunos">
                                     @{
-                                        // Define o limiar de engajamento para considerar alunos menos ativos
-                                        double limiarEngajamento = 30.0;
-
-                                        // Filtra alunos do curso com engajamento abaixo do limiar
                                         var alunosMenosAtivos = Model.AlunosEngajamento
-                                        .Where(a => a.Engajamento < limiarEngajamento)
-                                        .OrderBy(a => a.Engajamento)  // ordem crescente pelo engajamento
+                                        .Where(a => a.Engajamento < 30)
+                                        .OrderBy(a => a.Engajamento)
                                         .ToList();
 
                                         int posicao = 1;
@@ -329,10 +325,16 @@
 
                                     @foreach (var l in alunosMenosAtivos)
                                     {
+                                        var engajamentoFormatado = l.Engajamento < 0
+                                        ? $"{l.Engajamento.ToString("0.0")}%"
+                                        : $"{l.Engajamento.ToString("0")}%";
+
                                         <tr class="linha @(posicao > 5 ? "escondido" : "")">
                                             <td style="width: 14px">@posicao</td>
-                                            <td style="flex: 1"><a asp-page="/PerfilAluno" asp-route-userId="@l.UserId">@l.Nome</a></td>
-                                            <td>@l.Engajamento.ToString("0.00")%</td>
+                                            <td style="flex: 1">
+                                                <a asp-page="/PerfilAluno" asp-route-userId="@l.UserId">@l.Nome</a>
+                                            </td>
+                                            <td>@engajamentoFormatado</td>
                                         </tr>
                                         posicao++;
                                     }
@@ -397,12 +399,14 @@
                                                 var engajamento = Model.AlunosEngajamento
                                                 .FirstOrDefault(e => e.UserId == al.user_id)?.Engajamento;
 
-                                                string engajamentoFormatado = engajamento.HasValue
-                                                ? $"{engajamento.Value.ToString("0.00")}%"
+                                                var engajamentoFormatado = engajamento.HasValue
+                                                ? (engajamento < 1 ? $"{engajamento.Value:0.00}%" : $"{engajamento.Value:0}%")
                                                 : "N/A";
                                             }
+
                                             @engajamentoFormatado
                                         </td>
+
                                     </tr>
                                 }
                             }

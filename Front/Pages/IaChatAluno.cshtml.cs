@@ -43,7 +43,7 @@ namespace Front.Pages
             var client = _httpClientFactory.CreateClient();
 
             // Buscar dados do aluno
-            var resumoResponse = await client.GetAsync($"https://localhost:7232/resumo-aluno-ia/{UserId}");
+            var resumoResponse = await client.GetAsync($"https://localhost:7232/api/Mongo/resumo-aluno-ia/{UserId}");
             if (!resumoResponse.IsSuccessStatusCode)
             {
                 ModelState.AddModelError("", "Aluno não encontrado.");
@@ -81,7 +81,7 @@ namespace Front.Pages
         private async Task CarregarDadosAluno()
         {
             var client = _httpClientFactory.CreateClient();
-            var resumoResponse = await client.GetAsync($"https://localhost:7232/resumo-aluno-ia/{UserId}");
+            var resumoResponse = await client.GetAsync($"https://localhost:7232/api/Mongo/resumo-aluno-ia/{UserId}");
 
             if (!resumoResponse.IsSuccessStatusCode)
             {
