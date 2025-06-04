@@ -1,5 +1,6 @@
 ﻿@page "{userId}"
 @model Front.Pages.PerfilAlunoModel
+@using Front.Models
 @{
 
 }
@@ -41,22 +42,22 @@ style="
                     </div>
                 </div>
                 <div class="coluna" style="gap: 10px">
-                    
-                        @if (Model.AlunoLogs.Any())
-                        {
-                            var ultimoLog = Model.AlunoLogs
-                            .OrderByDescending(l => DateTime.Parse(l.date))
-                            .FirstOrDefault();
 
-                            DateTime ultimo_acesso = DateTime.Parse(ultimoLog.date);
+                    @if (Model.AlunoLogs.Any())
+                    {
+                        var ultimoLog = Model.AlunoLogs
+                        .OrderByDescending(l => DateTime.Parse(l.date))
+                        .FirstOrDefault();
+
+                        DateTime ultimo_acesso = DateTime.Parse(ultimoLog.date);
                         <h5 class="corCinza60B">
                             Último Acesso: Dia @ultimo_acesso.Day de @ultimo_acesso.ToString("MMMM") às @ultimo_acesso.Hour: @ultimo_acesso.Minute
                         </h5>
-                        }
+                    }
 
 
 
-                    
+
                     <h5 class="corCinza60B">
                         Total de Acessos: @Model.AlunoDetalhes.total_acessos
                     </h5>
@@ -67,20 +68,24 @@ style="
 
     <div class="ImputIA linha">
         <img src="~/css/icons/estrelaIA.svg"
-             alt="ÍconeHome"
-             width="18"
-             height="18" />
+        alt="ÍconeHome"
+        width="18"
+        height="18" />
         <input type="text"
-               id="IaPergunta"
-               name="nome"
-               placeholder="Pergunte a inteligência Artifical!" />
+        id="IaPergunta"
+        name="nome"
+        placeholder="Pergunte a inteligência Artifical!" />
         <a asp-page="/IaChatAluno" asp-route-userId="@Model.AlunoDetalhes.user_id">Gerar</a>
     </div>
+    @{
+        var abaSelecionada = Request.Query["aba"].ToString();
+        if (string.IsNullOrEmpty(abaSelecionada)) abaSelecionada = "1";
+    }
 
     <div class="abas">
-        <input type="radio" name="aba" id="aba1" checked />
-        <input type="radio" name="aba" id="aba2" />
-        <input type="radio" name="aba" id="aba3" />
+        <input type="radio" name="aba" id="aba1" @(abaSelecionada == "1" ? "checked" : "") />
+        <input type="radio" name="aba" id="aba2" @(abaSelecionada == "2" ? "checked" : "") />
+        <input type="radio" name="aba" id="aba3" @(abaSelecionada == "3" ? "checked" : "") />
 
         <div class="botoes">
             <label for="aba1">Dashboard</label>
@@ -188,84 +193,84 @@ style="
                             let chart;
 
                             function criarGrafico() {
-                                const isDarkMode = document.documentElement.classList.contains('dark');
+                            const isDarkMode = document.documentElement.classList.contains('dark');
 
-                                const coresClaro = ['#003DE5', '#22C55E', '#FF6A6A', '#EAB308'];
-                                const coresEscuro = ['#7AAEFF', '#5A8BDD', '#3A69BB', '#1A4799'];
+                            const coresClaro = ['#003DE5', '#22C55E', '#FF6A6A', '#EAB308'];
+                            const coresEscuro = ['#7AAEFF', '#5A8BDD', '#3A69BB', '#1A4799'];
 
-                                const corTexto = isDarkMode ? '#8F98B2' : '#8F98B2';
-                                const cores = isDarkMode ? coresEscuro : coresClaro;
+                            const corTexto = isDarkMode ? '#8F98B2' : '#8F98B2';
+                            const cores = isDarkMode ? coresEscuro : coresClaro;
 
-                                if (chart) chart.destroy();
+                            if (chart) chart.destroy();
 
-                                chart = new Chart(ctx, {
-                                    type: 'doughnut',
-                                    data: {
-                                        labels: [@Html.Raw(labels)],
-                                        datasets: [{
-                                            data: [@dados],
-                                            backgroundColor: cores,
-                                            borderWidth: 0,
-                                        }]
-                                    },
-                                    options: {
-                                        responsive: true,
-                                        maintainAspectRatio: false,
-                                        rotation: 270,
-                                        circumference: 360,
-                                        cutout: '70%',
-                                        plugins: {
-                                            legend: {
-                                                display: true,
-                                                position: 'right',
-                                                labels: {
-                                                    boxWidth: 12,
-                                                    usePointStyle: true,
-                                                    pointStyle: 'rectRounded',
-                                                    color: corTexto,
-                                                    font: { size: 14, family: 'Inter' },
-                                                    padding: 20
-                                                }
-                                            }
-                                        }
-                                    },
-                                    plugins: [{
-                                        id: 'centerText',
-                                        beforeDraw(chart) {
-                                            const { ctx, chartArea: { left, right, top, bottom } } = chart;
-                                            const x = (left + right) / 2;
-                                            const y = (top + bottom) / 2;
+                            chart = new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                            labels: [@Html.Raw(labels)],
+                            datasets: [{
+                            data: [@dados],
+                            backgroundColor: cores,
+                            borderWidth: 0,
+                            }]
+                            },
+                            options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            rotation: 270,
+                            circumference: 360,
+                            cutout: '70%',
+                            plugins: {
+                            legend: {
+                            display: true,
+                            position: 'right',
+                            labels: {
+                            boxWidth: 12,
+                            usePointStyle: true,
+                            pointStyle: 'rectRounded',
+                            color: corTexto,
+                            font: { size: 14, family: 'Inter' },
+                            padding: 20
+                            }
+                            }
+                            }
+                            },
+                            plugins: [{
+                            id: 'centerText',
+                            beforeDraw(chart) {
+                            const { ctx, chartArea: { left, right, top, bottom } } = chart;
+                            const x = (left + right) / 2;
+                            const y = (top + bottom) / 2;
 
-                                            ctx.save();
-                                            ctx.font = 'bold 16px Inter';
-                                            ctx.fillStyle = corTexto;
-                                            ctx.textAlign = 'center';
-                                            ctx.textBaseline = 'middle';
+                            ctx.save();
+                            ctx.font = 'bold 16px Inter';
+                            ctx.fillStyle = corTexto;
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
 
-                                            const texto = '@acoes.Sum(a => a.Quantidade) Ações';
-                                            ctx.fillText(texto, x, y);
-                                            ctx.restore();
-                                        }
-                                    }]
-                                });
+                            const texto = '@acoes.Sum(a => a.Quantidade) Ações';
+                            ctx.fillText(texto, x, y);
+                            ctx.restore();
+                            }
+                            }]
+                            });
                             }
 
                             if (localStorage.getItem('theme') === 'dark') {
-                                document.documentElement.classList.add('dark');
-                                toggle.checked = true;
+                            document.documentElement.classList.add('dark');
+                            toggle.checked = true;
                             }
 
                             criarGrafico();
 
                             toggle.addEventListener('change', function () {
-                                if (this.checked) {
-                                    document.documentElement.classList.add('dark');
-                                    localStorage.setItem('theme', 'dark');
-                                } else {
-                                    document.documentElement.classList.remove('dark');
-                                    localStorage.setItem('theme', 'light');
-                                }
-                                criarGrafico();
+                            if (this.checked) {
+                            document.documentElement.classList.add('dark');
+                            localStorage.setItem('theme', 'dark');
+                            } else {
+                            document.documentElement.classList.remove('dark');
+                            localStorage.setItem('theme', 'light');
+                            }
+                            criarGrafico();
                             });
                         </script>
                     </div>
@@ -313,8 +318,8 @@ style="
                     }
                     <script>
                         function toggleDiv(id) {
-                            const div = document.getElementById(id);
-                            div.classList.toggle('aberto');
+                        const div = document.getElementById(id);
+                        div.classList.toggle('aberto');
                         }
                     </script>
 
@@ -322,38 +327,54 @@ style="
 
             </div> <!-- fecha conteudo linha -->
 
-
-
-
             <div class="conteudo" id="conteudo2">
-                <div class="calendario-logs">
-                    <div class="grid-calendario">
-                        @if (Model.AlunoLogs != null)
+                <div class="calendario-logs" id="calendario">
+                    @{
+                        int mes = Convert.ToInt32(Request.Query["mes"]) == 0 ? DateTime.Now.Month : Convert.ToInt32(Request.Query["mes"]);
+                        int ano = Convert.ToInt32(Request.Query["ano"]) == 0 ? DateTime.Now.Year : Convert.ToInt32(Request.Query["ano"]);
+
+                        var primeiroDiaMes = new DateTime(ano, mes, 1);
+                        int diasNoMes = DateTime.DaysInMonth(ano, mes);
+                        int diasAtePrimeiroDia = (int)primeiroDiaMes.DayOfWeek;
+
+                        var logsPorDia = Model.AlunoLogs?
+                        .GroupBy(l => DateTime.Parse(l.date).Date)
+                        .ToDictionary(g => g.Key, g => g.ToList())
+                        ?? new Dictionary<DateTime, List<LogUsuario>>();
+                    }
+
+                    <!-- Navegação do mês -->
+                    <div class="navegacao-mes">
+                        <button onclick="mudarMes(-1)">&#9664;</button>
+                        <span class="corPreta50B">@primeiroDiaMes.ToString("MMMM yyyy")</span>
+                        <button onclick="mudarMes(1)">&#9654;</button>
+                    </div>
+
+                    <!-- Calendário -->
+                    <div class="grid-calendario2">
+                        <!-- Espaços até o primeiro dia -->
+                        @for (int j = 0; j < diasAtePrimeiroDia; j++)
                         {
-                            var gruposFiltrados = Model.AlunoLogs
-                            .Where(log =>
-                            (log.action == "graded" && log.target == "user" && log.component == "core") ||
-                            (log.action == "uploaded" && log.target == "assessable" && log.component == "mod_forum"))
-                            .GroupBy(l => DateTime.Parse(l.date).Date) // <- força só a data
-                            .OrderByDescending(g => g.Key);
+                            <div class="diaMesInativo"></div>
+                        }
 
-                            foreach (var grupo in gruposFiltrados)
-                            {
-                                <div class="QuadroCards coluna" style="gap: 16px;">
-                                    
-                                    <div class="linha" style="--gap: 10px; align-items: center; margin-bottom: 16px">
-                                        <img src="~/css/icons/calendario.svg" height="17"/>
-                                        <h4 class="corPreta50B">@grupo.Key.ToString("dd/MM/yyyy")</h4>
-                                    </div>
-                                    @foreach (var log in grupo)
+                        <!-- Dias do mês -->
+                        @for (int i = 1; i <= diasNoMes; i++)
+                        {
+                            var dataAtual = new DateTime(ano, mes, i);
+                            <div class="diaMes @(logsPorDia.ContainsKey(dataAtual) ? "temLog" : "")">
+                                <span class="diaspan">@i</span>
+
+                                @if (logsPorDia.ContainsKey(dataAtual))
+                                {
+                                    foreach (var log in logsPorDia[dataAtual])
                                     {
-                                        string acao = null;
-
-                                        if (log.action == "graded" && log.target == "user" && log.component == "core")
-                                            acao = "Atividade Concluída";
-
-                                        if (log.action == "uploaded" && log.target == "assessable" && log.component == "mod_forum")
-                                            acao = "Postagem no Fórum";
+                                        string acao = log.action switch
+                                        {
+                                            "graded" when log.target == "user" && log.component == "core" => "Atividade Concluída",
+                                            "uploaded" when log.target == "assessable" && log.component == "mod_forum" => "Postagem no Fórum",
+                                            _ => null
+                                        };
 
                                         if (acao != null)
                                         {
@@ -363,16 +384,64 @@ style="
                                             </div>
                                         }
                                     }
-                                </div>
-                            }
+                                }
+                            </div>
                         }
                     </div>
 
+                    <script>
+                        // Função para mudar mês/ano na URL sem reload
+                        function mudarMes(direcao) {
+                          const urlParams = new URLSearchParams(window.location.search);
+                          let mes = parseInt(urlParams.get('mes')) || new Date().getMonth() + 1;
+                          let ano = parseInt(urlParams.get('ano')) || new Date().getFullYear();
+
+                          mes += direcao;
+                          if (mes < 1) {
+                            mes = 12;
+                            ano -= 1;
+                          }
+                          if (mes > 12) {
+                            mes = 1;
+                            ano += 1;
+                          }
+
+                          urlParams.set('mes', mes);
+                          urlParams.set('ano', ano);
+
+                          // Recarrega a página com a URL atualizada para atualizar o calendário
+                          window.location.href = window.location.pathname + '?' + urlParams.toString() + window.location.hash;
+                        }
+
+                        // Ao carregar a página, marca a aba certa com base na URL
+                        window.addEventListener('DOMContentLoaded', () => {
+                          const urlParams = new URLSearchParams(window.location.search);
+                          const abaSelecionada = urlParams.get('aba') || '1'; // padrão aba1
+
+                          // Marca o input radio correspondente
+                          const inputSelecionado = document.getElementById('aba' + abaSelecionada);
+                          if (inputSelecionado) {
+                            inputSelecionado.checked = true;
+                          }
+
+                          // Adiciona listener para trocar aba e atualizar URL
+                          document.querySelectorAll('.botoes label').forEach((label, index) => {
+                            label.addEventListener('click', () => {
+                              const params = new URLSearchParams(window.location.search);
+                              params.set('aba', (index + 1).toString());
+                              history.replaceState(null, '', window.location.pathname + '?' + params.toString() + window.location.hash);
+                            });
+                          });
+                        });
+                    </script>
 
                 </div>
-
             </div>
+
+
+
             <div class="conteudo" id="conteudo3"></div>
         </div>
+
     </div>
 </div>

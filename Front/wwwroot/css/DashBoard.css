@@ -451,3 +451,33 @@ th:last-child .bot_tab {
         font-size: 0.9em;
         color: var(--Preto50B);
     }
+
+
+
+.grid-calendario2 {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+
+.diaMes
+{
+    background-color: var(--Branco);
+    height: fit-content;
+    flex: 1;
+    padding: 16px;
+    border-radius: 8px;
+
+}
+
+
+.diaMes .diaspan {
+color: var(--Preto50B);
+}
+
+
+
+.diaMesInativo
+{
+
+}

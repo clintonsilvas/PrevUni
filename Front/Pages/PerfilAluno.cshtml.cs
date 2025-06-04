@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Front.Models;
 using System.Globalization;
+using Front.Models;
 
 namespace Front.Pages
 {
@@ -109,5 +110,7 @@ namespace Front.Pages
                 .ToDictionary(g => g.Key, g => g.Count())
                 ?? new Dictionary<string, int>();
         }
+
+
     }
 }
