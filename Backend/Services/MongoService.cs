@@ -323,12 +323,26 @@ namespace Backend.Services
 
         public async Task<BsonDocument> GerarResumoAlunoIAAsync(string userId)
         {
+            DateTime dataAtual = DateTime.UtcNow;
+            DateTime dataLimite = dataAtual.AddMonths(-2);
+
             var pipeline = new[]
             {
         new BsonDocument("$unwind", "$logs"),
         new BsonDocument("$match", new BsonDocument("logs.user_id", userId)),
-
-        // Criar campo yearWeek para agrupamento semanal: "YYYY-Www"
+        new BsonDocument("$addFields", new BsonDocument("logs", new BsonDocument
+        {
+            { "$mergeObjects", new BsonArray
+                {
+                    "$logs",
+                    new BsonDocument
+                    {
+                        { "dateObj", new BsonDocument("$toDate", "$logs.date") }
+                    }
+                }
+            }
+        })),
+        new BsonDocument("$match", new BsonDocument("logs.dateObj", new BsonDocument("$gte", dataLimite))),
         new BsonDocument("$addFields", new BsonDocument("logs", new BsonDocument
         {
             { "$mergeObjects", new BsonArray
@@ -336,17 +350,14 @@ namespace Backend.Services
                     "$logs",
                     new BsonDocument("yearWeek", new BsonDocument("$dateToString", new BsonDocument
                     {
-                        { "date", new BsonDocument("$toDate", "$logs.date") },
-                        { "format", "%Y-W%V" },  // %V = ISO week number
+                        { "date", "$logs.dateObj" },
+                        { "format", "%Y-W%V" },
                         { "timezone", "UTC" }
                     }))
                 }
             }
         })),
-
         new BsonDocument("$replaceRoot", new BsonDocument("newRoot", "$logs")),
-
-        // Primeiro agrupamento para contar interações por curso, componente e semana, e pegar último acesso do curso
         new BsonDocument("$group", new BsonDocument
         {
             { "_id", new BsonDocument
@@ -360,8 +371,6 @@ namespace Backend.Services
             },
             { "count", new BsonDocument("$sum", 1) }
         }),
-
-        // Segundo agrupamento para montar estrutura por curso e semana
         new BsonDocument("$group", new BsonDocument
         {
             { "_id", new BsonDocument
@@ -379,8 +388,6 @@ namespace Backend.Services
             { "total", new BsonDocument("$sum", "$count") },
             { "ultimo_acesso", new BsonDocument("$max", "$_id.user_lastaccess") }
         }),
-
-        // Terceiro agrupamento para juntar semanas dentro do curso
         new BsonDocument("$group", new BsonDocument
         {
             { "_id", "$_id.course" },
@@ -403,20 +410,7 @@ namespace Backend.Services
                 })
             },
             { "ultimo_acesso", new BsonDocument("$max", "$ultimo_acesso") }
-        }),
-
-        // Quarto agrupamento para montar curso com interações totais e por componente (agregando todas semanas)
-        new BsonDocument("$group", new BsonDocument
-        {
-            { "_id", "$_id" },
-            { "semanas", new BsonDocument("$first", "$semanas") },
-            { "ultimo_acesso", new BsonDocument("$first", "$ultimo_acesso") },
-            { "interacoes_por_componente", new BsonDocument("$push", "$semanas.interacoes_por_componente") },
-        }),
-
-        // Ajuste final para somar interacoes por componente no curso (somar todas semanas)
-        // Para simplificar, podemos fazer o cálculo na aplicação depois.
-
+        })
     };
 
             var result = await _collection.AggregateAsync<BsonDocument>(pipeline);
@@ -425,7 +419,6 @@ namespace Backend.Services
             if (!grouped.Any())
                 return new BsonDocument { { "erro", "Usuário não encontrado" } };
 
-            // Recupera o userId e nome (pegar do primeiro log)
             var primeiroLog = await _collection.Find(Builders<AlunoLogs>.Filter.Eq(x => x.user_id, userId)).FirstOrDefaultAsync();
 
             var usuario = new BsonDocument
@@ -434,7 +427,6 @@ namespace Backend.Services
         { "nome", primeiroLog?.logs?.FirstOrDefault()?.name ?? "Desconhecido" }
     };
 
-            // Montar cursos a partir do resultado
             var cursos = new BsonArray();
 
             foreach (var cursoDoc in grouped)
@@ -443,12 +435,17 @@ namespace Backend.Services
                 var semanas = cursoDoc.GetValue("semanas", new BsonArray()).AsBsonArray;
                 var ultimoAcesso = cursoDoc.GetValue("ultimo_acesso", "").AsString;
 
-                // Agregar interações por componente somando semanas
                 var interacoesPorComponente = new Dictionary<string, int>();
+                var semanasList = new List<BsonDocument>();
 
-                foreach (var semana in semanas)
+                int semanaIndex = 1;
+
+                var semanasOrdenadas = semanas.OrderBy(s => s["week"].AsString).ToList();
+
+                foreach (var semana in semanasOrdenadas)
                 {
                     var compDoc = semana["interacoes_por_componente"].AsBsonDocument;
+
                     foreach (var elem in compDoc)
                     {
                         if (interacoesPorComponente.ContainsKey(elem.Name))
@@ -456,31 +453,29 @@ namespace Backend.Services
                         else
                             interacoesPorComponente[elem.Name] = elem.Value.AsInt32;
                     }
+
+                    var semanaDoc = new BsonDocument
+            {
+                { "semana", $"semana {semanaIndex}" },
+                { "total_interacoes", semana["total"].AsInt32 },
+                { "componentes", compDoc }
+            };
+
+                    semanasList.Add(semanaDoc);
+                    semanaIndex++;
                 }
 
                 var totalInteracoes = interacoesPorComponente.Values.Sum();
-
-                // Montar semanas com total e interacoes_por_componente
-                var semanasBson = new BsonDocument();
-                foreach (var semana in semanas)
-                {
-                    var week = semana["week"].AsString;
-                    var total = semana["total"].AsInt32;
-                    var comp = semana["interacoes_por_componente"].AsBsonDocument;
-                    semanasBson[week] = new BsonDocument
-            {
-                { "total", total },
-                { "interacoes_por_componente", comp }
-            };
-                }
 
                 var cursoBson = new BsonDocument
         {
             { "id", cursoId },
             { "total_interacoes", totalInteracoes },
-            { "ultimo_acesso", ultimoAcesso },
+            { "total_componentes_utilizados", interacoesPorComponente.Keys.Count },
+            { "semanas_ativas", semanasList.Count },
+            { "ultima_interacao", ultimoAcesso },
             { "interacoes_por_componente", new BsonDocument(interacoesPorComponente) },
-            { "interacoes_por_semana", semanasBson }
+            { "interacoes_por_semana", new BsonArray(semanasList) }
         };
 
                 cursos.Add(cursoBson);
@@ -489,6 +484,7 @@ namespace Backend.Services
             var retorno = new BsonDocument
     {
         { "usuario", usuario },
+        { "data_limite", dataLimite.ToString("yyyy-MM-dd") },
         { "cursos", cursos }
     };
 
