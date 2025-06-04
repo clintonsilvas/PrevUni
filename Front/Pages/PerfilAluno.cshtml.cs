@@ -2,51 +2,48 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Front.Models;
-using System.Globalization;
-using Front.Models;
+using System.Text.Json.Serialization;
 
 namespace Front.Pages
 {
-    public class PerfilAlunoModel : PageModel
+    public class PerfilAlunoModel(HttpClient httpClient) : PageModel
     {
-        private readonly HttpClient _httpClient;
+        private readonly HttpClient _httpClient = httpClient;
 
         [BindProperty(SupportsGet = true)]
         public string UserId { get; set; }
 
         public AlunoResumo AlunoDetalhes { get; set; }
-        public List<LogUsuario> AlunoLogs { get; set; } = new();
-        public List<int> SemanasAcessoAluno { get; set; } = new();
-        public Dictionary<string, int> InteracoesPorComponente { get; set; } = new();
+        public List<LogUsuario> AlunoLogs { get; set; } = [];
+        public List<int> SemanasAcessoAluno { get; set; } = [];
+        public Dictionary<string, int> InteracoesPorComponente { get; set; } = [];
 
-        public double EngajamentoAlto { get; set; }
-        public double EngajamentoMedio { get; set; }
-        public double EngajamentoBaixo { get; set; }
+        public float Engajamento { get; set; }
 
-        public PerfilAlunoModel(HttpClient httpClient) => _httpClient = httpClient;
+        public record AlunoEngajamento(
+            [property: JsonPropertyName("userId")] string UserId,
+            [property: JsonPropertyName("nome")] string Nome,
+            [property: JsonPropertyName("engajamento")] double Engajamento
+        );
 
         public async Task<IActionResult> OnGetAsync()
         {
             if (string.IsNullOrEmpty(UserId))
                 return NotFound("ID do aluno não fornecido.");
 
-            AlunoDetalhes = await GetFromApiAsync<AlunoResumo>($"https://localhost:7232/api/Mongo/resumo-aluno/{UserId}");
-            if (AlunoDetalhes == null)
-            {
-                AlunoDetalhes = new AlunoResumo { nome = "Aluno Não Encontrado", user_id = UserId };
-                return Page();
-            }
+            AlunoDetalhes = await GetFromApiAsync<AlunoResumo>($"https://localhost:7232/api/Mongo/resumo-aluno/{UserId}")
+                ?? new() { nome = "Aluno Não Encontrado", user_id = UserId };
 
-            AlunoLogs = await GetFromApiAsync<List<LogUsuario>>($"https://localhost:7232/api/Moodle/logs/{UserId}") ?? new List<LogUsuario>();
+            AlunoLogs = await GetFromApiAsync<List<LogUsuario>>($"https://localhost:7232/api/Moodle/logs/{UserId}") ?? [];
 
-            CalcularEngajamento();
+            var engajamento = await GetFromApiAsync<List<AlunoEngajamento>>($"https://localhost:7232/api/Mongo/engajamento-alunos");
+            Engajamento = (float)(engajamento?.FirstOrDefault(e => e.UserId == UserId)?.Engajamento ?? 0);
+
             CalcularSemanasAcessoAluno();
-            CalcularInteracoesPorComponente();
-
             return Page();
         }
 
-        private async Task<T> GetFromApiAsync<T>(string url)
+        private async Task<T?> GetFromApiAsync<T>(string url)
         {
             var res = await _httpClient.GetAsync(url);
             if (!res.IsSuccessStatusCode) return default;
@@ -54,63 +51,28 @@ namespace Front.Pages
             return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
 
-        private void CalcularEngajamento()
-        {
-            var acessos = AlunoDetalhes?.total_acessos ?? 0;
-            EngajamentoAlto = acessos > 1000 ? 100 : 0;
-            EngajamentoMedio = acessos is > 500 and <= 1000 ? 100 : 0;
-            EngajamentoBaixo = acessos <= 500 ? 100 : 0;
-        }
-
         private void CalcularSemanasAcessoAluno()
         {
-            if (AlunoLogs == null || AlunoLogs.Count == 0)
-            {
-                SemanasAcessoAluno.Clear();
-                return;
-            }
-
-            var datasValidas = AlunoLogs
+            var datas = AlunoLogs
                 .Select(l => DateTime.TryParse(l.date, out var dt) ? dt : (DateTime?)null)
                 .Where(dt => dt.HasValue)
                 .Select(dt => dt.Value)
                 .OrderBy(d => d)
                 .ToList();
 
-            if (datasValidas.Count == 0)
+            if (!datas.Any())
             {
                 SemanasAcessoAluno.Clear();
                 return;
             }
 
-            var primeiroAcesso = datasValidas.First();
-            SemanasAcessoAluno = new List<int>();
-
-            foreach (var data in datasValidas)
-            {
-                var semana = (int)((data - primeiroAcesso).TotalDays / 7);
-                while (SemanasAcessoAluno.Count <= semana)
-                    SemanasAcessoAluno.Add(0);
-
-                SemanasAcessoAluno[semana]++;
-            }
+            var inicio = datas.First();
+            SemanasAcessoAluno = datas
+                .Select(d => (int)((d - inicio).TotalDays / 7))
+                .GroupBy(s => s)
+                .OrderBy(g => g.Key)
+                .Select(g => g.Count())
+                .ToList();
         }
-
-        private void CalcularInteracoesPorComponente()
-        {
-            if (AlunoDetalhes?.interacoes_por_componente != null)
-            {
-                InteracoesPorComponente = new Dictionary<string, int>(AlunoDetalhes.interacoes_por_componente);
-                return;
-            }
-
-            InteracoesPorComponente = AlunoLogs?
-                .Where(l => !string.IsNullOrEmpty(l.component))
-                .GroupBy(l => l.component)
-                .ToDictionary(g => g.Key, g => g.Count())
-                ?? new Dictionary<string, int>();
-        }
-
-
     }
 }

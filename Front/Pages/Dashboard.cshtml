@@ -63,7 +63,14 @@ style="
                             </div>
                             <div class="coluna" style="--gap: 4px">
                                 <h5 class="corCinza80B">Engajamento Alto</h5>
-                                <h2 class="corVerde">63%</h2>
+                                <h2 class="corVerde">
+                                @{
+                                        var total_ = Model.AlunosEngajamento.Count;
+                                        var engagAlto = total_ == 0 ? 0 : (int)((Model.AlunosEngajamento.Count(l => l.Engajamento > 66) * 100.0) / total_);
+                                        var engagMedio = total_ == 0 ? 0 : (int)((Model.AlunosEngajamento.Count(l => l.Engajamento <= 66 && l.Engajamento >= 33) * 100.0) / total_);
+                                        var engagBaixo = total_ == 0 ? 0 : (int)((Model.AlunosEngajamento.Count(l => l.Engajamento < 33) * 100.0) / total_);
+
+                                } @engagAlto%</h2>
                             </div>
                         </div>
 
@@ -73,7 +80,7 @@ style="
                             </div>
                             <div class="coluna" style="--gap: 4px">
                                 <h5 class="corCinza80B">Engajamento Médio</h5>
-                                <h2 class="corAzul">63%</h2>
+                                <h2 class="corAzul">@engagMedio%</h2>
                             </div>
                         </div>
 
@@ -83,7 +90,7 @@ style="
                             </div>
                             <div class="coluna" style="--gap: 4px">
                                 <h5 class="corCinza80B">Engajamento Baixo</h5>
-                                <h2 class="corVermelha">63%</h2>
+                                <h2 class="corVermelha">@engagBaixo%</h2>
                             </div>
                         </div>
                     </div>

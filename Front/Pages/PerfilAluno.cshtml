@@ -26,22 +26,8 @@ style="
                 <div class="iconAzul02">
                     <img src="~/css/icons/formando.svg" alt="Icone_Aluno" />
                 </div>
-                <div class="coluna" style="--gap: 10px">
-                    <h1 class="corPreta40B">@Model.AlunoDetalhes.nome</h1>
-                </div>
-            </div>
-
-            <div class="linha" style="gap: 24px">
-                <div class="linha engag" style="flex: 1; align-items: center">
-                    <div class="iconAzul">
-                        <img src="~/css/icons/rostosememocao.svg" alt="Icone_Aluno" />
-                    </div>
-                    <div class="coluna" style="--gap: 4px">
-                        <h5 class="corCinza80B">Engajamento Médio</h5>
-                        <h2 class="corAzul">63%</h2>
-                    </div>
-                </div>
-                <div class="coluna" style="gap: 10px">
+                <div class="coluna" style="--gap: 8px">
+                    <h2 class="corPreta40B">@Model.AlunoDetalhes.nome</h2>
 
                     @if (Model.AlunoLogs.Any())
                     {
@@ -51,17 +37,49 @@ style="
 
                         DateTime ultimo_acesso = DateTime.Parse(ultimoLog.date);
                         <h5 class="corCinza60B">
-                            Último Acesso: Dia @ultimo_acesso.Day de @ultimo_acesso.ToString("MMMM") às @ultimo_acesso.Hour: @ultimo_acesso.Minute
+                            <span class="corCinza80B">Último Acesso:</span> Dia @ultimo_acesso.Day de @ultimo_acesso.ToString("MMMM") às @ultimo_acesso.Hour:@ultimo_acesso.Minute
+
                         </h5>
+                    }
+                </div>
+            </div>
+
+            <div class="linha" style="gap: 24px">
+                <div class="linha engag" style="flex: 1; align-items: center">
+                    @if(Model.Engajamento < 33)
+                    {
+                        <div class="iconVermelho">
+                            <img src="~/css/icons/rostotriste.svg" alt="Icone_Aluno" />
+                        </div>
+                        <div class="coluna" style="--gap: 4px">
+                            <h5 class="corCinza80B">Engajamento Baixo</h5>
+                            <h2 class="corVermelha">@Model.Engajamento%</h2>
+                        </div>
+                    }
+                    else if(Model.Engajamento <66)
+                    {
+                        <div class="iconAzul">
+                            <img src="~/css/icons/rostosememocao.svg" alt="Icone_Aluno" />
+                        </div>
+                        <div class="coluna" style="--gap: 4px">
+                            <h5 class="corCinza80B">Engajamento Médio</h5>
+                            <h2 class="corAzul">@Model.Engajamento%</h2>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="iconVerde">
+                            <img src="~/css/icons/rostofeliz.svg" alt="Icone_Aluno" />
+                        </div>
+                        <div class="coluna" style="--gap: 4px">
+                            <h5 class="corCinza80B">Engajamento Alto</h5>
+                            <h2 class="corVerde">@Model.Engajamento%</h2>
+                        </div>
                     }
 
 
-
-
-                    <h5 class="corCinza60B">
-                        Total de Acessos: @Model.AlunoDetalhes.total_acessos
-                    </h5>
                 </div>
+
             </div>
         </div>
     </div>
