@@ -24,13 +24,13 @@ nav {
   justify-content: center;
   align-items: center;
 }
-.icon_perfil span {
-  font-size: 12pt;
-  color: var(--Branco);
-  text-align: center;
-  text-transform: uppercase;
-  font-weight: 600;
-}
+
+
+    .icon_config:hover {
+        background-color: var(--Azul40S);
+        transform: scale(1.2), translateX(0.5)
+    }
+
 
 /* CONTAINER PRINCIPAL */
 .playground {

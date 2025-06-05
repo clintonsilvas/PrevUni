@@ -62,8 +62,15 @@ style="
                                 <img src="~/css/icons/rostofeliz.svg" alt="Icone_Aluno" />
                             </div>
                             <div class="coluna" style="--gap: 4px">
-                                <h5 class="corCinza80B">Engajamento Alto</h5>
-                                <h2 class="corVerde">63%</h2>
+                                <h5 class="corCinza70B">Engajamento Alto</h5>
+                                <h2 class="corVerde">
+                                @{
+                                        var total_ = Model.AlunosEngajamento.Count;
+                                        var engagAlto = total_ == 0 ? 0 : (int)((Model.AlunosEngajamento.Count(l => l.Engajamento > 66) * 100.0) / total_);
+                                        var engagMedio = total_ == 0 ? 0 : (int)((Model.AlunosEngajamento.Count(l => l.Engajamento <= 66 && l.Engajamento >= 33) * 100.0) / total_);
+                                        var engagBaixo = total_ == 0 ? 0 : (int)((Model.AlunosEngajamento.Count(l => l.Engajamento < 33) * 100.0) / total_);
+
+                                } @engagAlto%</h2>
                             </div>
                         </div>
 
@@ -72,8 +79,8 @@ style="
                                 <img src="~/css/icons/rostosememocao.svg" alt="Icone_Aluno" />
                             </div>
                             <div class="coluna" style="--gap: 4px">
-                                <h5 class="corCinza80B">Engajamento Médio</h5>
-                                <h2 class="corAzul">63%</h2>
+                                <h5 class="corCinza70B">Engajamento Médio</h5>
+                                <h2 class="corAzul">@engagMedio%</h2>
                             </div>
                         </div>
 
@@ -82,8 +89,8 @@ style="
                                 <img src="~/css/icons/rostotriste.svg" alt="Icone_Aluno" />
                             </div>
                             <div class="coluna" style="--gap: 4px">
-                                <h5 class="corCinza80B">Engajamento Baixo</h5>
-                                <h2 class="corVermelha">63%</h2>
+                                <h5 class="corCinza70B">Engajamento Baixo</h5>
+                                <h2 class="corVermelha">@engagBaixo%</h2>
                             </div>
                         </div>
                     </div>
@@ -311,25 +318,13 @@ style="
                             <img src="~/css/icons/alunosDesistentes.png" />
                             <h4 class="corPreta50B">Posíveis Desistentes</h4>
                         </div>
-                        <div class="tabela-card" > 
-                            <table >
-                                <tbody id="tabela-alunos" >
+                        <div class="tabela-card">
+                            <table>
+                                <tbody id="tabela-alunos">
                                     @{
-                                        var gruposLogs = Model.Cursos.Logs
-                                        .GroupBy(l => l.user_id)
-                                        .Select(g => new
-                                        {
-                                            UserId = g.Key,
-                                            Name = g.First().name,
-                                            QuantidadeLogs = g.Count()
-                                        })
-                                        .ToList();
-
-                                        double mediaLogs = gruposLogs.Any() ? gruposLogs.Average(g => g.QuantidadeLogs) : 0;
-
-                                        var alunosMenosAtivos = gruposLogs
-                                        .Where(g => g.QuantidadeLogs < mediaLogs)
-                                        .OrderBy(g => g.QuantidadeLogs)
+                                        var alunosMenosAtivos = Model.AlunosEngajamento
+                                        .Where(a => a.Engajamento < 30)
+                                        .OrderBy(a => a.Engajamento)
                                         .ToList();
 
                                         int posicao = 1;
@@ -337,15 +332,21 @@ style="
 
                                     @foreach (var l in alunosMenosAtivos)
                                     {
+                                        var engajamentoFormatado = l.Engajamento < 0
+                                        ? $"{l.Engajamento.ToString("0.0")}%"
+                                        : $"{l.Engajamento.ToString("0")}%";
 
-                                        <tr class="linha @(posicao > 5 ? "escondido" : "")" >
-                                            <td style="width 14px">@posicao</td>
-                                            <td style="flex: 1"><a asp-page="/PerfilAluno" asp-route-userId="@l.UserId">@l.Name</a></td>
-                                            <td>@l.QuantidadeLogs</td>
+                                        <tr class="linha @(posicao > 5 ? "escondido" : "")">
+                                            <td style="width: 14px">@posicao</td>
+                                            <td style="flex: 1">
+                                                <a asp-page="/PerfilAluno" asp-route-userId="@l.UserId">@l.Nome</a>
+                                            </td>
+                                            <td>@engajamentoFormatado</td>
                                         </tr>
                                         posicao++;
                                     }
                                 </tbody>
+
                             </table>
                             @if (alunosMenosAtivos.Count > 10)
                             {
@@ -401,8 +402,18 @@ style="
                                             @dataFormatada
                                         </td>
                                         <td>
-                                            @Model.Cursos.Logs.Where(l => l.name == al.nome).Count()
+                                            @{
+                                                var engajamento = Model.AlunosEngajamento
+                                                .FirstOrDefault(e => e.UserId == al.user_id)?.Engajamento;
+
+                                                var engajamentoFormatado = engajamento.HasValue
+                                                ? (engajamento < 1 ? $"{engajamento.Value:0.00}%" : $"{engajamento.Value:0}%")
+                                                : "N/A";
+                                            }
+
+                                            @engajamentoFormatado
                                         </td>
+
                                     </tr>
                                 }
                             }
@@ -413,18 +424,18 @@ style="
             </div>
 
             <div class="conteudo" id="conteudo3">
-                
-                    @foreach(var l in Model.Cursos.Logs)
-                    {
-                        <span>@l.date</span>
-                    }
-                    
+
+                @foreach (var l in Model.Cursos.Logs)
+                {
+                    <span>@l.date</span>
+                }
+
             </div>
         </div>
     </div>
 
 </div>
-    <script>
+<script>
         const estadoOrdenacao = {
             0: true,
             1: true,
@@ -492,4 +503,4 @@ style="
         }
     }
 
-    </script>
+</script>

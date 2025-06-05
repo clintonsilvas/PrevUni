@@ -1,153 +1,78 @@
-using System.Text.Json;
+Ôªøusing System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Front.Models;
-using System.Collections.Generic; 
-using System.Globalization;
-using System;
+using System.Text.Json.Serialization;
 
 namespace Front.Pages
 {
-    public class PerfilAlunoModel : PageModel
+    public class PerfilAlunoModel(HttpClient httpClient) : PageModel
     {
-        private readonly HttpClient _httpClient;
+        private readonly HttpClient _httpClient = httpClient;
 
         [BindProperty(SupportsGet = true)]
         public string UserId { get; set; }
 
         public AlunoResumo AlunoDetalhes { get; set; }
-        public List<LogUsuario> AlunoLogs { get; set; }
-        public List<int> SemanasAcessoAluno { get; set; } = new List<int>(new int[10]);
-        public Dictionary<string, int> InteracoesPorComponente { get; set; } = new Dictionary<string, int>();
+        public List<LogUsuario> AlunoLogs { get; set; } = [];
+        public List<int> SemanasAcessoAluno { get; set; } = [];
+        public Dictionary<string, int> InteracoesPorComponente { get; set; } = [];
 
-        public double EngajamentoAlto { get; set; }
-        public double EngajamentoMedio { get; set; }
-        public double EngajamentoBaixo { get; set; }
+        public float Engajamento { get; set; }
 
-        public PerfilAlunoModel(HttpClient httpClient)
-        {
-            _httpClient = httpClient;
-        }
+        public record AlunoEngajamento(
+            [property: JsonPropertyName("userId")] string UserId,
+            [property: JsonPropertyName("nome")] string Nome,
+            [property: JsonPropertyName("engajamento")] double Engajamento
+        );
 
         public async Task<IActionResult> OnGetAsync()
         {
             if (string.IsNullOrEmpty(UserId))
-            {
-                return NotFound("ID do aluno n„o fornecido.");
-            }
+                return NotFound("ID do aluno n√£o fornecido.");
 
-            var responseResumo = await _httpClient.GetAsync($"https://localhost:7232/resumo-aluno/{UserId}");
-            if (responseResumo.IsSuccessStatusCode)
-            {
-                var jsonResumo = await responseResumo.Content.ReadAsStringAsync();
-                AlunoDetalhes = JsonSerializer.Deserialize<AlunoResumo>(jsonResumo, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            }
-            else
-            {
-                AlunoDetalhes = new AlunoResumo { nome = "Aluno N„o Encontrado", user_id = UserId };
-                return Page();
-            }
+            AlunoDetalhes = await GetFromApiAsync<AlunoResumo>($"https://localhost:7232/api/Mongo/resumo-aluno/{UserId}")
+                ?? new() { nome = "Aluno N√£o Encontrado", user_id = UserId };
 
-            var responseLogs = await _httpClient.GetAsync($"https://localhost:7232/api/Moodle/logs/{UserId}");
-            if (responseLogs.IsSuccessStatusCode)
-            {
-                var jsonLogs = await responseLogs.Content.ReadAsStringAsync();
-                AlunoLogs = JsonSerializer.Deserialize<List<LogUsuario>>(jsonLogs, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            }
-            else
-            {
-                AlunoLogs = new List<LogUsuario>();
-            }
+            AlunoLogs = await GetFromApiAsync<List<LogUsuario>>($"https://localhost:7232/api/Moodle/logs/{UserId}") ?? [];
 
-            CalcularEngajamento();
+            var engajamento = await GetFromApiAsync<List<AlunoEngajamento>>($"https://localhost:7232/api/Mongo/engajamento-alunos");
+            Engajamento = (float)(engajamento?.FirstOrDefault(e => e.UserId == UserId)?.Engajamento ?? 0);
 
             CalcularSemanasAcessoAluno();
-
-            CalcularInteracoesPorComponente();
-
             return Page();
         }
 
-        private void CalcularEngajamento()
+        private async Task<T?> GetFromApiAsync<T>(string url)
         {
-            if (AlunoDetalhes == null) return;
-
-            // LÛgica parcial
-            if (AlunoDetalhes.total_acessos > 1000)
-            {
-                EngajamentoAlto = 100;
-                EngajamentoMedio = 0;
-                EngajamentoBaixo = 0;
-            }
-            else if (AlunoDetalhes.total_acessos > 500)
-            {
-                EngajamentoAlto = 0;
-                EngajamentoMedio = 100;
-                EngajamentoBaixo = 0;
-            }
-            else
-            {
-                EngajamentoAlto = 0;
-                EngajamentoMedio = 0;
-                EngajamentoBaixo = 100;
-            }
+            var res = await _httpClient.GetAsync(url);
+            if (!res.IsSuccessStatusCode) return default;
+            var json = await res.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
 
         private void CalcularSemanasAcessoAluno()
         {
-            if (AlunoLogs == null || !AlunoLogs.Any())
+            var datas = AlunoLogs
+                .Select(l => DateTime.TryParse(l.date, out var dt) ? dt : (DateTime?)null)
+                .Where(dt => dt.HasValue)
+                .Select(dt => dt.Value)
+                .OrderBy(d => d)
+                .ToList();
+
+            if (!datas.Any())
             {
-                SemanasAcessoAluno = new List<int>();
+                SemanasAcessoAluno.Clear();
                 return;
             }
 
-            DateTime primeiroAcesso = AlunoLogs
-                .Where(l => DateTime.TryParse(l.date, out _))
-                .Select(l => DateTime.Parse(l.date))
-                .DefaultIfEmpty(DateTime.Now)
-                .Min();
-
-            SemanasAcessoAluno = new List<int>();
-
-            foreach (var log in AlunoLogs)
-            {
-                if (DateTime.TryParse(log.date, out DateTime dataLog))
-                {
-                    TimeSpan diferenca = dataLog - primeiroAcesso;
-                    int semana = (int)(diferenca.TotalDays / 7) + 1;
-
-                    while (SemanasAcessoAluno.Count < semana)
-                    {
-                        SemanasAcessoAluno.Add(0);
-                    }
-                    SemanasAcessoAluno[semana - 1]++;
-                }
-            }
-        }
-        private void CalcularInteracoesPorComponente()
-        {
-            InteracoesPorComponente = new Dictionary<string, int>();
-            if (AlunoDetalhes?.interacoes_por_componente != null)
-            {
-                InteracoesPorComponente = AlunoDetalhes.interacoes_por_componente;
-            }
-            else if (AlunoLogs != null && AlunoLogs.Any())
-            {
-                foreach (var log in AlunoLogs)
-                {
-                    if (!string.IsNullOrEmpty(log.component))
-                    {
-                        if (InteracoesPorComponente.ContainsKey(log.component))
-                        {
-                            InteracoesPorComponente[log.component]++;
-                        }
-                        else
-                        {
-                            InteracoesPorComponente.Add(log.component, 1);
-                        }
-                    }
-                }
-            }
+            var inicio = datas.First();
+            SemanasAcessoAluno = datas
+                .Select(d => (int)((d - inicio).TotalDays / 7))
+                .GroupBy(s => s)
+                .OrderBy(g => g.Key)
+                .Select(g => g.Count())
+                .ToList();
         }
     }
 }

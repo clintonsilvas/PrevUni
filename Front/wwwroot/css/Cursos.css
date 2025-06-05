@@ -20,20 +20,23 @@
     }
 
 .cur_porcVerd {
-  background-color: var(--verde_trasparente);
-  border-radius: 20px;
-  padding: 4px 8px 4px 4px;
+    background-color: var(--verde_trasparente);
+    border-radius: 20px;
+    padding: 4px 8px 4px 4px;
+    color: var(--Cinza80B)
 }
 .cur_porcVerm {
-  background-color: var(--vermelho_transparenre);
-  border-radius: 20px;
-  padding: 4px 8px 4px 4px;
+    background-color: var(--vermelho_transparenre);
+    border-radius: 20px;
+    padding: 4px 8px 4px 4px;
+    color: var(--Cinza80B)
 }
 
 .cur_porcAzul {
   background-color: var(--Azul10S);
   border-radius: 20px;
   padding: 4px 8px 4px 4px;
+  color: var(--Cinza80B)
 }
 
 .cur_porcFont {
@@ -41,5 +44,13 @@
   font-size: 10pt;
   font-weight: 600;
 }
+
+.dark .cur_porcAzul,
+.dark .cur_porcVerd,
+.dark .cur_porcVerm {
+    color: #9197A7
+}
+
+
 
 

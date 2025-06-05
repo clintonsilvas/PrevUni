@@ -21,7 +21,7 @@
         <div class="coluna" style="gap: 10px">
             <h4 class="corPreta50B">Importar dados dos alunos.</h4>
             <span class="SubH5 corCinza60B">
-                Atualize os dados dos alunos. Este processo pode durar algum tempo, não feche esta página após iniciar.
+                Atualize os dados dos alunos. Este processo pode durar algum tempo, portanto não feche esta página após iniciar.
             </span>
 
             @if (!string.IsNullOrEmpty(Model.Message))
@@ -58,7 +58,7 @@
                             }
                         }
                         <div id="progressBar" class="progress-bar" style="width: @(progressPercentage.ToString("F0"))%;">
-                            <span class="SubH4">@(progressPercentage.ToString("F0"))%</span>
+                            <span>@(progressPercentage.ToString("F0"))%</span>
                         </div>
                     </div>
                 }
@@ -112,7 +112,7 @@
             // Recarrega a página a cada 5 segundos para obter o status atualizado
             setTimeout(function() {
                 window.location.reload();
-            }, 5000);
+            }, 2500);
         </script>
     }
 }
