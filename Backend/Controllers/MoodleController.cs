@@ -120,6 +120,20 @@ namespace Backend.Controllers
             }
         }
 
+        [HttpGet("curso/alunos")]
+        public async Task<IActionResult> GetAlunosPorTodosOsCursos()
+        {
+            try
+            {
+                var logs = await _mongoService.GetAlunosPorTodosOsCursosAsync();
+                return Ok(logs);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erro ao buscar logs: {ex.Message}");
+            }
+        }
+
     }
 
 }

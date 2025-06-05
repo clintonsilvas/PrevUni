@@ -144,6 +144,69 @@ namespace Backend.Services
             return alunos;
         }
 
+        public async Task<List<CursoComAlunos>> GetAlunosPorTodosOsCursosAsync()
+        {
+            var pipeline = new[]
+            {
+        new BsonDocument("$unwind", "$logs"),
+        new BsonDocument("$group", new BsonDocument
+        {
+            { "_id", new BsonDocument
+                {
+                    { "course_fullname", "$logs.course_fullname" },
+                    { "user_id", "$logs.user_id" }
+                }
+            },
+            { "nome", new BsonDocument("$first", "$logs.name") },
+            { "ultimo_acesso", new BsonDocument("$max", "$logs.user_lastaccess") }
+        }),
+        new BsonDocument("$group", new BsonDocument
+        {
+            { "_id", "$_id.course_fullname" },
+            { "alunos", new BsonDocument("$push", new BsonDocument
+                {
+                    { "user_id", "$_id.user_id" },
+                    { "nome", "$nome" },
+                    { "ultimo_acesso", "$ultimo_acesso" }
+                })
+            }
+        }),
+        new BsonDocument("$project", new BsonDocument
+        {
+            { "_id", 0 },
+            { "curso", "$_id" },
+            { "alunos", 1 }
+        })
+    };
+
+            using var cursor = await _collection.AggregateAsync<BsonDocument>(pipeline);
+
+            var cursos = new List<CursoComAlunos>();
+
+            while (await cursor.MoveNextAsync())
+            {
+                foreach (var doc in cursor.Current)
+                {
+                    var alunos = doc["alunos"].AsBsonArray.Select(a => new Usuario
+                    {
+                        user_id = a["user_id"].AsString,
+                        name = a["nome"].AsString,
+                        user_lastaccess = a["ultimo_acesso"].AsString
+                    }).ToList();
+
+                    cursos.Add(new CursoComAlunos
+                    {
+                        curso = doc.GetValue("curso", "").AsString,
+                        usuarios = alunos
+                    });
+                }
+            }
+
+            return cursos;
+        }
+
+
+
 
         public class AlunoEngajamento
         {
@@ -363,6 +426,8 @@ namespace Backend.Services
 
             return logs;
         }
+
+ 
 
         public async Task<string> GerarResumoAlunoIAAsync(string userId)
         {
