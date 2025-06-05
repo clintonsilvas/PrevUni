@@ -325,97 +325,46 @@ namespace Backend.Services
         {
             var pipeline = new[]
             {
-        new BsonDocument("$unwind", "$logs"),
-        new BsonDocument("$match", new BsonDocument("logs.user_id", userId)),
-        new BsonDocument("$addFields", new BsonDocument("logs", new BsonDocument
-        {
-            { "$mergeObjects", new BsonArray
+                new BsonDocument("$unwind", "$logs"),
+                new BsonDocument("$match", new BsonDocument("logs.user_id", userId)),
+                new BsonDocument("$replaceRoot", new BsonDocument("newRoot", "$logs")),
+                new BsonDocument("$group", new BsonDocument
                 {
-                    "$logs",
-                    new BsonDocument
-                    {
-                        { "dateObj", new BsonDocument("$toDate", "$logs.date") }
-                    }
-                }
-            }
-        })),
-        new BsonDocument("$addFields", new BsonDocument("logs", new BsonDocument
-        {
-            { "$mergeObjects", new BsonArray
-                {
-                    "$logs",
-                    new BsonDocument("yearWeek", new BsonDocument("$dateToString", new BsonDocument
-                    {
-                        { "date", "$logs.dateObj" },
-                        { "format", "%Y-W%V" },
-                        { "timezone", "UTC" }
-                    }))
-                }
-            }
-        })),
-        new BsonDocument("$replaceRoot", new BsonDocument("newRoot", "$logs")),
-        new BsonDocument("$group", new BsonDocument
-        {
-            { "_id", new BsonDocument
-                {
-                    { "course", "$course_fullname" },
-                    { "yearWeek", "$yearWeek" }
-                }
-            },
-            { "interacoes_por_componente", new BsonDocument("$push", "$component") },
-            { "total", new BsonDocument("$sum", 1) },
-            { "ultimo_acesso", new BsonDocument("$max", "$user_lastaccess") }
-        }),
-        new BsonDocument("$group", new BsonDocument
-        {
-            { "_id", "$_id.course" },
-            { "semanas", new BsonDocument("$push", new BsonDocument
-                {
-                    { "week", "$_id.yearWeek" },
-                    { "total", "$total" },
-                    { "interacoes_por_componente", "$interacoes_por_componente" },
-                    { "ultimo_acesso", "$ultimo_acesso" }
+                    { "_id", "$user_id" },
+                    { "nome", new BsonDocument("$first", "$name") },
+                    { "ultimo_acesso", new BsonDocument("$max", "$user_lastaccess") },
+                    { "total_acessos", new BsonDocument("$sum", 1) },
+                    { "dias_ativos", new BsonDocument("$addToSet", new BsonDocument("$substr", new BsonArray { "$date", 0, 10 })) },
+                    { "interacoes_por_componente", new BsonDocument("$push", "$component") },
+                    { "cursos", new BsonDocument("$addToSet", "$course_fullname") }
                 })
-            }
-        })
-    };
+            };
 
             var result = await _collection.AggregateAsync<BsonDocument>(pipeline);
-            var cursos = await result.ToListAsync();
+            var doc = await result.FirstOrDefaultAsync();
 
-            if (!cursos.Any())
-                return "Usuário não encontrado ou sem interações.";
+            if (doc == null) return "Usuário não encontrado";
 
-            var resumoList = new List<string>();
+            // Agrupando contagem de componentes
+            var componentes = doc["interacoes_por_componente"].AsBsonArray
+                .GroupBy(x => x.AsString)
+                .ToDictionary(g => g.Key, g => g.Count());
 
-            foreach (var cursoDoc in cursos)
+            var componentesStr = string.Join(",", componentes.Select(kv => $"{kv.Key}:{kv.Value}"));
+            var cursosStr = string.Join(",", doc["cursos"].AsBsonArray.Select(c => c.AsString));
+
+            var resumoStr = string.Join(" / ", new[]
             {
-                var curso = cursoDoc["_id"].AsString;
-                var semanas = cursoDoc["semanas"].AsBsonArray;
+                $"ID: {doc["_id"]}",
+                $"Nome: {doc["nome"]}",
+                $"Último Acesso: {doc["ultimo_acesso"]}",
+                $"Total de Acessos: {doc["total_acessos"]}",
+                $"Dias Ativos: {doc["dias_ativos"].AsBsonArray.Count}",
+                $"Interações por Componente: {componentesStr}",
+                $"Cursos Acessados: {cursosStr}"
+            });
 
-                resumoList.Add($"Curso: {curso}");
-
-                foreach (var semanaDoc in semanas.OrderBy(s => s["week"].AsString))
-                {
-                    var semana = semanaDoc["week"].AsString;
-                    var total = semanaDoc["total"].AsInt32;
-                    var ultimoAcesso = semanaDoc["ultimo_acesso"].ToString();
-
-                    // Agrupando interações por componente
-                    var componentes = semanaDoc["interacoes_por_componente"].AsBsonArray
-                        .GroupBy(x => x.AsString)
-                        .ToDictionary(g => g.Key, g => g.Count());
-
-                    var compStr = string.Join(", ", componentes.Select(kv => $"{kv.Key}: {kv.Value}"));
-
-                    resumoList.Add($"  Semana: {semana}");
-                    resumoList.Add($"    Total de Interações: {total}");
-                    resumoList.Add($"    Último Acesso: {ultimoAcesso}");
-                    resumoList.Add($"    Componentes: {compStr}");
-                }
-            }
-
-            return string.Join(Environment.NewLine, resumoList);
+            return resumoStr;
         }
 
 
