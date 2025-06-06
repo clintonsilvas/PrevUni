@@ -478,7 +478,7 @@ th:last-child .bot_tab {
     gap: 8px;
 }
 .diaMes {
-    background-color: var(--Branco);
+    background-color: var(--Cinza100B);
     max-height: 136px;
     min-height: 136px; /* Troca height por max-height */
     overflow: hidden;
@@ -492,11 +492,15 @@ th:last-child .bot_tab {
     border-top: 4px solid var(--Azul10S)
 }
 
+    .diaMes:hover {
+        border-top: 4px solid var(--Azul30S)
+    }
+
 
 .diaMesAberto {
     border-top: 4px solid var(--Azul-principal);
-    background-color: var(--Branco);
-    max-height: 1000px;
+    background-color: var(--Azul10S);
+    max-height: 10000px;
     overflow: hidden;
     flex: 1;
     display: flex;
@@ -537,18 +541,40 @@ color: var(--Preto50B);
     font-weight: 600;
     justify-content: center;
     height: 22px;
-    width: 22px;
+    width: fit-content;
+    padding: 0px 8px;
+
+    align-items: center;
 }
+
+    .mais_dia span {
+        color: var(--Branco);
+
+        font-size: 8pt;
+        font-weight: 800;
+
+        height: 22px;
+        width: fit-content;
+    }
 
 .NomeDiaSemana {
     flex: 1;
     text-align: center;
     text-transform: uppercase;
-    color: var(--Azul-principal);
+    color: var(--Cinza70B);
     font-size: 12pt;
     font-weight: 500;
-    background-color: var(--Azul10S);
+    background-color: var(--Cinza100B);
     padding: 4px;
     border-radius: 100px
-    
-    
+}
+
+.btn_seta
+{
+    background-color: var(--Azul10S);
+    border: none;
+    color: var(--Azul-principal);
+    padding: 10px;
+    border-radius: 8px;
+
+}

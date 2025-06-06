@@ -346,7 +346,7 @@ style="
             </div> <!-- fecha conteudo linha -->
 
             <div class="conteudo" id="conteudo2">
-                <div class="calendario-logs" id="calendario">
+                <div class="calendario-logs QuadroCards" id="calendario">
                     @{
                         int mes = Convert.ToInt32(Request.Query["mes"]) == 0 ? DateTime.Now.Month : Convert.ToInt32(Request.Query["mes"]);
                         int ano = Convert.ToInt32(Request.Query["ano"]) == 0 ? DateTime.Now.Year : Convert.ToInt32(Request.Query["ano"]);
@@ -362,10 +362,18 @@ style="
                     }
 
                     <!-- Navegação do mês -->
-                    <div class="navegacao-mes">
-                        <button onclick="mudarMes(-1)">&#9664;</button>
-                        <span class="corPreta50B">@primeiroDiaMes.ToString("MMMM yyyy")</span>
-                        <button onclick="mudarMes(1)">&#9654;</button>
+                    <div class="navegacao-mes linha" style="flex: 1; margin-bottom: 20px; align-items: center">
+                        @{
+                            var mesAno = primeiroDiaMes.ToString("MMMM yyyy");
+                            var mesAnoCapitalizado = char.ToUpper(mesAno[0]) + mesAno.Substring(1);
+                        }
+                        <h2 class="corPreta50B" style="flex: 1;">@mesAnoCapitalizado</h2>
+
+                        <div class="linha" style="gap: 8px">
+                            <button class="btn_seta" onclick="mudarMes(-1)">⟵</button>
+                            <button class="btn_seta" onclick="mudarMes(1)">⟶</button>
+                        </div>
+
                     </div>
 
                     <!-- Calendário -->
@@ -391,13 +399,16 @@ style="
                             <div id="@id" onclick="AbreDia('@id')" class="diaMes @(logsPorDia.ContainsKey(dataAtual) ? "temLog" : "")">
                                 <div class="linha" >
                                     <span class="diaspan" style="flex: 1">@i</span>
-
-                                    @if (logsPorDia.ContainsKey(dataAtual) &&
-                                  logsPorDia[dataAtual].Count(l =>
-                                  (l.target == "user" && l.component == "core" && l.action == "graded") ||
-                                  (l.target == "assessable" && l.component == "mod_forum" && l.action == "uploaded")) > 1)
+                                    @if (logsPorDia.ContainsKey(dataAtual))
                                     {
-                                        <span class="mais_dia">+</span>
+                                        var totalLogs = logsPorDia[dataAtual].Count(l =>
+                                        (l.target == "user" && l.component == "core" && l.action == "graded") ||
+                                        (l.target == "assessable" && l.component == "mod_forum" && l.action == "uploaded"));
+
+                                        if (totalLogs > 1)
+                                        {
+                                            <span class="mais_dia">+<span>@(totalLogs-1)</span></span>
+                                        }
                                     }
 
                                 </div>
