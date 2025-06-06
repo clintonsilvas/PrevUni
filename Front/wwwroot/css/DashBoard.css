@@ -437,19 +437,37 @@ th:last-child .bot_tab {
     display: flex;
     flex-direction: column;
     gap: 8px;
-    background-color: transparent;
-    padding:0px;
-    flex: 1
+    background-color: var(--Azul10S);
+    padding:8px;
+    height: fit-content;
+    flex: 1;
+    padding-bottom: 40px;
 }
 
-    .item-log .acao {
-        font-weight: bold;
+
+.diaMesAberto .item-log {
+    padding-bottom: 8px;
+}
+
+.item-log .acao {
+    width: 100%;
+    font-size: 10pt;
+    font-weight: 600;
+    color: var(--Preto40B);
+}
+
+    .item-log .curso {
+        width: 100%;
+        font-size: 8pt;
+        font-weight: 600;
         color: var(--Azul-principal);
     }
 
+    .item-log .acao,
     .item-log .curso {
-        font-size: 0.9em;
-        color: var(--Preto50B);
+        white-space: nowrap; /* impede quebra de linha */
+        overflow: hidden; /* esconde o que passa da largura */
+        text-overflow: ellipsis; /* coloca os três pontos (...) */
     }
 
 
@@ -459,19 +477,44 @@ th:last-child .bot_tab {
     grid-template-columns: repeat(7, 1fr);
     gap: 8px;
 }
-
-.diaMes
-{
+.diaMes {
     background-color: var(--Branco);
-    height: fit-content;
+    max-height: 136px;
+    min-height: 136px; /* Troca height por max-height */
+    overflow: hidden;
     flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
     padding: 16px;
     border-radius: 8px;
-
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    border-top: 4px solid var(--Azul10S)
 }
 
 
-.diaMes .diaspan {
+.diaMesAberto {
+    border-top: 4px solid var(--Azul-principal);
+    background-color: var(--Branco);
+    max-height: 1000px;
+    overflow: hidden;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    border-radius: 8px;
+    min-height: 160px;
+}
+
+
+.diaMes,
+.diaMesAberto {
+    transition: all 0.15s ease-in-out; /* ou só o que for mudar, tipo background-color */
+}
+
+
+.diaspan {
 color: var(--Preto50B);
 }
 
@@ -481,3 +524,31 @@ color: var(--Preto50B);
 {
 
 }
+
+
+
+.mais_dia
+{
+    color: var(--Branco);
+    background-color: var(--Azul-principal);
+    align-items: center;
+    text-align: center;
+    border-radius: 40px;
+    font-weight: 600;
+    justify-content: center;
+    height: 22px;
+    width: 22px;
+}
+
+.NomeDiaSemana {
+    flex: 1;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--Azul-principal);
+    font-size: 12pt;
+    font-weight: 500;
+    background-color: var(--Azul10S);
+    padding: 4px;
+    border-radius: 100px
+    
+    

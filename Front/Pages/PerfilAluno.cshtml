@@ -371,6 +371,13 @@ style="
                     <!-- Calendário -->
                     <div class="grid-calendario2">
                         <!-- Espaços até o primeiro dia -->
+                        <span class="NomeDiaSemana">Domingo</span>
+                        <span class="NomeDiaSemana">Segunda</span>
+                        <span class="NomeDiaSemana">Terça</span>
+                        <span class="NomeDiaSemana">Quarta</span>
+                        <span class="NomeDiaSemana">Quinta</span>
+                        <span class="NomeDiaSemana">Sexta</span>
+                        <span class="NomeDiaSemana">Sabado</span>
                         @for (int j = 0; j < diasAtePrimeiroDia; j++)
                         {
                             <div class="diaMesInativo"></div>
@@ -380,8 +387,21 @@ style="
                         @for (int i = 1; i <= diasNoMes; i++)
                         {
                             var dataAtual = new DateTime(ano, mes, i);
-                            <div class="diaMes @(logsPorDia.ContainsKey(dataAtual) ? "temLog" : "")">
-                                <span class="diaspan">@i</span>
+                            var id = $"{dataAtual.Day}_{dataAtual.Month}";
+                            <div id="@id" onclick="AbreDia('@id')" class="diaMes @(logsPorDia.ContainsKey(dataAtual) ? "temLog" : "")">
+                                <div class="linha" >
+                                    <span class="diaspan" style="flex: 1">@i</span>
+
+                                    @if (logsPorDia.ContainsKey(dataAtual) &&
+                                  logsPorDia[dataAtual].Count(l =>
+                                  (l.target == "user" && l.component == "core" && l.action == "graded") ||
+                                  (l.target == "assessable" && l.component == "mod_forum" && l.action == "uploaded")) > 1)
+                                    {
+                                        <span class="mais_dia">+</span>
+                                    }
+
+                                </div>
+
 
                                 @if (logsPorDia.ContainsKey(dataAtual))
                                 {
@@ -394,19 +414,46 @@ style="
                                             _ => null
                                         };
 
+
+
                                         if (acao != null)
                                         {
                                             <div class="item-log">
+                                                
                                                 <span class="acao">@acao</span>
+                                                <span class="acao">@DateTime.Parse(log.date.ToString()).ToString("HH:mm")</span>
                                                 <span class="curso">@log.course_fullname</span>
                                             </div>
                                         }
                                     }
                                 }
+
                             </div>
                         }
-                    </div>
 
+                    </div>
+                    <script>
+                        function AbreDia(id) {
+                          const elemento = document.getElementById(id);
+
+                          if (!elemento) {
+                            console.warn('Elemento não encontrado: ' + id);
+                            return;
+                          }
+
+                          const jaAberto = elemento.classList.contains('diaMesAberto');
+
+                          const dias = document.querySelectorAll('.diaMes, .diaMesAberto, .temLog');
+                          dias.forEach(dia => {
+                            dia.className = dia.className.replace('diaMesAberto', 'diaMes').trim();
+                          });
+
+                          if (!jaAberto) {
+                            elemento.className = 'diaMesAberto';
+                          }
+                        }
+
+                    </script>
                     <script>
                         // Função para mudar mês/ano na URL sem reload
                         function mudarMes(direcao) {
