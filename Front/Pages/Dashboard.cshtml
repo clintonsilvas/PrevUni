@@ -64,13 +64,13 @@ style="
                             <div class="coluna" style="--gap: 4px">
                                 <h5 class="corCinza70B">Engajamento Alto</h5>
                                 <h2 class="corVerde">
-                                @{
+                                    @{
                                         var total_ = Model.AlunosEngajamento.Count;
                                         var engagAlto = total_ == 0 ? 0 : (int)((Model.AlunosEngajamento.Count(l => l.Engajamento > 66) * 100.0) / total_);
                                         var engagMedio = total_ == 0 ? 0 : (int)((Model.AlunosEngajamento.Count(l => l.Engajamento <= 66 && l.Engajamento >= 33) * 100.0) / total_);
                                         var engagBaixo = total_ == 0 ? 0 : (int)((Model.AlunosEngajamento.Count(l => l.Engajamento < 33) * 100.0) / total_);
 
-                                } @engagAlto%</h2>
+                                    } @engagAlto%</h2>
                             </div>
                         </div>
 
@@ -386,7 +386,7 @@ style="
                             @{
                                 System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("pt-BR");
                                 int i = 0;
-                                foreach (var al in Model.Alunos)
+                                foreach (var al in Model.Alunos.OrderBy(c => c.nome))
                                 {
                                     i++;
                                     <tr>
@@ -401,18 +401,34 @@ style="
                                             }
                                             @dataFormatada
                                         </td>
-                                        <td>
-                                            @{
-                                                var engajamento = Model.AlunosEngajamento
+                                        @{
+                                            var engajamento = Model.AlunosEngajamento
                                                 .FirstOrDefault(e => e.UserId == al.user_id)?.Engajamento;
 
-                                                var engajamentoFormatado = engajamento.HasValue
-                                                ? (engajamento < 1 ? $"{engajamento.Value:0.00}%" : $"{engajamento.Value:0}%")
-                                                : "N/A";
+                                            var engajamentoFormatado = engajamento.HasValue
+                                            ? (engajamento < 1 ? $"{engajamento.Value:0.00}%" : $"{engajamento.Value:0}%")
+                                            : "N/A";
+                                            if (engajamento < 33)
+                                            {
+                                                <td class="corVermelha">
+                                                    @engajamentoFormatado
+                                                </td>
                                             }
+                                            else if (engajamento >= 33 && engajamento <= 66)
+                                            {
+                                                <td class="corAzul">
+                                                    @engajamentoFormatado
+                                                </td>
+                                            }
+                                            else
+                                            {
+                                                <td class="corVerde">
+                                                    @engajamentoFormatado
+                                                </td>
+                                            }
+                                        }
+                                        
 
-                                            @engajamentoFormatado
-                                        </td>
 
                                     </tr>
                                 }
