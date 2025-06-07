@@ -1,5 +1,6 @@
 ﻿@page "{curso}"
 @model Front.Pages.DashboardModel
+@using Front.Models;
 @{
     ViewData["Title"] = "Dashboard do Curso";
 }
@@ -13,9 +14,53 @@ style="
 ">
     <div class="coluna" style="--gap: 10px">
         <span class="SubH1 corAzul">Bem Vindo(a)</span>
-        <h1 class="corPreta40B">@Model.Cursos.curso</h1>
+        <div class="linha" style="align-items: center">
+            <h1 class="corPreta40B">@Model.Cursos.curso</h1>
+            <input type="checkbox" style="display: none" id="favCurso" @(FavoritoService.EhFavorito(Model.Cursos.curso) ? "checked" : "")
+                   onchange="toggleFavorito(this)" />
+            <label for="favCurso">
+                <img id="imgFavCurso" src="@Url.Content(FavoritoService.EhFavorito(Model.Cursos.curso) ? "~/css/icons/estrela.svg" : "~/css/icons/estrela_inativa.svg")" height="20" />
+
+            </label>
+
+            <script>
+                async function toggleFavorito(checkbox) {
+                    const checked = checkbox.checked;
+                    const curso = '@Model.Cursos.curso';
+                    const img = document.getElementById('imgFavCurso');
+
+                    // Trocar a imagem já no clique
+                    img.src = checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
+
+                    const url = checked
+                        ? `/api/favoritos/adicionar?curso=${encodeURIComponent(curso)}`
+                        : `/api/favoritos/remover?curso=${encodeURIComponent(curso)}`;
+
+                    try {
+                        const response = await fetch(url, { method: 'POST' });
+                        if (!response.ok) {
+                            alert('Erro ao atualizar favoritos');
+                            checkbox.checked = !checked;
+                            img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
+                        }
+                    } catch (err) {
+                        alert('Erro na requisição');
+                        checkbox.checked = !checked;
+                        img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
+                    }
+                }
+            </script>
+        </div>
+
     </div>
-    <button onclick="location.reload()" class="botaoatualiza">Atualizar</button>
+    <div class="linha">
+
+
+        <button onclick="location.reload()" class="botaoatualiza">Atualizar</button>
+    </div>
+
+
+
 </header>
 <!--
 <div class="linha Endereco" style="align-items: center">

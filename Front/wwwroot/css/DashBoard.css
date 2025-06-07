@@ -578,3 +578,7 @@ color: var(--Preto50B);
     border-radius: 8px;
 
 }
+
+    .btn_seta:hover {
+        background-color: var(--Azul20S);
+    }

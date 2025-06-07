@@ -366,7 +366,11 @@ style="
                             var mesAno = primeiroDiaMes.ToString("MMMM yyyy");
                             var mesAnoCapitalizado = char.ToUpper(mesAno[0]) + mesAno[1..];
                         }
-                        <h2 class="corPreta50B" style="flex: 1;">@mesAnoCapitalizado</h2>
+                        <div class="linha" style="--gap: 10px; align-items: center; margin-right: auto">
+                            <img src="~/css/icons/calendario.svg" height="20" />
+                            <h3 class="corPreta50B" style="flex: 1;">@mesAnoCapitalizado</h3>
+                        </div>
+
                         <div class="linha" style="gap: 8px">
                             <button class="btn_seta" onclick="mudarMes(-1)">⟵</button>
                             <button class="btn_seta" onclick="mudarMes(1)">⟶</button>

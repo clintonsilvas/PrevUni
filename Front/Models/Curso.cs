@@ -1,16 +1,20 @@
 ﻿using System.Net.Http;
 using System.Text.Json;
-
+using Front.Models;
 namespace Front.Models
 {
 
     public class Curso
     {
+        private readonly FavoritoService _favoritoService;
         public string curso { get; set; }
         public int alunos { get; set; }
         public List<LogUsuario> Logs { get; set; } = new();
         public List<int> Semanas { get; set; } = new(new int[10]);
         public List<Usuario> usuarios { get; set; } = new();
+
+        public bool IsFavorito { get; set; }
+
 
         public int engagAlto = 0;
         public int engagMedio = 0;

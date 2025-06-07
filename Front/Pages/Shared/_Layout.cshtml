@@ -1,4 +1,5 @@
-﻿<!DOCTYPE html>
+﻿@using Front.Models
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="utf-8" />
@@ -7,30 +8,81 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel=" stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <script>
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.classList.add('dark');
         }
     </script>
-
     <link rel="icon" href="~/css/icons/estrelaIA.svg" type="image/svg+xml">
+    <style>
+        .btnFavorito {
+            position: absolute;
+            height: 40px;
+            width: 40px;
+            z-index: 2;
+            left: 0;
+            top: 40%;
+            border-radius: 0px 20px 20px 0px;
+            border: none;
+            background-color: var(--Branco);
+            color: var(--Azul-principal);
+        }
+
+            .btnFavorito.ativa {
+                left: 20%;
+            }
+
+        .sidebarFavoritos {
+            position: relative;
+
+            width: 0%;
+            height: 20%;
+            transform: translateX(-100%);
+            opacity: 0;
+            visibility: hidden;
+            transition: transform 0.3s ease-in-out, opacity 0.3s ease-in-out;
+        }
+
+            .sidebarFavoritos.ativa {
+                transform: translateX(0);
+                opacity: 1;
+                visibility: visible;
+                width: 20%;
+                padding: 0px 0px 0px 16px;
+            }
+
+        .curso_tab_fav {
+            text-decoration: none;
+            color: var(--Cinza70B);
+            font-size: 12pt;
+            font-weight: 500;
+        }
+
+            .curso_tab_fav:hover {
+                color: var(--Azul-principal);
+                font-weight: 600;
+            }
+
+        .caixa_fav {
+            background-color: var(--Cinza100B);
+            padding: 16px;
+            border-radius: 8px;
+        }
+    </style>
 </head>
-
-@await RenderSectionAsync("Scripts", required: false)
-
 <body>
-        <nav class="linha">
-            <div class="linha" style="gap: 52px">
-                <a asp-area="" asp-page="/Index">
+    <nav class="linha">
+        <div class="linha" style="gap: 52px">
+            <a asp-area="" asp-page="/Index">
                 <img id="logoClara" src="~/css/icons/PrevUni.svg" />
-                    <img id="logoEscura" src="~/css/icons/PrevUni_modEscuro.svg" />
-                </a>
-                <div class="linha links_nav" style="gap: 24px">
-                    <a asp-area="" asp-page="/Cursos">Cursos</a>                    
-                </div>
+                <img id="logoEscura" src="~/css/icons/PrevUni_modEscuro.svg" />
+            </a>
+            <div class="linha links_nav" style="gap: 24px">
+                <a asp-area="" asp-page="/Cursos">Cursos</a>
             </div>
-            <div class=" linha" style="align-items:center">
+        </div>
+        <div class="linha" style="align-items:center">
             <label class="switch">
                 <input type="checkbox" id="toggleTheme" />
                 <span class="slider">
@@ -38,39 +90,70 @@
                     <img id="modEscuro" src="~/css/icons/Escuro.svg" height="14px" />
                 </span>
             </label>
-            <a asp-page="/Configuracao" class="icon_config"><img src="~/css/icons/configuracoes.svg" /></a>
-            </div>
-        </nav>    
-        <main class="playground">
-        @if (ViewData["OcultarSombra"] == null)
-        {
-            <div class="sobreposicao_inferior"></div>
-        }
+            <a asp-page="/Configuracao" class="icon_config">
+                <img src="~/css/icons/configuracoes.svg" />
+            </a>
+        </div>
+    </nav>
 
+    <div class="linha" style="height: 100%">
+        <button onclick="MostraFavoritos()" class="btnFavorito">»</button>
+
+        <aside id="sidebarFavoritos" class="sidebarFavoritos">
+            <div class="linha" style="align-items: center; margin-bottom: 20px">
+                <img src="~/css/icons/estrela.svg" height="20" />
+                <h4 class="corCinza60B">Favoritos</h4>
+            </div>
+            <div class="coluna caixa_fav" style="gap: 10px">
+                <img src="~/css/icons/caderno.svg" height="20" style="margin-right: auto" />
+                @{
+                    var cursos = FavoritoService.ListarCursos();
+                    foreach (var c in cursos)
+                    {
+                        <a class="curso_tab_fav" asp-page="/Dashboard" asp-route-curso="@c">@c</a>
+                    }
+                }
+            </div>
+        </aside>
+
+        <main class="playground">
+            @if (ViewData["OcultarSombra"] == null)
+            {
+                <div class="sobreposicao_inferior"></div>
+            }
             <div class="scroll-content">
                 @RenderBody()
             </div>
         </main>
+    </div>
+
     <script>
-        const toggle = document.getElementById('toggleTheme');
+        document.addEventListener("DOMContentLoaded", function () {
+        window.MostraFavoritos = function () {
+            const sidebar = document.getElementById("sidebarFavoritos");
+            const btn = document.querySelector(".btnFavorito");
+            const aberto = sidebar.classList.toggle("ativa");
+            btn.classList.toggle("ativa", aberto);
+        };
 
-        // Aplica o tema salvo ao carregar
-        if (localStorage.getItem('theme') === 'dark') {
-          document.documentElement.classList.add('dark');
-          toggle.checked = true;
-        }
+            const toggle = document.getElementById('toggleTheme');
+            if (localStorage.getItem('theme') === 'dark') {
+                document.documentElement.classList.add('dark');
+                toggle.checked = true;
+            }
 
-        toggle.addEventListener('change', function () {
-          if (this.checked) {
-            document.documentElement.classList.add('dark');
-            localStorage.setItem('theme', 'dark');
-          } else {
-            document.documentElement.classList.remove('dark');
-            localStorage.setItem('theme', 'light');
-          }
+            toggle.addEventListener('change', function () {
+                if (this.checked) {
+                    document.documentElement.classList.add('dark');
+                    localStorage.setItem('theme', 'dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                    localStorage.setItem('theme', 'light');
+                }
+            });
         });
     </script>
 
-
+    @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>
