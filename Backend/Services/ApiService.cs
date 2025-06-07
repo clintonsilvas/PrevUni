@@ -183,7 +183,7 @@ namespace Backend.Services
                 status.Status = "Em Andamento";
                 status.Mensagem = "Processando usuários...";
 
-                int maxParallel = 5;
+                int maxParallel = 2;
                 var semaphore = new SemaphoreSlim(maxParallel);
 
                 var tasks = usuariosParaImportar.Select(async (usuario, index) =>

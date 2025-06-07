@@ -10,6 +10,137 @@ namespace Backend.Services
     {
         private readonly IMongoCollection<AlunoLogs> _collection;
 
+
+
+        public class AlunoEngajamento
+        {
+            public string UserId { get; set; }
+            public string Nome { get; set; }
+            public double Engajamento { get; set; } // 0 a 100
+        }
+
+        public class AcaoQuantidade
+        {
+            public string Acao { get; set; }
+            public int Quantidade { get; set; }
+        }
+
+        public class EngajamentoService
+        {
+            private readonly IMongoCollection<BsonDocument> _logs;
+
+
+
+            public EngajamentoService(IMongoDatabase database)
+            {
+                _logs = database.GetCollection<BsonDocument>("logs");
+            }
+
+            public async Task<List<AlunoEngajamento>> CalcularEngajamentoAlunosAsync()
+            {
+                var pipeline = new[]
+                {
+        new BsonDocument("$unwind", "$logs"),
+        new BsonDocument("$group", new BsonDocument
+        {
+            { "_id", new BsonDocument
+                {
+                    { "user_id", "$logs.user_id" },
+                    { "nome", "$logs.name" },
+                    { "acao", "$logs.action" },
+                    { "target", "$logs.target"},
+                    {"component", $"logs.component" }
+
+                }
+            },
+            { "qtd", new BsonDocument("$sum", 1) }
+        })
+    };
+
+                using var cursor = await _logs.AggregateAsync<BsonDocument>(pipeline);
+
+                var resultados = await cursor.ToListAsync();
+
+                var agrupados = resultados
+                    .GroupBy(d => new
+                    {
+                        UserId = d["_id"].AsBsonDocument.TryGetValue("user_id", out var userId) ? userId.AsString : "undefined",
+                        Nome = d["_id"].AsBsonDocument.TryGetValue("nome", out var nome) ? nome.AsString : "undefined"
+                    })
+                    .Select(g => new AlunoEngajamento
+                    {
+                        UserId = g.Key.UserId,
+                        Nome = g.Key.Nome,
+                        Engajamento = CalcularLES(g.Select(x => new AcaoQuantidade
+                        {
+                            Acao = x["_id"].AsBsonDocument.TryGetValue("acao", out var acao) ? acao.AsString : "undefined",
+                            Quantidade = x["qtd"].ToInt32()
+                        }).ToList())
+                    })
+                    .ToList();
+
+                return agrupados;
+            }
+
+
+
+            private double CalcularLES(List<AcaoQuantidade> acoes)
+            {
+                int totalVisualizacao = Soma(acoes, new List<string> { "viewed" });
+                int totalEntrega = Soma(acoes, new List<string> { "submitted", "uploaded" });
+                int totalForum = Soma(acoes, new List<string> { "created", "uploaded", "viewed" });
+                int totalAcesso = Soma(acoes, new List<string> { "viewed" });
+                int totalAvaliacao = Soma(acoes, new List<string> { "graded", "reviewed" });
+                int totalTempo = totalVisualizacao;
+
+                double notaVisualizacao = NotaPorFaixa(totalVisualizacao, 500);
+                double notaEntrega = NotaPorFaixa(totalEntrega, 20);
+                double notaForum = NotaPorFaixa(totalForum, 30);
+                double notaAcesso = NotaPorFaixa(totalAcesso, 100);
+                double notaAvaliacao = NotaPorFaixa(totalAvaliacao, 20);
+                double notaTempo = NotaPorFaixa(totalTempo, 500);
+
+                double les =
+                    notaEntrega * 0.30 +
+                    notaVisualizacao * 0.20 +
+                    notaForum * 0.15 +
+                    notaTempo * 0.15 +
+                    notaAcesso * 0.10 +
+                    notaAvaliacao * 0.10;
+
+                return Math.Round(les * 10, 2);
+            }
+
+
+            private int Soma(List<AcaoQuantidade> acoes, List<string> nomes)
+            {
+                return acoes.Where(a => nomes.Contains(a.Acao)).Sum(a => a.Quantidade);
+            }
+
+            private double NotaPorFaixa(int valor, int maxEsperado)
+            {
+                double nota = (double)valor / maxEsperado * 10;
+                return Math.Min(nota, 10);
+            }
+        }
+
+
+
+
+        public class UsuarioComAcoes
+        {
+            public string UserId { get; set; }
+            public string Nome { get; set; }
+            public List<AcaoQtd> Acoes { get; set; }
+        }
+
+        public class AcaoQtd
+        {
+            public string Acao { get; set; }
+            public int Quantidade { get; set; }
+        }
+
+
         public MongoService(IConfiguration config)
         {
             var client = new MongoClient(config["MongoSettings:ConnectionString"]);
@@ -143,7 +274,6 @@ namespace Backend.Services
 
             return alunos;
         }
-
         public async Task<List<CursoComAlunos>> GetAlunosPorTodosOsCursosAsync()
         {
             var pipeline = new[]
@@ -179,9 +309,9 @@ namespace Backend.Services
         })
     };
 
-            using var cursor = await _collection.AggregateAsync<BsonDocument>(pipeline);
-
             var cursos = new List<CursoComAlunos>();
+
+            using var cursor = await _collection.AggregateAsync<BsonDocument>(pipeline);
 
             while (await cursor.MoveNextAsync())
             {
@@ -204,116 +334,6 @@ namespace Backend.Services
 
             return cursos;
         }
-
-
-
-
-        public class AlunoEngajamento
-        {
-            public string UserId { get; set; }
-            public string Nome { get; set; }
-            public double Engajamento { get; set; } // 0 a 100
-        }
-
-        public class AcaoQuantidade
-        {
-            public string Acao { get; set; }
-            public int Quantidade { get; set; }
-        }
-
-        public class EngajamentoService
-        {
-            private readonly IMongoCollection<BsonDocument> _logs;
-
-            public EngajamentoService(IMongoDatabase database)
-            {
-                _logs = database.GetCollection<BsonDocument>("logs");
-            }
-
-            public async Task<List<AlunoEngajamento>> CalcularEngajamentoAlunosAsync()
-            {
-                var pipeline = new[]
-                {
-        new BsonDocument("$unwind", "$logs"),
-        new BsonDocument("$group", new BsonDocument
-        {
-            { "_id", new BsonDocument
-                {
-                    { "user_id", "$logs.user_id" },
-                    { "nome", "$logs.name" },
-                    { "acao", "$logs.action" }
-                }
-            },
-            { "qtd", new BsonDocument("$sum", 1) }
-        })
-    };
-
-                using var cursor = await _logs.AggregateAsync<BsonDocument>(pipeline);
-
-                var resultados = await cursor.ToListAsync();
-
-                var agrupados = resultados
-                    .GroupBy(d => new
-                    {
-                        UserId = d["_id"].AsBsonDocument.TryGetValue("user_id", out var userId) ? userId.AsString : "undefined",
-                        Nome = d["_id"].AsBsonDocument.TryGetValue("nome", out var nome) ? nome.AsString : "undefined"
-                    })
-                    .Select(g => new AlunoEngajamento
-                    {
-                        UserId = g.Key.UserId,
-                        Nome = g.Key.Nome,
-                        Engajamento = CalcularLES(g.Select(x => new AcaoQuantidade
-                        {
-                            Acao = x["_id"].AsBsonDocument.TryGetValue("acao", out var acao) ? acao.AsString : "undefined",
-                            Quantidade = x["qtd"].ToInt32()
-                        }).ToList())
-                    })
-                    .ToList();
-
-                return agrupados;
-            }
-
-
-
-            private double CalcularLES(List<AcaoQuantidade> acoes)
-            {
-                int totalVisualizacao = Soma(acoes, new List<string> { "viewed" });
-                int totalEntrega = Soma(acoes, new List<string> { "submitted", "uploaded" });
-                int totalForum = Soma(acoes, new List<string> { "created", "uploaded", "viewed" });
-                int totalAcesso = Soma(acoes, new List<string> { "viewed" });
-                int totalAvaliacao = Soma(acoes, new List<string> { "graded", "reviewed" });
-                int totalTempo = totalVisualizacao;
-
-                double notaVisualizacao = NotaPorFaixa(totalVisualizacao, 500);
-                double notaEntrega = NotaPorFaixa(totalEntrega, 20);
-                double notaForum = NotaPorFaixa(totalForum, 30);
-                double notaAcesso = NotaPorFaixa(totalAcesso, 100);
-                double notaAvaliacao = NotaPorFaixa(totalAvaliacao, 20);
-                double notaTempo = NotaPorFaixa(totalTempo, 500);
-
-                double les =
-                    notaEntrega * 0.30 +
-                    notaVisualizacao * 0.20 +
-                    notaForum * 0.15 +
-                    notaTempo * 0.15 +
-                    notaAcesso * 0.10 +
-                    notaAvaliacao * 0.10;
-
-                return Math.Round(les * 10, 2);
-            }
-
-            private int Soma(List<AcaoQuantidade> acoes, List<string> nomes)
-            {
-                return acoes.Where(a => nomes.Contains(a.Acao)).Sum(a => a.Quantidade);
-            }
-
-            private double NotaPorFaixa(int valor, int maxEsperado)
-            {
-                double nota = (double)valor / maxEsperado * 10;
-                return Math.Min(nota, 10);
-            }
-        }
-
 
         public async Task<List<UsuarioComAcoes>> GetAcoesPorUsuarioAsync()
         {
@@ -379,39 +399,23 @@ namespace Backend.Services
             return usuarios;
         }
 
-        public class UsuarioComAcoes
-        {
-            public string UserId { get; set; }
-            public string Nome { get; set; }
-            public List<AcaoQtd> Acoes { get; set; }
-        }
-
-        public class AcaoQtd
-        {
-            public string Acao { get; set; }
-            public int Quantidade { get; set; }
-        }
-
-
         public async Task<List<LogUsuario>> GetLogsPorCursoAsync(string nomeCurso)
         {
-            var pipeline = new BsonDocument[]
+            var pipeline = new[]
             {
         new BsonDocument("$unwind", "$logs"),
         new BsonDocument("$match", new BsonDocument("logs.course_fullname", nomeCurso)),
         new BsonDocument("$replaceRoot", new BsonDocument("newRoot", "$logs"))
-            };
+    };
 
             var resultado = await _collection.AggregateAsync<BsonDocument>(pipeline);
 
             var logs = new List<LogUsuario>();
             await resultado.ForEachAsync(doc =>
             {
-                var log = new LogUsuario
+                logs.Add(new LogUsuario
                 {
-                    // Aqui trata o user_id para evitar erro ou null
-                    user_id = doc.Contains("user_id") && !doc["user_id"].IsBsonNull ? doc["user_id"].AsString : "",
-
+                    user_id = doc.GetValue("user_id", "").IsBsonNull ? "" : doc["user_id"].AsString,
                     name = doc.GetValue("name", "").AsString,
                     date = doc.GetValue("date", "").AsString,
                     action = doc.GetValue("action", "").AsString,
@@ -419,13 +423,12 @@ namespace Backend.Services
                     component = doc.GetValue("component", "").AsString,
                     course_fullname = doc.GetValue("course_fullname", "").AsString,
                     user_lastaccess = doc.GetValue("user_lastaccess", "").AsString,
-                };
-
-                logs.Add(log);
+                });
             });
 
             return logs;
         }
+
 
         public async Task<string> GerarResumoAlunoIAAsync(string userId)
         {

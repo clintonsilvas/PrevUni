@@ -27,7 +27,7 @@ style="
                     <img src="~/css/icons/formando.svg" alt="Icone_Aluno" />
                 </div>
                 <div class="coluna" style="--gap: 8px">
-                    <h2 class="corPreta40B">@Model.AlunoDetalhes.nome</h2>
+                    <h2 class="corPreta40B">@Model.User.name</h2>
 
                     @if (Model.AlunoLogs.Any())
                     {
@@ -93,7 +93,7 @@ style="
         id="IaPergunta"
         name="nome"
         placeholder="Pergunte a inteligência Artifical!" />
-        <a asp-page="/IaChatAluno" asp-route-userId="@Model.AlunoDetalhes.user_id">Gerar</a>
+        <a asp-page="/IaChatAluno" asp-route-userId="@Model.User.user_id">Gerar</a>
     </div>
     @{
         var abaSelecionada = Request.Query["aba"].ToString();
@@ -358,159 +358,123 @@ style="
                         var logsPorDia = Model.AlunoLogs?
                         .GroupBy(l => DateTime.Parse(l.date).Date)
                         .ToDictionary(g => g.Key, g => g.ToList())
-                        ?? new Dictionary<DateTime, List<LogUsuario>>();
+                        ?? new();
                     }
 
-                    <!-- Navegação do mês -->
                     <div class="navegacao-mes linha" style="flex: 1; margin-bottom: 20px; align-items: center">
                         @{
                             var mesAno = primeiroDiaMes.ToString("MMMM yyyy");
-                            var mesAnoCapitalizado = char.ToUpper(mesAno[0]) + mesAno.Substring(1);
+                            var mesAnoCapitalizado = char.ToUpper(mesAno[0]) + mesAno[1..];
                         }
                         <h2 class="corPreta50B" style="flex: 1;">@mesAnoCapitalizado</h2>
-
                         <div class="linha" style="gap: 8px">
                             <button class="btn_seta" onclick="mudarMes(-1)">⟵</button>
                             <button class="btn_seta" onclick="mudarMes(1)">⟶</button>
                         </div>
-
                     </div>
 
-                    <!-- Calendário -->
                     <div class="grid-calendario2">
-                        <!-- Espaços até o primeiro dia -->
-                        <span class="NomeDiaSemana">Domingo</span>
-                        <span class="NomeDiaSemana">Segunda</span>
-                        <span class="NomeDiaSemana">Terça</span>
-                        <span class="NomeDiaSemana">Quarta</span>
-                        <span class="NomeDiaSemana">Quinta</span>
-                        <span class="NomeDiaSemana">Sexta</span>
-                        <span class="NomeDiaSemana">Sabado</span>
+                        @foreach (var dia in new[] { "Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sabado" })
+                        {
+                            <span class="NomeDiaSemana">@dia</span>
+                        }
+
                         @for (int j = 0; j < diasAtePrimeiroDia; j++)
                         {
                             <div class="diaMesInativo"></div>
                         }
 
-                        <!-- Dias do mês -->
                         @for (int i = 1; i <= diasNoMes; i++)
                         {
                             var dataAtual = new DateTime(ano, mes, i);
                             var id = $"{dataAtual.Day}_{dataAtual.Month}";
-                            <div id="@id" onclick="AbreDia('@id')" class="diaMes @(logsPorDia.ContainsKey(dataAtual) ? "temLog" : "")">
-                                <div class="linha" >
+                            var possuiLog = logsPorDia.ContainsKey(dataAtual);
+                            var logsDoDia = possuiLog ? logsPorDia[dataAtual] : null;
+
+                            <div id="@id" onclick="AbreDia('@id')" class="diaMes @(possuiLog ? "temLog" : "")">
+                                <div class="linha">
                                     <span class="diaspan" style="flex: 1">@i</span>
-                                    @if (logsPorDia.ContainsKey(dataAtual))
+
+                                    @if (possuiLog)
                                     {
-                                        var totalLogs = logsPorDia[dataAtual].Count(l =>
+                                        var totalLogs = logsDoDia.Count(l =>
                                         (l.target == "user" && l.component == "core" && l.action == "graded") ||
                                         (l.target == "assessable" && l.component == "mod_forum" && l.action == "uploaded"));
 
                                         if (totalLogs > 1)
                                         {
-                                            <span class="mais_dia">+<span>@(totalLogs-1)</span></span>
+                                            <span class="mais_dia">+<span>@(totalLogs - 1)</span></span>
                                         }
                                     }
-
                                 </div>
 
-
-                                @if (logsPorDia.ContainsKey(dataAtual))
+                                @if (possuiLog)
                                 {
-                                    foreach (var log in logsPorDia[dataAtual])
+                                    foreach (var log in logsDoDia)
                                     {
-                                        string acao = log.action switch
+                                        string? acao = log.action switch
                                         {
                                             "graded" when log.target == "user" && log.component == "core" => "Atividade Concluída",
                                             "uploaded" when log.target == "assessable" && log.component == "mod_forum" => "Postagem no Fórum",
                                             _ => null
                                         };
 
-
-
                                         if (acao != null)
                                         {
                                             <div class="item-log">
-                                                
                                                 <span class="acao">@acao</span>
-                                                <span class="acao">@DateTime.Parse(log.date.ToString()).ToString("HH:mm")</span>
+                                                <span class="acao">@DateTime.Parse(log.date).ToString("HH:mm")</span>
                                                 <span class="curso">@log.course_fullname</span>
                                             </div>
                                         }
                                     }
                                 }
-
                             </div>
                         }
-
                     </div>
+
                     <script>
                         function AbreDia(id) {
-                          const elemento = document.getElementById(id);
+                            const elemento = document.getElementById(id);
+                            if (!elemento) return console.warn('Elemento não encontrado:', id);
 
-                          if (!elemento) {
-                            console.warn('Elemento não encontrado: ' + id);
-                            return;
-                          }
-
-                          const jaAberto = elemento.classList.contains('diaMesAberto');
-
-                          const dias = document.querySelectorAll('.diaMes, .diaMesAberto, .temLog');
-                          dias.forEach(dia => {
-                            dia.className = dia.className.replace('diaMesAberto', 'diaMes').trim();
-                          });
-
-                          if (!jaAberto) {
-                            elemento.className = 'diaMesAberto';
-                          }
-                        }
-
-                    </script>
-                    <script>
-                        // Função para mudar mês/ano na URL sem reload
-                        function mudarMes(direcao) {
-                          const urlParams = new URLSearchParams(window.location.search);
-                          let mes = parseInt(urlParams.get('mes')) || new Date().getMonth() + 1;
-                          let ano = parseInt(urlParams.get('ano')) || new Date().getFullYear();
-
-                          mes += direcao;
-                          if (mes < 1) {
-                            mes = 12;
-                            ano -= 1;
-                          }
-                          if (mes > 12) {
-                            mes = 1;
-                            ano += 1;
-                          }
-
-                          urlParams.set('mes', mes);
-                          urlParams.set('ano', ano);
-
-                          // Recarrega a página com a URL atualizada para atualizar o calendário
-                          window.location.href = window.location.pathname + '?' + urlParams.toString() + window.location.hash;
-                        }
-
-                        // Ao carregar a página, marca a aba certa com base na URL
-                        window.addEventListener('DOMContentLoaded', () => {
-                          const urlParams = new URLSearchParams(window.location.search);
-                          const abaSelecionada = urlParams.get('aba') || '1'; // padrão aba1
-
-                          // Marca o input radio correspondente
-                          const inputSelecionado = document.getElementById('aba' + abaSelecionada);
-                          if (inputSelecionado) {
-                            inputSelecionado.checked = true;
-                          }
-
-                          // Adiciona listener para trocar aba e atualizar URL
-                          document.querySelectorAll('.botoes label').forEach((label, index) => {
-                            label.addEventListener('click', () => {
-                              const params = new URLSearchParams(window.location.search);
-                              params.set('aba', (index + 1).toString());
-                              history.replaceState(null, '', window.location.pathname + '?' + params.toString() + window.location.hash);
+                            const jaAberto = elemento.classList.contains('diaMesAberto');
+                            document.querySelectorAll('.diaMes, .diaMesAberto, .temLog').forEach(dia => {
+                                dia.className = dia.className.replace('diaMesAberto', 'diaMes').trim();
                             });
-                          });
+
+                            if (!jaAberto) elemento.className = 'diaMesAberto';
+                        }
+
+                        function mudarMes(direcao) {
+                            const urlParams = new URLSearchParams(window.location.search);
+                            let mes = parseInt(urlParams.get('mes')) || new Date().getMonth() + 1;
+                            let ano = parseInt(urlParams.get('ano')) || new Date().getFullYear();
+
+                            mes += direcao;
+                            if (mes < 1) { mes = 12; ano--; }
+                            if (mes > 12) { mes = 1; ano++; }
+
+                            urlParams.set('mes', mes);
+                            urlParams.set('ano', ano);
+                            window.location.href = window.location.pathname + '?' + urlParams + window.location.hash;
+                        }
+
+                        window.addEventListener('DOMContentLoaded', () => {
+                            const urlParams = new URLSearchParams(window.location.search);
+                            const aba = urlParams.get('aba') || '1';
+                            const input = document.getElementById('aba' + aba);
+                            if (input) input.checked = true;
+
+                            document.querySelectorAll('.botoes label').forEach((label, i) => {
+                                label.addEventListener('click', () => {
+                                    const params = new URLSearchParams(window.location.search);
+                                    params.set('aba', (i + 1).toString());
+                                    history.replaceState(null, '', window.location.pathname + '?' + params + window.location.hash);
+                                });
+                            });
                         });
                     </script>
-
                 </div>
             </div>
 
