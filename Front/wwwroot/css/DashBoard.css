@@ -123,6 +123,20 @@
     color: var(--Cinza70B);
 }
 
+.tabela-card thead
+{
+    background-color: var(--Cinza100B);
+    border-bottom: 1px solid var(--Cinza90B);
+
+}
+
+
+    .tabela-card thead th
+    {
+        padding: 20px;
+    }
+
+
     .tabela-card a {
         color: var(--Cinza70B);
         text-decoration: none;
@@ -145,7 +159,7 @@
 
     .tabela-card td,
     .tabela-card th {
-        padding: 8px;
+        padding: 10px 20px;
         width: fit-content;
     }
 
@@ -153,9 +167,10 @@
         background-color: var(--Cinza100B);
     }
 
-    .tabela-card th:last-child,
+    .tabela-card th:last-child button,
     .tabela-card td:last-child {
         text-align: right;
+        margin-left: auto;
     }
 
     .tabela-card td:first-child {
@@ -176,10 +191,6 @@
     cursor: pointer;
 }
 
-/* Inverter texto e �cone no �ltimo bot�o (Engajamento) */
-th:last-child .bot_tab {
-    flex-direction: row-reverse;
-}
 
 
 .caixaProgresso {
