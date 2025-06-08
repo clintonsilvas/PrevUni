@@ -33,8 +33,8 @@ style="
                     img.src = checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
 
                     const url = checked
-                        ? `/api/favoritos/adicionar?curso=${encodeURIComponent(curso)}`
-                        : `/api/favoritos/remover?curso=${encodeURIComponent(curso)}`;
+                        ? `/api/favoritos/adicionar_curso?curso=${encodeURIComponent(curso)}`
+                        : `/api/favoritos/remover_curso?curso=${encodeURIComponent(curso)}`;
 
                     try {
                         const response = await fetch(url, { method: 'POST' });
@@ -403,7 +403,7 @@ style="
                 </div>
             </div>
             <div class="conteudo" id="conteudo2">
-                <div class="tabela-card QuadroCards" style="padding: 0; overflow: hidden">
+                <div class="tabela-card QuadroCards">
                     <table id="tabelaAlunos">
                         <thead>
                             <tr>

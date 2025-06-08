@@ -1,8 +1,29 @@
-﻿using System.Linq;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
 using System.Text.Json;
 
 namespace Front.Models
 {
+    public class AlunoNome
+    {
+        public string UserId { get; set; }
+        public string Nome { get; set; }
+
+        public override bool Equals(object obj)
+        {
+            return obj is AlunoNome other &&
+                   UserId == other.UserId &&
+                   Nome == other.Nome;
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(UserId, Nome);
+        }
+    }
+
     public class AppFavoritos
     {
         public Favoritos Favoritos { get; set; } = new();
@@ -11,10 +32,10 @@ namespace Front.Models
     public class Favoritos
     {
         public List<string> Cursos { get; set; } = new();
-        public List<string> Alunos { get; set; } = new();
+        public List<AlunoNome> Alunos { get; set; } = new();
     }
 
-    public  class FavoritoService
+    public class FavoritoService
     {
         private static readonly string _path = "appfavoritos.json";
         private static AppFavoritos _dados;
@@ -33,8 +54,8 @@ namespace Front.Models
             }
 
             _dados.Favoritos ??= new Favoritos();
-            _dados.Favoritos.Cursos ??= new List<string>();  // mudou para string
-            _dados.Favoritos.Alunos ??= new List<string>();
+            _dados.Favoritos.Cursos ??= new List<string>();
+            _dados.Favoritos.Alunos ??= new List<AlunoNome>();
         }
 
         public static void AdicionarCurso(string curso)
@@ -49,18 +70,33 @@ namespace Front.Models
             }
             catch (Exception ex)
             {
-                // log do erro para ver o que está causando
                 Console.WriteLine($"Erro ao adicionar curso: {ex.Message}");
-                throw;  // relança pra que o erro 500 apareça
+                throw;
             }
         }
 
-        public static List<string> ListarCursos()
+        public static void AdicionarAluno(string nome, string id)
         {
-            return _dados.Favoritos.Cursos;
+            var aux = new AlunoNome { Nome = nome, UserId = id };
+
+            try
+            {
+                if (!_dados.Favoritos.Alunos.Contains(aux))
+                {
+                    _dados.Favoritos.Alunos.Add(aux);
+                    Salvar();
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Erro ao adicionar aluno: {ex.Message}");
+                throw;
+            }
         }
 
+        public static List<string> ListarCursos() => _dados.Favoritos.Cursos;
 
+        public static List<AlunoNome> ListarAluno() => _dados.Favoritos.Alunos;
 
         public static void RemoverCurso(string nomeCurso)
         {
@@ -71,9 +107,20 @@ namespace Front.Models
             }
         }
 
-        public static bool EhFavorito(string nomeCurso)
+        public static void RemoverAluno(string nomeAluno, string id)
         {
-            return _dados.Favoritos.Cursos.Contains(nomeCurso);
+            var aux = new AlunoNome { Nome = nomeAluno, UserId = id };
+            if (_dados.Favoritos.Alunos.Contains(aux))
+            {
+                _dados.Favoritos.Alunos.Remove(aux);
+                Salvar();
+            }
+        }
+
+        public static bool EhFavorito(string nome)
+        {
+            return _dados.Favoritos.Cursos.Contains(nome) ||
+                   _dados.Favoritos.Alunos.Any(a => a.UserId == nome);
         }
 
         private static void Salvar()
@@ -82,6 +129,4 @@ namespace Front.Models
             File.WriteAllText(_path, json);
         }
     }
-
-
 }

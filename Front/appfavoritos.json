@@ -6,19 +6,6 @@
       "ALUNOS HACKATHON",
       "COURSE_AC16FD94E137C018"
     ],
-<<<<<<< HEAD
-    "Alunos": [
-      {
-        "UserId": "34868",
-        "Nome": "SAMUEL NOGUEIRA DA SILVA"
-      },
-      {
-        "UserId": "USER_0544A8A95209",
-        "Nome": "A4 A3"
-      }
-    ]
-=======
     "Alunos": []
->>>>>>> 15e740774e19fdf36b7d4aa44fe92a4130b86a90
   }
 }

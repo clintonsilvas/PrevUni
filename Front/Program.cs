@@ -34,18 +34,36 @@ app.MapGet("/", context =>
 app.MapRazorPages();
 
 
-app.MapPost("/api/favoritos/adicionar", (HttpRequest request) =>
+app.MapPost("/api/favoritos/adicionar_curso", (HttpRequest request) =>
 {
     var curso = request.Query["curso"].ToString();
     FavoritoService.AdicionarCurso(curso);
     return Results.Ok();
 });
 
-app.MapPost("/api/favoritos/remover", (HttpRequest request) =>
+app.MapPost("/api/favoritos/remover_curso", (HttpRequest request) =>
 {
     var curso = request.Query["curso"].ToString();
     FavoritoService.RemoverCurso(curso);
     return Results.Ok();
 });
+
+
+app.MapPost("/api/favoritos/adicionar_aluno", (HttpRequest request) =>
+{
+    var nome = request.Query["nome"].ToString();
+    var id = request.Query["id"].ToString();
+    FavoritoService.AdicionarAluno(nome, id);
+    return Results.Ok();
+});
+
+app.MapPost("/api/favoritos/remover_aluno", (HttpRequest request) =>
+{
+    var nome = request.Query["nome"].ToString();
+    var id = request.Query["id"].ToString();
+    FavoritoService.RemoverAluno(nome, id);
+    return Results.Ok();
+});
+
 
 app.Run();
