@@ -77,6 +77,17 @@ style="
                             <span class="corCinza80B">Último Acesso:</span> Dia @ultimo_acesso.Day de @ultimo_acesso.ToString("MMMM") às @ultimo_acesso.Hour:@ultimo_acesso.Minute
 
                         </h5>
+                        
+                        <form method="get" class="linha" style="align-items: center">
+                            <h5 class="corCinza80B">Com base em: </h5>
+                            <select class="cursoComboBox" name="curso" onchange="this.form.submit()">
+                                <option value="">Todos os cursos</option>
+                                @foreach (var curso in Model.ListaDeCursos)
+                                {
+                                    <option value="@curso" selected="@(curso == Request.Query["curso"])">@curso</option>
+                                }
+                            </select>
+                        </form>
                     }
                 </div>
             </div>

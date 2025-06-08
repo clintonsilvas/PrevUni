@@ -590,7 +590,11 @@ style="
                                     <tr>
                                         <td>@i</td>
                                         <td>
-                                            <a asp-page="/PerfilAluno" asp-route-userId="@al.user_id">@al.nome</a>
+                                            <a asp-page="/PerfilAluno"
+                                               asp-route-userId="@al.user_id"
+                                               asp-route-curso="@Model.Cursos.curso">
+                                                @al.nome
+                                            </a>
                                         </td>
                                         <td>
                                             @{

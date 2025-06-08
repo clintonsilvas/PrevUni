@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Front.Models;
+using System.Reflection;
 
 namespace Front.Pages;
 
@@ -17,6 +18,8 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
     public List<LogUsuario> AlunoLogs { get; set; } = [];
     public List<int> SemanasAcessoAluno { get; set; } = [];
     public Dictionary<string, int> InteracoesPorComponente { get; set; } = [];
+
+    public List<string> ListaDeCursos { get; set; } = [];
 
     public float Engajamento { get; set; }
 
@@ -40,6 +43,14 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
         // Atribui os dados recebidos
         AlunoLogs = logsTask.Result ?? [];
         var engajamentos = engajamentosTask.Result;
+
+        ListaDeCursos = AlunoLogs.Select(l => l.course_fullname).Distinct().OrderBy(c => c).ToList();
+
+
+        if (!string.IsNullOrWhiteSpace(Curso))
+        {
+            AlunoLogs = AlunoLogs.Where(log => log.course_fullname == Curso).ToList();
+        }
 
         if (!AlunoLogs.Any())
             return NotFound("Nenhum log encontrado para o aluno.");
@@ -77,6 +88,11 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
             return default;
         }
     }
+
+
+    [BindProperty(SupportsGet = true)]
+    public string Curso { get; set; } = string.Empty;
+
 
     private void CalcularSemanasAcessoAluno()
     {

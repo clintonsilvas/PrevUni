@@ -590,3 +590,26 @@ color: var(--Preto50B);
     .btn_seta:hover {
         background-color: var(--Azul20S);
     }
+
+
+
+
+.cursoComboBox {
+    background-color: var(--Cinza100B);
+    color: var(--Cinza70B);
+    border: 1px solid var(--Azul10S);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 16px;
+    width: auto;
+    min-width: 150px;
+
+    -webkit-appearance: none; /* Remove estilo padrão no Chrome/Safari */
+    -moz-appearance: none; /* Remove estilo padrão no Firefox */
+    appearance: none; /* Remove estilo padrão geral */
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23007bff" height="30" viewBox="0 0 24 24" width="30" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    cursor: pointer;
+}
