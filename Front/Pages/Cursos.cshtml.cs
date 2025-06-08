@@ -13,6 +13,9 @@ namespace Front.Pages
 
         private readonly HttpClient _httpClient;
 
+
+
+
         public CursosModel(HttpClient httpClient)
         {
             _httpClient = httpClient;
