@@ -30,37 +30,37 @@ style="
                     <div class="linha" style="align-items: center">
                         <h2 class="corPreta40B">@Model.User.name</h2>
                         <input type="checkbox" style="display: none" id="favCurso" @(FavoritoService.EhFavorito(@Model.User.name) ? "checked" : "")
-                               onchange="alunoFavorito(this)" />
+                        onchange="alunoFavorito(this)" />
                         <label for="favCurso">
                             <img id="imgFavCurso" src="@Url.Content(FavoritoService.EhFavorito(@Model.User.user_id) ? "~/css/icons/estrela.svg" : "~/css/icons/estrela_inativa.svg")" height="20" />
                         </label>
 
                         <script>
                             async function alunoFavorito(checkbox) {
-                                const checked = checkbox.checked;
-                                const aluno = '@Model.User.user_id';
-                                const nome = '@Model.User.name';
-                                const img = document.getElementById('imgFavCurso');
+                            const checked = checkbox.checked;
+                            const aluno = '@Model.User.user_id';
+                            const nome = '@Model.User.name';
+                            const img = document.getElementById('imgFavCurso');
 
-                                // Trocar a imagem já no clique
-                                img.src = checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
+                            // Trocar a imagem já no clique
+                            img.src = checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
 
-                                const url = checked
-                                    ? `/api/favoritos/adicionar_aluno?nome=${encodeURIComponent(nome)}&id=${encodeURIComponent(aluno)}`
-                                    : `/api/favoritos/remover_aluno?nome=${encodeURIComponent(nome)}&id=${encodeURIComponent(aluno)}`;
+                            const url = checked
+                            ? `/api/favoritos/adicionar_aluno?nome=${encodeURIComponent(nome)}&id=${encodeURIComponent(aluno)}`
+                            : `/api/favoritos/remover_aluno?nome=${encodeURIComponent(nome)}&id=${encodeURIComponent(aluno)}`;
 
-                                try {
-                                    const response = await fetch(url, { method: 'POST' });
-                                    if (!response.ok) {
-                                        alert('Erro ao atualizar favoritos');
-                                        checkbox.checked = !checked;
-                                        img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
-                                    }
-                                } catch (err) {
-                                    alert('Erro na requisição');
-                                    checkbox.checked = !checked;
-                                    img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
-                                }
+                            try {
+                            const response = await fetch(url, { method: 'POST' });
+                            if (!response.ok) {
+                            alert('Erro ao atualizar favoritos');
+                            checkbox.checked = !checked;
+                            img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
+                            }
+                            } catch (err) {
+                            alert('Erro na requisição');
+                            checkbox.checked = !checked;
+                            img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
+                            }
                             }
                         </script>
                     </div>
@@ -152,185 +152,314 @@ style="
         <div class="conteudos">
             <div class="conteudo" id="conteudo1" style="flex-direction: row">
 
-                <div class="QuadroCards GraficoEvolucao linha" style="flex: 1; --gap: 40px; flex-wrap: wrap;">
-                    <div class="coluna graf_caixa" style="--gap: 16px; flex: 1; min-width: 300px;">
-                        <div class="linha" style="--gap: 10px; align-items: center">
-                            <img src="~/css/icons/graficos.svg" />
-                            <h4 class="corPreta50B">Evolução</h4>
-                            @{
-                                var logs = Model.AlunoLogs;
-                                if (logs.Any())
-                                {
-                                    var datas = logs.Select(l => DateTime.Parse(l.date)).ToList();
-                                    var mesAntigo = datas.Min().ToString("MMMM", new System.Globalization.CultureInfo("pt-BR"));
-                                    var mesAtual = datas.Max().ToString("MMMM", new System.Globalization.CultureInfo("pt-BR"));
-                                    <span class="corCinza80B" style="margin-inline-start: auto;">@mesAntigo à @mesAtual</span>
-                                }
-                            }
-                        </div>
-                        @{
-                            var semanas = Model.SemanasAcessoAluno;
-                            int total = semanas.Any() ? semanas.Max() : 0;
-                        }
-                        <div class="coluna" id="graf01" style="--gap: 8px">
-                            <div class="linha" style="height: 240px; justify-content: space-between">
-                                <div class="coluna" style="width: 60px">
-                                    <p class="corCinza60B" style="margin-bottom: auto">100%</p>
-                                    <p class="corCinza60B" style="margin-bottom: auto">80%</p>
-                                    <p class="corCinza60B" style="margin-bottom: auto">60%</p>
-                                    <p class="corCinza60B" style="margin-bottom: auto">40%</p>
-                                    <p class="corCinza60B" style="margin-bottom: auto">20%</p>
-                                    <p class="corCinza60B">0%</p>
-                                </div>
-                                <div class="linha" style="flex: 1; justify-content: space-between">
-                                    @foreach (var s in semanas)
-                                    {
-                                        var porcentagem = total > 0 ? (int)Math.Round((s * 100.0) / total) : 0;
-                                        <div class="grafContainer">
-                                            <div class="grafCinza"></div>
-                                            <div class="grafAzul" style="--Porcentagem: @porcentagem%"></div>
-                                        </div>
-                                    }
-                                </div>
-                            </div>
-                            <div class="linha">
-                                <p class="corAzul" style="width: 60px">
-                                    <strong>Semanas</strong>
-                                </p>
-                                <div class="linha" style="flex: 1; justify-content: space-between">
-                                    @for (int i2 = 1; i2 <= semanas.Count; i2++)
-                                    {
-                                        <p class="corCinza60B">@i2</p>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                <div class="QuadroCards GraficoEvolucao linha"
+                style="flex: 1; --gap: 16px">
 
-                    @{
-                        var acoes = Model.AlunoLogs
-                        .Select(l =>
-                        {
-                            if (l.action == "graded" && l.target == "user" && l.component == "core")
-                                return "Atividade Concluída";
 
-                            if (l.action == "uploaded" && l.target == "assessable" && l.component == "mod_forum")
-                                return "Postagem no Fórum";
 
-                            return null;
-                        })
-                        .Where(a => a != null)
-                        .GroupBy(a => a)
-                        .Select(g => new
-                        {
-                            Acao = g.Key,
-                            Quantidade = g.Count()
-                        })
-                        .ToList();
-
-                        var labels = string.Join(",", acoes.Select(a => $"'{a.Acao}'"));
-                        var dados = string.Join(",", acoes.Select(a => a.Quantidade));
-                    }
-                    <div class="coluna graf_caixa" style="--gap: 16px">
+                    <div class="coluna graf_caixa" style="--gap: 16px; flex: 1">
                         <div class="linha" style="--gap: 10px; align-items: center">
                             <img src="~/css/icons/graficos.svg" />
                             <h4 class="corPreta50B">Ações Realizadas</h4>
                         </div>
 
+                        @using System.Globalization
+
+                        @{
+                            var acoesFixas = new Acoes().ListarAcoes();
+
+                            string AcaoDe(string a, string t, string c) =>
+                            acoesFixas.FirstOrDefault(x => x.action == a && x.target == t && x.component == c)?.nome_acao ?? "Outros";
+
+                            var cal = CultureInfo.CurrentCulture.Calendar;
+
+                            // Processa todos os logs de uma vez só
+                            var logsProcessados = Model.AlunoLogs
+                            .Select(l => new
+                            {
+                                Semana = cal.GetWeekOfYear(DateTime.Parse(l.date), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday),
+                                Ano = DateTime.Parse(l.date).Year,
+                                Nome = AcaoDe(l.action, l.target, l.component)
+                            })
+                            .ToList();
+
+                            // Agrupamento por semana (gráfico de barras empilhadas)
+                            var grupos = logsProcessados
+                            .GroupBy(x => new { x.Ano, x.Semana, x.Nome })
+                            .Select(g => new
+                            {
+                                g.Key.Ano,
+                                g.Key.Semana,
+                                Acao = g.Key.Nome,
+                                Qtde = g.Count()
+                            })
+                            .OrderBy(g => g.Ano).ThenBy(g => g.Semana)
+                            .ToList();
+
+                            var semanasOrdenadas = grupos
+                            .Select(g => new { g.Ano, g.Semana })
+                            .Distinct()
+                            .OrderBy(s => s.Ano).ThenBy(s => s.Semana)
+                            .ToList();
+
+                            var labels1 = semanasOrdenadas.Select((s, i) => (i + 1).ToString()).ToList();
+                            var nomesAcoes = grupos.Select(g => g.Acao).Distinct().ToList();
+
+                            var datasets = nomesAcoes.Select((nome, idx) => new
+                            {
+                                label = nome,
+                                data = semanasOrdenadas.Select(s =>
+                                grupos.FirstOrDefault(g =>
+                                g.Ano == s.Ano && g.Semana == s.Semana && g.Acao == nome
+                                )?.Qtde ?? 0).ToList(),
+                                backgroundColor = $"hsl({idx * 60},70%,60%)",
+                                stack = "stack1",
+                                borderRadius = 10,
+                                barPercentage = 0.5,
+                                categoryPercentage = 0.8
+                            }).ToList();
+
+                            var anosArray = semanasOrdenadas.Select(s => s.Ano).ToList();
+                            var semanasArray = semanasOrdenadas.Select(s => s.Semana).ToList();
+
+                            var lblJson = System.Text.Json.JsonSerializer.Serialize(labels1);
+                            var dsJson = System.Text.Json.JsonSerializer.Serialize(datasets);
+                            var anosJson = System.Text.Json.JsonSerializer.Serialize(anosArray);
+                            var semanasJson = System.Text.Json.JsonSerializer.Serialize(semanasArray);
+
+                            // Agrupamento simples por ação (gráfico de pizza, por exemplo)
+                            var acoes = logsProcessados
+                            //.Where(x => x.Nome != "Outros") // remover filtro para incluir "Outros"
+                            .GroupBy(x => x.Nome)
+                            .Select(g => new
+                            {
+                                Acao = g.Key,
+                                Quantidade = g.Count()
+                            })
+                            .ToList();
+
+                            var labels = string.Join(",", acoes.Select(a => $"'{a.Acao}'"));
+                            var dados = string.Join(",", acoes.Select(a => a.Quantidade));
+                        }
+
+
+
+
+                        <canvas id="graficoLogs"></canvas>
+
+                    </div>
+
+                    <div class="coluna graf_caixa" style="--gap: 16px; flex: 1">
+                        <div class="linha" style="--gap: 10px; align-items: center">
+                            <img src="~/css/icons/graficos.svg" />
+                            <h4 class="corPreta50B">Ações Realizadas</h4>
+                        </div>
+
+
+
+
                         <div style="max-width: 400px; margin: auto; position: relative;">
                             <canvas id="graficoPizza" width="900" height="240"></canvas>
                         </div>
 
-                        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
                         <script>
                             const toggle = document.getElementById('toggleTheme');
-                            const ctx = document.getElementById('graficoPizza').getContext('2d');
-                            let chart;
+                            const ctxBarras = document.getElementById('graficoLogs')?.getContext('2d');
+                            const ctxPizza = document.getElementById('graficoPizza')?.getContext('2d');
 
-                            function criarGrafico() {
-                            const isDarkMode = document.documentElement.classList.contains('dark');
+                            const anos = @Html.Raw(anosJson);
+                            const semanas = @Html.Raw(semanasJson);
 
-                            const coresClaro = ['#003DE5', '#22C55E', '#FF6A6A', '#EAB308'];
-                            const coresEscuro = ['#7AAEFF', '#5A8BDD', '#3A69BB', '#1A4799'];
-
-                            const corTexto = isDarkMode ? '#8F98B2' : '#8F98B2';
-                            const cores = isDarkMode ? coresEscuro : coresClaro;
-
-                            if (chart) chart.destroy();
-
-                            chart = new Chart(ctx, {
-                            type: 'doughnut',
-                            data: {
-                            labels: [@Html.Raw(labels)],
-                            datasets: [{
-                            data: [@dados],
-                            backgroundColor: cores,
-                            borderWidth: 0,
-                            }]
-                            },
-                            options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            rotation: 270,
-                            circumference: 360,
-                            cutout: '70%',
-                            plugins: {
-                            legend: {
-                            display: true,
-                            position: 'right',
-                            labels: {
-                            boxWidth: 12,
-                            usePointStyle: true,
-                            pointStyle: 'rectRounded',
-                            color: corTexto,
-                            font: { size: 14, family: 'Inter' },
-                            padding: 20
+                            const acoesComOutros = [
+                            @foreach (var acao in acoes)
+                            {
+                                @: { label: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(acao.Acao)), quantidade: @acao.Quantidade },
                             }
-                            }
-                            }
-                            },
-                            plugins: [{
-                            id: 'centerText',
-                            beforeDraw(chart) {
-                            const { ctx, chartArea: { left, right, top, bottom } } = chart;
-                            const x = (left + right) / 2;
-                            const y = (top + bottom) / 2;
+                            ];
 
-                            ctx.save();
-                            ctx.font = 'bold 16px Inter';
-                            ctx.fillStyle = corTexto;
-                            ctx.textAlign = 'center';
-                            ctx.textBaseline = 'middle';
+                            const totalAcoes = @acoes.Sum(a => a.Quantidade);
+                            const totalLog = @Model.AlunoLogs.Count;
+                            const quantidadeOutros = totalLog - totalAcoes;
+                            if (quantidadeOutros > 0) acoesComOutros.push({ label: 'Outros', quantidade: quantidadeOutros });
 
-                            const texto = '@acoes.Sum(a => a.Quantidade) Ações';
-                            ctx.fillText(texto, x, y);
-                            ctx.restore();
-                            }
-                            }]
-                            });
+                            const labelsPizza = acoesComOutros.map(a => a.label);
+                            const dadosPizza = acoesComOutros.map(a => a.quantidade);
+
+                            const coresClaro = ['#002899', '#0036cc', '#99b4ff', '#ccd9ff'];
+                            const coresEscuro = ['#7AAEFF', '#5A8BDD', '#3A69BB', '#1A4799', '#555555'];
+
+                            const getDateRange = (year, week) => {
+                              const simple = new Date(year, 0, 1 + (week - 1) * 7);
+                              const dow = simple.getDay();
+                              const ISOweekStart = new Date(simple);
+                              ISOweekStart.setDate(simple.getDate() - dow + (dow <= 4 ? 1 : 8));
+                              const ISOweekEnd = new Date(ISOweekStart);
+                              ISOweekEnd.setDate(ISOweekStart.getDate() + 6);
+                              const f = d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                              return `${f(ISOweekStart)} à ${f(ISOweekEnd)}`;
+                            };
+
+                            let graficoBarras, graficoPizza;
+
+                            function criarGraficos() {
+                              const isDark = document.documentElement.classList.contains('dark');
+                              const cores = isDark ? coresEscuro : coresClaro;
+                              const corTexto = '#8F98B2';
+
+                              if (ctxBarras) {
+                                if (graficoBarras) graficoBarras.destroy();
+                                const chartData = {
+                                  labels: @Html.Raw(lblJson),
+                                  datasets: @Html.Raw(dsJson)
+                                };
+                                chartData.datasets.forEach((ds, i) => {
+                                  ds.backgroundColor = cores[i % cores.length];
+                                  ds.borderWidth = 0;
+                                });
+                                const totaisPorSemana = chartData.labels.map((_, i) =>
+                                  chartData.datasets.reduce((s, ds) => s + ds.data[i], 0)
+                                );
+                                graficoBarras = new Chart(ctxBarras, {
+                                  type: 'bar',
+                                  data: chartData,
+                                  options: {
+                                    responsive: true,
+                                    maintainAspectRatio: true,
+                                    plugins: {
+                                      tooltip: {
+                                        mode: 'index',
+                                        intersect: false,
+                                        callbacks: {
+                                          title: ctx => {
+                                            const i = ctx[0].dataIndex;
+                                            return `(${getDateRange(anos[i], semanas[i])})`;
+                                          },
+                                          label: ctx => {
+                                            const val = ctx.parsed.y;
+                                            if (val === 0) return null;
+                                            const total = ctx.chart.data.datasets.reduce((s, ds) => s + ds.data[ctx.dataIndex], 0);
+                                            const pct = total ? ((val / total) * 100).toFixed(1) : 0;
+                                            return `${ctx.dataset.label}: ${val} (${pct}%)`;
+                                          }
+                                        }
+                                      },
+                                      legend: { display: false }
+                                    },
+                                    scales: {
+                                      x: {
+                                        stacked: true,
+                                        grid: { display: false },
+                                        ticks: { color: corTexto, font: { family: 'Inter, sans-serif', size: 10, weight: '500' } }
+                                      },
+                                      y: {
+                                        stacked: true,
+                                        beginAtZero: true,
+                                        grid: { display: false },
+                                        ticks: {
+                                          color: corTexto,
+                                          font: { family: 'Inter, sans-serif', size: 10, weight: '500' },
+                                          callback: v => {
+                                            const max = Math.max(...totaisPorSemana);
+                                            return max ? ((v / max) * 100).toFixed(0) + '%' : '0%';
+                                          }
+                                        }
+                                      }
+                                    }
+                                  }
+                                });
+                              }
+
+                              if (ctxPizza) {
+                                if (graficoPizza) graficoPizza.destroy();
+                                graficoPizza = new Chart(ctxPizza, {
+                                  type: 'doughnut',
+                                  data: {
+                                    labels: labelsPizza,
+                                    datasets: [{
+                                      data: dadosPizza,
+                                      backgroundColor: cores.slice(0, labelsPizza.length),
+                                      borderWidth: 0,
+                                    }]
+                                  },
+                                  options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    rotation: 270,
+                                    cutout: '70%',
+                                    plugins: {
+                                      legend: {
+                                        display: true,
+                                        position: 'right',
+                                        labels: {
+                                          boxWidth: 12,
+                                          usePointStyle: true,
+                                          pointStyle: 'rectRounded',
+                                          color: corTexto,
+                                          font: { size: 14, family: 'Inter' },
+                                          padding: 20
+                                        },
+                                        onClick: (e, item) => {
+                                          const label = item.text;
+                                          const idxPizza = graficoPizza.data.labels.indexOf(label);
+                                          graficoPizza.getDatasetMeta(0).data[idxPizza].hidden = !graficoPizza.getDatasetMeta(0).data[idxPizza].hidden;
+                                          graficoPizza.update();
+
+                                          const idxBarra = graficoBarras.data.datasets.findIndex(ds => ds.label === label);
+                                          if (idxBarra !== -1) {
+                                            const ds = graficoBarras.data.datasets[idxBarra];
+                                            ds.hidden = !ds.hidden;
+                                            graficoBarras.update();
+                                          }
+                                        }
+                                      }
+                                    }
+                                  },
+                                  plugins: [{
+                                    id: 'centerText',
+                                    beforeDraw(chart) {
+                                      const { ctx, chartArea: { left, right, top, bottom } } = chart;
+                                      ctx.save();
+                                      ctx.font = 'bold 16px Arial, Inter, sans-serif';
+                                      ctx.fillStyle = corTexto;
+                                      ctx.textAlign = 'center';
+                                      ctx.textBaseline = 'middle';
+                                      const total = dadosPizza.reduce((a, b) => a + b, 0);
+                                      ctx.fillText(`${total} Ações`, (left + right) / 2, (top + bottom) / 2);
+                                      ctx.restore();
+                                    }
+                                  }]
+                                });
+                              }
                             }
 
                             if (localStorage.getItem('theme') === 'dark') {
-                            document.documentElement.classList.add('dark');
-                            toggle.checked = true;
+                              document.documentElement.classList.add('dark');
+                              if (toggle) toggle.checked = true;
                             }
 
-                            criarGrafico();
+                            criarGraficos();
 
-                            toggle.addEventListener('change', function () {
-                            if (this.checked) {
-                            document.documentElement.classList.add('dark');
-                            localStorage.setItem('theme', 'dark');
-                            } else {
-                            document.documentElement.classList.remove('dark');
-                            localStorage.setItem('theme', 'light');
-                            }
-                            criarGrafico();
+                            toggle?.addEventListener('change', () => {
+                              if (toggle.checked) {
+                                document.documentElement.classList.add('dark');
+                                localStorage.setItem('theme', 'dark');
+                              } else {
+                                document.documentElement.classList.remove('dark');
+                                localStorage.setItem('theme', 'light');
+                              }
+                              criarGraficos();
                             });
                         </script>
+
+
+
+
+
+
                     </div>
 
-                </div> <!-- fecha QuadroCards GraficoEvolucao -->
+
+                </div>
 
                 <div class="QuadroCards coluna Unidades">
                     <div class="linha" style="--gap: 10px; align-items: center">
@@ -438,9 +567,9 @@ style="
 
                                     @if (possuiLog)
                                     {
+
                                         var totalLogs = logsDoDia.Count(l =>
-                                        (l.target == "user" && l.component == "core" && l.action == "graded") ||
-                                        (l.target == "assessable" && l.component == "mod_forum" && l.action == "uploaded"));
+                                        AcaoDe(l.action, l.target, l.component) != "Outros");
 
                                         if (totalLogs > 1)
                                         {
@@ -453,14 +582,9 @@ style="
                                 {
                                     foreach (var log in logsDoDia)
                                     {
-                                        string? acao = log.action switch
-                                        {
-                                            "graded" when log.target == "user" && log.component == "core" => "Atividade Concluída",
-                                            "uploaded" when log.target == "assessable" && log.component == "mod_forum" => "Postagem no Fórum",
-                                            _ => null
-                                        };
+                                        string? acao = AcaoDe(log.action, log.target, log.component);
 
-                                        if (acao != null)
+                                        if (acao != null && acao != "Outros")
                                         {
                                             <div class="item-log">
                                                 <span class="acao">@acao</span>

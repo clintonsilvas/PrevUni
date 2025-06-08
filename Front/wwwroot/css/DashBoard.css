@@ -123,6 +123,17 @@
     color: var(--Cinza70B);
 }
 
+    .tabela-card thead {
+        background-color: var(--Cinza100B);
+        border-bottom: 1px solid var(--Cinza90B);
+    }
+
+
+        .tabela-card thead th {
+            padding: 20px;
+        }
+
+
     .tabela-card a {
         color: var(--Cinza70B);
         text-decoration: none;
@@ -145,7 +156,7 @@
 
     .tabela-card td,
     .tabela-card th {
-        padding: 8px;
+        padding: 10px 20px;
         width: fit-content;
     }
 
@@ -153,9 +164,10 @@
         background-color: var(--Cinza100B);
     }
 
-    .tabela-card th:last-child,
+    .tabela-card th:last-child button,
     .tabela-card td:last-child {
         text-align: right;
+        margin-left: auto;
     }
 
     .tabela-card td:first-child {
@@ -163,7 +175,6 @@
         font-weight: 800;
         width: 10px;
     }
-
 /* Bot�o de ordena��o */
 .bot_tab {
     border: none;

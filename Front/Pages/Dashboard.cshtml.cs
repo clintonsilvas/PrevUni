@@ -8,6 +8,10 @@ namespace Front.Pages
 {
     public class DashboardModel : PageModel
     {
+
+
+
+
         public Curso Cursos { get; set; } = new();
         public List<AlunoResumo> Alunos { get; set; } = new();
 

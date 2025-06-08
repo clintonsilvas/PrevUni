@@ -1,0 +1,67 @@
+﻿@page
+@model Front.Pages.Pagina_de_TesteModel
+@{
+}
+
+@{
+    Layout = null; // se estiver usando layout, remova essa linha
+    var logs = new List<dynamic>
+    {
+        new { date = "2024-06-01" },
+        new { date = "2024-06-01" },
+        new { date = "2024-06-02" },
+        new { date = "2024-06-03" },
+        new { date = "2024-06-03" },
+        new { date = "2024-06-03" }
+    };
+
+    var agrupados = logs
+        .GroupBy(l => DateTime.Parse(l.date).Date)
+        .Select(g => new { Data = g.Key.ToString("yyyy-MM-dd"), Quantidade = g.Count() })
+        .ToList();
+
+    var labels = agrupados.Select(a => a.Data).ToList();
+    var values = agrupados.Select(a => a.Quantidade).ToList();
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Gráfico de Logs</title>
+</head>
+<body>
+    <canvas id="graficoLogs" width="600" height="300"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        const labels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(labels));
+        const values = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(values));
+
+        const ctx = document.getElementById('graficoLogs').getContext('2d');
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Quantidade de Logs',
+                    data: values,
+                    backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                }]
+            },
+            options: {
+                responsive: true,
+                scales: {
+                    x: {
+                        title: { display: true, text: 'Data' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Quantidade' }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
