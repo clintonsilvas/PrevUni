@@ -27,44 +27,7 @@ style="
                     <img src="~/css/icons/formando.svg" alt="Icone_Aluno" />
                 </div>
                 <div class="coluna" style="--gap: 8px">
-                    <div class="linha" style="align-items: center">
-                        <h2 class="corPreta40B">@Model.User.name</h2>
-                        <input type="checkbox" style="display: none" id="favCurso" @(FavoritoService.EhFavorito(@Model.User.name) ? "checked" : "")
-                               onchange="alunoFavorito(this)" />
-                        <label for="favCurso">
-                            <img id="imgFavCurso" src="@Url.Content(FavoritoService.EhFavorito(@Model.User.user_id) ? "~/css/icons/estrela.svg" : "~/css/icons/estrela_inativa.svg")" height="20" />
-                        </label>
-
-                        <script>
-                            async function alunoFavorito(checkbox) {
-                                const checked = checkbox.checked;
-                                const aluno = '@Model.User.user_id';
-                                const nome = '@Model.User.name';
-                                const img = document.getElementById('imgFavCurso');
-
-                                // Trocar a imagem já no clique
-                                img.src = checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
-
-                                const url = checked
-                                    ? `/api/favoritos/adicionar_aluno?nome=${encodeURIComponent(nome)}&id=${encodeURIComponent(aluno)}`
-                                    : `/api/favoritos/remover_aluno?nome=${encodeURIComponent(nome)}&id=${encodeURIComponent(aluno)}`;
-
-                                try {
-                                    const response = await fetch(url, { method: 'POST' });
-                                    if (!response.ok) {
-                                        alert('Erro ao atualizar favoritos');
-                                        checkbox.checked = !checked;
-                                        img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
-                                    }
-                                } catch (err) {
-                                    alert('Erro na requisição');
-                                    checkbox.checked = !checked;
-                                    img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
-                                }
-                            }
-                        </script>
-                    </div>
-
+                    <h2 class="corPreta40B">@Model.User.name</h2>
 
                     @if (Model.AlunoLogs.Any())
                     {

@@ -65,6 +65,7 @@
 
             .curso_tab_fav:hover {
                 color: var(--Azul-principal);
+                font-weight: 600;
             }
 
         .caixa_fav {
@@ -107,23 +108,13 @@
                 <img src="~/css/icons/estrela.svg" height="20" />
                 <h4 class="corCinza60B">Favoritos</h4>
             </div>
-            <div class="coluna caixa_fav" style="gap: 10px;">
+            <div class="coluna caixa_fav" style="gap: 10px">
                 <img src="~/css/icons/caderno.svg" height="20" style="margin-right: auto" />
                 @{
                     var cursos = FavoritoService.ListarCursos();
                     foreach (var c in cursos)
                     {
                         <a class="curso_tab_fav" asp-page="/Dashboard" asp-route-curso="@c">@c</a>
-                    }
-                }
-            </div>
-            <div class="coluna caixa_fav" style="gap: 10px; margin-top: 16px">
-                <img src="~/css/icons/caderno.svg" height="20" style="margin-right: auto" />
-                @{
-                    List<AlunoNome> alunos = FavoritoService.ListarAluno();
-                    foreach (AlunoNome c in alunos)
-                    {
-                        <a class="curso_tab_fav" asp-page="/PerfilAluno" asp-route-userId="@c.UserId">@c.Nome</a>
                     }
                 }
             </div>
