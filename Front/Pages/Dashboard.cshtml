@@ -151,7 +151,7 @@ style="
                 <div class="linha alt_li" style="flex: 1">
                     <div class="QuadroCards GraficoEvolucao linha"
                     style="flex: 1; --gap: 16px">
-                    
+
 
 
                         <div class="coluna graf_caixa" style="--gap: 16px; flex: 1">
@@ -241,9 +241,9 @@ style="
 
 
 
-                            
-                                <canvas id="graficoLogs"></canvas>
-                            
+
+                            <canvas id="graficoLogs"></canvas>
+
                         </div>
 
                         <div class="coluna graf_caixa" style="--gap: 16px; flex: 1">
@@ -282,7 +282,7 @@ style="
                                 const quantidadeOutros = totalLog - totalAcoes;
 
                                 if (quantidadeOutros > 0) {
-                                    acoesComOutros.push({ label: 'Outros', quantidade: quantidadeOutros });
+                                acoesComOutros.push({ label: 'Outros', quantidade: quantidadeOutros });
                                 }
 
                                 const labelsPizza = acoesComOutros.map(a => a.label);
@@ -292,191 +292,191 @@ style="
                                 const coresEscuro = ['#7AAEFF', '#5A8BDD', '#3A69BB', '#1A4799', '#555555'];
 
                                 function getDateRange(year, week) {
-                                    const simple = new Date(year, 0, 1 + (week - 1) * 7);
-                                    const dow = simple.getDay();
-                                    const ISOweekStart = new Date(simple);
-                                    if (dow <= 4)
-                                        ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
-                                    else
-                                        ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+                                const simple = new Date(year, 0, 1 + (week - 1) * 7);
+                                const dow = simple.getDay();
+                                const ISOweekStart = new Date(simple);
+                                if (dow <= 4)
+                                ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
+                                else
+                                ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
 
-                                    const ISOweekEnd = new Date(ISOweekStart);
-                                    ISOweekEnd.setDate(ISOweekStart.getDate() + 6);
+                                const ISOweekEnd = new Date(ISOweekStart);
+                                ISOweekEnd.setDate(ISOweekStart.getDate() + 6);
 
-                                    const f = d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-                                    return `${f(ISOweekStart)} à ${f(ISOweekEnd)}`;
+                                const f = d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+                                return `${f(ISOweekStart)} à ${f(ISOweekEnd)}`;
                                 }
 
                                 let graficoBarras;
                                 let graficoPizza;
 
                                 function criarGraficos() {
-                                    const isDarkMode = document.documentElement.classList.contains('dark');
-                                    const cores = isDarkMode ? coresEscuro : coresClaro;
-                                    const corTexto = '#8F98B2';
+                                const isDarkMode = document.documentElement.classList.contains('dark');
+                                const cores = isDarkMode ? coresEscuro : coresClaro;
+                                const corTexto = '#8F98B2';
 
-                                    // Gráfico de Barras
-                                    if (ctxBarras) {
-                                        if (graficoBarras) graficoBarras.destroy();
+                                // Gráfico de Barras
+                                if (ctxBarras) {
+                                if (graficoBarras) graficoBarras.destroy();
 
-                                        const chartData = {
-                                            labels: @Html.Raw(lblJson),
-                                            datasets: @Html.Raw(dsJson)
-                                        };
+                                const chartData = {
+                                labels: @Html.Raw(lblJson),
+                                datasets: @Html.Raw(dsJson)
+                                };
 
-                                        chartData.datasets.forEach((ds, i) => {
-                                            ds.backgroundColor = cores[i % cores.length];
-                                            ds.borderWidth = 0;
-                                        });
+                                chartData.datasets.forEach((ds, i) => {
+                                ds.backgroundColor = cores[i % cores.length];
+                                ds.borderWidth = 0;
+                                });
 
-                                        const totaisPorSemana = chartData.labels.map((_, i) =>
-                                            chartData.datasets.reduce((soma, ds) => soma + ds.data[i], 0)
-                                        );
+                                const totaisPorSemana = chartData.labels.map((_, i) =>
+                                chartData.datasets.reduce((soma, ds) => soma + ds.data[i], 0)
+                                );
 
-                                        graficoBarras = new Chart(ctxBarras, {
-                                            type: 'bar',
-                                            data: chartData,
-                                            options: {
-                                                responsive: true,
-                                                maintainAspectRatio: true,
-                                                plugins: {
-                                                    tooltip: {
-                                                        mode: 'index',
-                                                        intersect: false,
-                                                        callbacks: {
-                                                            title: context => {
-                                                                const index = context[0].dataIndex;
-                                                                return `(${getDateRange(anos[index], semanas[index])})`;
-                                                            },
-                                                            label: context => {
-                                                                const valor = context.parsed.y;
-                                                                if (valor === 0) return null;
-                                                                const total = context.chart.data.datasets.reduce((soma, ds) => soma + ds.data[context.dataIndex], 0);
-                                                                const porcentagem = total > 0 ? ((valor / total) * 100).toFixed(1) : 0;
-                                                                return `${context.dataset.label}: ${valor} (${porcentagem}%)`;
-                                                            }
-                                                        }
-                                                    },
-                                                    legend: { display: false }
-                                                },
-                                                scales: {
-                                                    x: {
-                                                        stacked: true,
-                                                        grid: { display: false },
-                                                        ticks: {
-                                                            color: corTexto,
-                                                            font: { family: 'Inter, sans-serif', size: 10, weight: '500' }
-                                                        }
-                                                    },
-                                                    y: {
-                                                        stacked: true,
-                                                        beginAtZero: true,
-                                                        grid: { display: false },
-                                                        ticks: {
-                                                            color: corTexto,
-                                                            font: { family: 'Inter, sans-serif', size: 10, weight: '500' },
-                                                            callback: valor => {
-                                                                const max = Math.max(...totaisPorSemana);
-                                                                const porcentagem = max > 0 ? (valor / max) * 100 : 0;
-                                                                return porcentagem.toFixed(0) + '%';
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            },
-                                        });
-                                    }
+                                graficoBarras = new Chart(ctxBarras, {
+                                type: 'bar',
+                                data: chartData,
+                                options: {
+                                responsive: true,
+                                maintainAspectRatio: true,
+                                plugins: {
+                                tooltip: {
+                                mode: 'index',
+                                intersect: false,
+                                callbacks: {
+                                title: context => {
+                                const index = context[0].dataIndex;
+                                return `(${getDateRange(anos[index], semanas[index])})`;
+                                },
+                                label: context => {
+                                const valor = context.parsed.y;
+                                if (valor === 0) return null;
+                                const total = context.chart.data.datasets.reduce((soma, ds) => soma + ds.data[context.dataIndex], 0);
+                                const porcentagem = total > 0 ? ((valor / total) * 100).toFixed(1) : 0;
+                                return `${context.dataset.label}: ${valor} (${porcentagem}%)`;
+                                }
+                                }
+                                },
+                                legend: { display: false }
+                                },
+                                scales: {
+                                x: {
+                                stacked: true,
+                                grid: { display: false },
+                                ticks: {
+                                color: corTexto,
+                                font: { family: 'Inter, sans-serif', size: 10, weight: '500' }
+                                }
+                                },
+                                y: {
+                                stacked: true,
+                                beginAtZero: true,
+                                grid: { display: false },
+                                ticks: {
+                                color: corTexto,
+                                font: { family: 'Inter, sans-serif', size: 10, weight: '500' },
+                                callback: valor => {
+                                const max = Math.max(...totaisPorSemana);
+                                const porcentagem = max > 0 ? (valor / max) * 100 : 0;
+                                return porcentagem.toFixed(0) + '%';
+                                }
+                                }
+                                }
+                                }
+                                },
+                                });
+                                }
 
-                                    // Gráfico de Pizza
-                                    if (ctxPizza) {
-                                        if (graficoPizza) graficoPizza.destroy();
+                                // Gráfico de Pizza
+                                if (ctxPizza) {
+                                if (graficoPizza) graficoPizza.destroy();
 
-                                        graficoPizza = new Chart(ctxPizza, {
-                                            type: 'doughnut',
-                                            data: {
-                                                labels: labelsPizza,
-                                                datasets: [{
-                                                    data: dadosPizza,
-                                                    backgroundColor: cores.slice(0, labelsPizza.length),
-                                                    borderWidth: 0,
-                                                }]
-                                            },
-                                            options: {
-                                                responsive: true,
-                                                maintainAspectRatio: false,
-                                                rotation: 270,
-                                                circumference: 360,
-                                                cutout: '70%',
-                                                plugins: {
-                                                    legend: {
-                                                        display: true,
-                                                        position: 'right',
-                                                        labels: {
-                                                            boxWidth: 12,
-                                                            usePointStyle: true,
-                                                            pointStyle: 'rectRounded',
-                                                            color: corTexto,
-                                                            font: { size: 14, family: 'Inter' },
-                                                            padding: 20
-                                                        },
-                                                        onClick: (e, legendItem) => {
-                                                            const label = legendItem.text;
-                                                            const indexPizza = graficoPizza.data.labels.findIndex(l => l === label);
-                                                            const metaPizza = graficoPizza.getDatasetMeta(0).data[indexPizza];
-                                                            metaPizza.hidden = !metaPizza.hidden;
-                                                            graficoPizza.update();
+                                graficoPizza = new Chart(ctxPizza, {
+                                type: 'doughnut',
+                                data: {
+                                labels: labelsPizza,
+                                datasets: [{
+                                data: dadosPizza,
+                                backgroundColor: cores.slice(0, labelsPizza.length),
+                                borderWidth: 0,
+                                }]
+                                },
+                                options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                rotation: 270,
+                                circumference: 360,
+                                cutout: '70%',
+                                plugins: {
+                                legend: {
+                                display: true,
+                                position: 'right',
+                                labels: {
+                                boxWidth: 12,
+                                usePointStyle: true,
+                                pointStyle: 'rectRounded',
+                                color: corTexto,
+                                font: { size: 14, family: 'Inter' },
+                                padding: 20
+                                },
+                                onClick: (e, legendItem) => {
+                                const label = legendItem.text;
+                                const indexPizza = graficoPizza.data.labels.findIndex(l => l === label);
+                                const metaPizza = graficoPizza.getDatasetMeta(0).data[indexPizza];
+                                metaPizza.hidden = !metaPizza.hidden;
+                                graficoPizza.update();
 
-                                                            const indexBarras = graficoBarras.data.datasets.findIndex(ds => ds.label === label);
-                                                            if (indexBarras !== -1) {
-                                                                const ds = graficoBarras.data.datasets[indexBarras];
-                                                                ds.hidden = !ds.hidden;
-                                                                graficoBarras.update();
-                                                            }
-                                                        }
-                                                    }
-                                                }
-                                            },
-                                            plugins: [{
-                                                id: 'centerText',
-                                                beforeDraw(chart) {
-                                                    const { ctx, chartArea: { left, right, top, bottom } } = chart;
-                                                    const x = (left + right) / 2;
-                                                    const y = (top + bottom) / 2;
+                                const indexBarras = graficoBarras.data.datasets.findIndex(ds => ds.label === label);
+                                if (indexBarras !== -1) {
+                                const ds = graficoBarras.data.datasets[indexBarras];
+                                ds.hidden = !ds.hidden;
+                                graficoBarras.update();
+                                }
+                                }
+                                }
+                                }
+                                },
+                                plugins: [{
+                                id: 'centerText',
+                                beforeDraw(chart) {
+                                const { ctx, chartArea: { left, right, top, bottom } } = chart;
+                                const x = (left + right) / 2;
+                                const y = (top + bottom) / 2;
 
-                                                    ctx.save();
-                                                    ctx.font = 'bold 16px Arial, Inter, sans-serif';
-                                                    ctx.fillStyle = corTexto;
-                                                    ctx.textAlign = 'center';
-                                                    ctx.textBaseline = 'middle';
+                                ctx.save();
+                                ctx.font = 'bold 16px Arial, Inter, sans-serif';
+                                ctx.fillStyle = corTexto;
+                                ctx.textAlign = 'center';
+                                ctx.textBaseline = 'middle';
 
-                                                    const totalAcoes = dadosPizza.reduce((a, b) => a + b, 0);
-                                                    ctx.fillText(`${totalAcoes} Ações`, x, y);
-                                                    ctx.restore();
-                                                }
-                                            }]
-                                        });
-                                    }
+                                const totalAcoes = dadosPizza.reduce((a, b) => a + b, 0);
+                                ctx.fillText(`${totalAcoes} Ações`, x, y);
+                                ctx.restore();
+                                }
+                                }]
+                                });
+                                }
                                 }
 
                                 // Aplica tema salvo ao carregar
                                 if (localStorage.getItem('theme') === 'dark') {
-                                    document.documentElement.classList.add('dark');
-                                    if (toggle) toggle.checked = true;
+                                document.documentElement.classList.add('dark');
+                                if (toggle) toggle.checked = true;
                                 }
 
                                 criarGraficos();
 
                                 if (toggle) {
-                                    toggle.addEventListener('change', function () {
-                                        if (this.checked) {
-                                            document.documentElement.classList.add('dark');
-                                            localStorage.setItem('theme', 'dark');
-                                        } else {
-                                            document.documentElement.classList.remove('dark');
-                                            localStorage.setItem('theme', 'light');
-                                        }
-                                        criarGraficos();
-                                    });
+                                toggle.addEventListener('change', function () {
+                                if (this.checked) {
+                                document.documentElement.classList.add('dark');
+                                localStorage.setItem('theme', 'dark');
+                                } else {
+                                document.documentElement.classList.remove('dark');
+                                localStorage.setItem('theme', 'light');
+                                }
+                                criarGraficos();
+                                });
                                 }
                             </script>
 
@@ -549,7 +549,7 @@ style="
                         <thead>
                             <tr>
                                 <th>
-                                    <button onclick="ordenarTabela(0)" class="bot_tab">#</button>
+                                    <span class="bot_tab">#</span>
                                 </th>
                                 <th>
                                     <button onclick="ordenarTabela(1)" class="bot_tab">
@@ -561,8 +561,20 @@ style="
                                         Último Acesso <img src="~/css/icons/Ordenar.svg" />
                                     </button>
                                 </th>
+                                @{
+                                    int ind = 3;
+                                }
+                                @foreach(var ac in acoesFixas)
+                                {
+                                    <th>
+                                        <button onclick="ordenarTabela(@ind)" class="bot_tab">
+                                            @ac.nome_acao <img src="~/css/icons/Ordenar.svg" />
+                                        </button>
+                                    </th>
+                                    ind++;
+                                }
                                 <th>
-                                    <button onclick="ordenarTabela(3)" class="bot_tab">
+                                    <button onclick="ordenarTabela(@ind)" class="bot_tab">
                                         Engajamento <img src="~/css/icons/Ordenar.svg" />
                                     </button>
                                 </th>
@@ -587,6 +599,13 @@ style="
                                             }
                                             @dataFormatada
                                         </td>
+                                        @foreach (var ac in acoesFixas)
+                                        {
+                                            <td>
+                                                @Model.Cursos.Logs.Where(l => l.user_id == al.user_id && l.action == ac.action && l.target == ac.target && l.component == ac.component).ToList().Count()
+                                            </td>
+                                        }
+
                                         @{
                                             var engajamento = Model.AlunosEngajamento
                                             .FirstOrDefault(e => e.UserId == al.user_id)?.Engajamento;
@@ -638,27 +657,32 @@ style="
 
 </div>
 <script>
-        const estadoOrdenacao = {
-            0: true,
-            1: true,
-            2: true
-        };
+    const estadoOrdenacao = {};
+
     function ordenarTabela(coluna) {
         const tabela = document.getElementById("tabelaAlunos");
         const tbody = tabela.querySelector("tbody");
         const linhas = Array.from(tbody.querySelectorAll("tr"));
-        const crescente = estadoOrdenacao[coluna];
+        const crescente = estadoOrdenacao[coluna] ?? true;
 
         linhas.sort((a, b) => {
             let valA = a.children[coluna].innerText.trim();
             let valB = b.children[coluna].innerText.trim();
 
-            if (coluna === 2) { // Data
+            // Detectar tipo de dado
+            const isPercentual = valA.includes('%');
+            const isDataCustom = valA.startsWith("Dia ");
+            const isNumero = !isNaN(parseFloat(valA.replace(',', '.')));
+
+            if (isPercentual) {
+                valA = parseFloat(valA.replace('%', '').replace(',', '.')) || 0;
+                valB = parseFloat(valB.replace('%', '').replace(',', '.')) || 0;
+            } else if (isDataCustom) {
                 valA = parseDataPersonalizada(valA);
                 valB = parseDataPersonalizada(valB);
-            } else if (coluna === 3) { // % presença
-                valA = parseFloat(valA.replace('%', '')) || 0;
-                valB = parseFloat(valB.replace('%', '')) || 0;
+            } else if (isNumero) {
+                valA = parseFloat(valA.replace(',', '.'));
+                valB = parseFloat(valB.replace(',', '.'));
             }
 
             if (!isNaN(valA) && !isNaN(valB)) {

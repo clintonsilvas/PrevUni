@@ -187,10 +187,7 @@
     cursor: pointer;
 }
 
-/* Inverter texto e �cone no �ltimo bot�o (Engajamento) */
-th:last-child .bot_tab {
-    flex-direction: row-reverse;
-}
+
 
 
 .caixaProgresso {

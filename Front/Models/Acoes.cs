@@ -12,9 +12,9 @@
         {
             return new List<Acoes>
     {
-        new Acoes { nome_acao = "Atividade Concluída", action = "graded", target = "user", component = "core" },
-        new Acoes { nome_acao = "Postagem no Fórum", action = "uploaded", target = "assessable", component = "mod_forum" },
-        new Acoes { nome_acao = "Realizou um Quizz", action = "submitted", target = "attempt", component = "mod_quiz" },
+        new Acoes { nome_acao = "Atividade", action = "graded", target = "user", component = "core" },
+        new Acoes { nome_acao = "Fórum", action = "uploaded", target = "assessable", component = "mod_forum" },
+        new Acoes { nome_acao = "Quizz", action = "submitted", target = "attempt", component = "mod_quiz" },
 
         //new Acoes { nome_acao = "Visualizar Disciplina", action = "viewed", target = "course", component = "core" },
         //new Acoes { nome_acao = "Visualizar Tela com todos os Emblemas", action = "viewed", target = "badge_listing", component = "core" },
