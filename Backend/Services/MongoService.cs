@@ -1,7 +1,8 @@
 ﻿using Backend.Models;
+using Backend.Services;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using Backend.Services;
+using System.Text;
 
 
 namespace Backend.Services
@@ -432,49 +433,104 @@ namespace Backend.Services
 
         public async Task<string> GerarResumoAlunoIAAsync(string userId)
         {
-            var pipeline = new[]
-            {
-        new BsonDocument("$unwind", "$logs"),
-        new BsonDocument("$match", new BsonDocument("logs.user_id", userId)),
-        new BsonDocument("$replaceRoot", new BsonDocument("newRoot", "$logs")),
-        new BsonDocument("$group", new BsonDocument
-        {
-            { "_id", "$user_id" },
-            { "nome", new BsonDocument("$first", "$name") },
-            { "ultimo_acesso", new BsonDocument("$max", "$user_lastaccess") },
-            { "total_acessos", new BsonDocument("$sum", 1) },
-            { "dias_ativos", new BsonDocument("$addToSet", new BsonDocument("$substr", new BsonArray { "$date", 0, 10 })) },
-            { "interacoes_por_componente", new BsonDocument("$push", "$component") },
-            { "cursos", new BsonDocument("$addToSet", "$course_fullname") }
-        })
-    };
+            // Pegar todos os logs do usuário
+            var match = new BsonDocument("$match", new BsonDocument("user_id", userId));
+            var unwind = new BsonDocument("$unwind", "$logs");
+            var matchLogs = new BsonDocument("$match", new BsonDocument("logs.user_id", userId));
+            var replaceRoot = new BsonDocument("$replaceRoot", new BsonDocument("newRoot", "$logs"));
 
-            var result = await _collection.AggregateAsync<BsonDocument>(pipeline);
-            var doc = await result.FirstOrDefaultAsync();
+            var pipeline = new List<BsonDocument> { unwind, matchLogs, replaceRoot };
 
-            if (doc == null) return "Usuário não encontrado";
+            var resultado = await _collection.AggregateAsync<BsonDocument>(pipeline);
+            var logs = await resultado.ToListAsync();
 
-            // Agrupando contagem de componentes
-            var componentes = doc["interacoes_por_componente"].AsBsonArray
-                .GroupBy(x => x.AsString)
+            if (!logs.Any())
+                return "Usuário não encontrado ou sem interações.";
+
+            var nome = logs.FirstOrDefault()?.GetValue("name", BsonNull.Value)?.AsString ?? "Nome não disponível";
+
+            var cursoInteracoes = logs
+                .GroupBy(l => l["course_fullname"].AsString)
                 .ToDictionary(g => g.Key, g => g.Count());
 
-            var componentesStr = string.Join(",", componentes.Select(kv => $"{kv.Key}:{kv.Value}"));
-            var cursosStr = string.Join(",", doc["cursos"].AsBsonArray.Select(c => c.AsString));
+            var componentes = logs
+                .GroupBy(l => l["component"].AsString)
+                .ToDictionary(g => g.Key, g => g.Count());
 
-            var resumoStr = string.Join(" / ", new[]
+            var acoes = logs
+                .GroupBy(l => l["action"].AsString)
+                .ToDictionary(g => g.Key, g => g.Count());
+
+            var diasAtivos = logs
+                .Select(l => DateTime.Parse(l["date"].AsString).Date)
+                .Distinct()
+                .Count();
+
+            var primeiroAcesso = logs
+                .Min(l => DateTime.Parse(l["date"].AsString));
+
+            var ultimoAcesso = logs
+                .Max(l => DateTime.Parse(l["date"].AsString));
+
+            var totalInteracoes = logs.Count;
+
+            // Interações semanais
+            var porSemana = logs
+                .GroupBy(l =>
+                {
+                    var data = DateTime.Parse(l["date"].AsString);
+                    var calendar = System.Globalization.CultureInfo.InvariantCulture.Calendar;
+                    var week = calendar.GetWeekOfYear(data, System.Globalization.CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+                    return $"{data.Year}-W{week:D2}";
+                })
+                .OrderBy(g => g.Key)
+                .Select(g =>
+                {
+                    var componentesSemana = g.GroupBy(l => l["component"].AsString)
+                                             .ToDictionary(c => c.Key, c => c.Count());
+                    return new
+                    {
+                        Semana = g.Key,
+                        Total = g.Count(),
+                        Componentes = componentesSemana
+                    };
+                });
+
+            // Construir o resumo
+            var sb = new StringBuilder();
+            sb.AppendLine($"Nome do Aluno: {nome}");
+            sb.AppendLine($"User ID: {userId}");
+            sb.AppendLine($"Total de Interações: {totalInteracoes}");
+            sb.AppendLine($"Dias Ativos: {diasAtivos}");
+            sb.AppendLine($"Primeiro Acesso: {primeiroAcesso:yyyy-MM-dd}");
+            sb.AppendLine($"Último Acesso: {ultimoAcesso:yyyy-MM-dd}");
+            sb.AppendLine();
+
+            sb.AppendLine("Interações por Curso:");
+            foreach (var curso in cursoInteracoes)
+                sb.AppendLine($"- {curso.Key}: {curso.Value} interações");
+
+            sb.AppendLine("\nComponentes mais utilizados:");
+            foreach (var comp in componentes.OrderByDescending(c => c.Value).Take(5))
+                sb.AppendLine($"- {comp.Key}: {comp.Value}");
+
+            sb.AppendLine("\nAções mais realizadas:");
+            foreach (var acao in acoes.OrderByDescending(a => a.Value).Take(5))
+                sb.AppendLine($"- {acao.Key}: {acao.Value}");
+
+            sb.AppendLine("\nResumo Semanal:");
+            foreach (var semana in porSemana)
             {
-        $"ID: {doc["_id"]}",
-        $"Nome: {doc["nome"]}",
-        $"Último Acesso: {doc["ultimo_acesso"]}",
-        $"Total de Acessos: {doc["total_acessos"]}",
-        $"Dias Ativos: {doc["dias_ativos"].AsBsonArray.Count}",
-        $"Interações por Componente: {componentesStr}",
-        $"Cursos Acessados: {cursosStr}"
-    });
+                sb.AppendLine($"Semana: {semana.Semana}");
+                sb.AppendLine($"  Total de Interações: {semana.Total}");
+                sb.AppendLine($"  Componentes:");
+                foreach (var comp in semana.Componentes)
+                    sb.AppendLine($"    - {comp.Key}: {comp.Value}");
+            }
 
-            return resumoStr;
+            return sb.ToString();
         }
+
 
         public async Task<BsonDocument> GerarResumoAlunoAsync(string userId)
         {
