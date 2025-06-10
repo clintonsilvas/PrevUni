@@ -523,7 +523,8 @@ style="
                                         <tr class="linha @(posicao > 5 ? "escondido" : "")">
                                             <td style="width: 14px">@posicao</td>
                                             <td style="flex: 1">
-                                                <a asp-page="/PerfilAluno" asp-route-userId="@l.UserId">@l.Nome</a>
+                                                <a asp-page="/PerfilAluno" asp-route-userId="@l.UserId" asp-route-curso="@Model.Cursos.curso">@l.Nome</a>
+                       
                                             </td>
                                             <td>@engajamentoFormatado</td>
                                         </tr>

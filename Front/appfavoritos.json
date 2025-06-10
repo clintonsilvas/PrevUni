@@ -3,7 +3,11 @@
     "Cursos": [
       "COURSE_43D01694F015D74B",
       "ALUNOS HACKATHON",
-      "COURSE_AC16FD94E137C018"
+      "COURSE_AC16FD94E137C018",
+      "COURSE_0BDFE78A862B6FE2",
+      "COURSE_6F593E333D7CBBE8",
+      "COURSE_142E3171609C3155",
+      "COURSE_455F25B492E9AD8C"
     ],
     "Alunos": [
       {
@@ -17,6 +21,10 @@
       {
         "UserId": "USER_D03EDF83BECF",
         "Nome": "E3 P5"
+      },
+      {
+        "UserId": "USER_4FFA84F31196",
+        "Nome": "A4 D1"
       }
     ]
   }
