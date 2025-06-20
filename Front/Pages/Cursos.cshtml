@@ -48,16 +48,16 @@
         </div>
     </div>
     <div class="flex grid" id="us_cont">
-        @foreach (var curso in Model.Cursos.OrderBy(c => c.curso))
+        @foreach (var curso in Model.Cursos.OrderBy(c => c.nomeCurso))
         {
-            <a asp-page="/Dashboard" asp-route-curso="@curso.curso" class="card-curso" style="text-decoration: none">
+            <a asp-page="/Dashboard" asp-route-curso="@curso.nomeCurso" class="card-curso" style="text-decoration: none">
                 <div class="flex QuadroCards_List coluna" style="gap: 24px">
                     <div class="linha" style="align-items: center">
                         <img src="~/css/icons/caderno.svg" height="16px" />
-                        <h4 class="corPreta40B">@curso.curso</h4>
+                        <h4 class="corPreta40B">@curso.nomeCurso</h4>
                     </div>
                     <div class="coluna" style="gap: 4px">
-                        <span class="subH4 corCinza60B">Quant: @curso.alunos Alunos</span>
+                        <span class="subH4 corCinza60B">Quant: @curso.quantAlunos Alunos</span>
                     </div>
                     <div class="linha">
                         <div class="linha cur_porcVerd" style="gap: 8px">

@@ -343,13 +343,24 @@
 
 .progress-container {
     width: 400px;
+    height: 80px;
     background-color: var(--Cinza100B);
     border-radius: 16px;
     overflow: hidden;
     height: 30px;
+    background-image: url('icons/ProgressBarBG.svg');
+    background-size: cover;
+
+    padding: 2px;
+    display: flex;
+}
+
+.dark .progress-container {
+    background-image: url('icons/ProgressBarBG_Dark.svg');
 }
 
 .progress-bar {
+    display: flex;
     height: 100%;
     background-color: var(--Verde);
     text-align: center;
@@ -359,6 +370,7 @@
 }
 
     .progress-bar span {
+        flex: 1;
         color: #fff;
         font-family: "Inter", sans-serif;
         font-size: 10pt;

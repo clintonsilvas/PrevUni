@@ -7,8 +7,8 @@ namespace Front.Models
     public class Curso
     {
         private readonly FavoritoService _favoritoService;
-        public string curso { get; set; }
-        public int alunos { get; set; }
+        public string nomeCurso { get; set; }
+        public int quantAlunos { get; set; }
         public List<LogUsuario> Logs { get; set; } = new();
         public List<int> Semanas { get; set; } = new(new int[10]);
         public List<Usuario> usuarios { get; set; } = new();
@@ -23,7 +23,7 @@ namespace Front.Models
         public async Task AtualizaSemanas()
         {
             using var httpClient = new HttpClient();
-            var response = await httpClient.GetAsync($"https://localhost:7232/api/Moodle/logs-por-curso/{curso}");
+            var response = await httpClient.GetAsync($"https://localhost:7232/api/Moodle/logs-por-nomeCurso/{nomeCurso}");
 
             if (!response.IsSuccessStatusCode) return;
 
@@ -51,7 +51,7 @@ namespace Front.Models
         public async Task AtualizaAlunos()
         {
             using var httpClient = new HttpClient();
-            var response = await httpClient.GetAsync($"https://localhost:7232/api/Moodle/alunos-por-curso/{curso}");
+            var response = await httpClient.GetAsync($"https://localhost:7232/api/Moodle/quantAlunos-por-nomeCurso/{nomeCurso}");
 
             if (!response.IsSuccessStatusCode) return;
 
@@ -63,7 +63,7 @@ namespace Front.Models
 
     public class CursoComAlunos
     {
-        public string curso { get; set; }
+        public string nomeCurso { get; set; }
         public List<Usuario> usuarios { get; set; }
     }
 }

@@ -2,7 +2,7 @@
 {
     public class CursoComAlunos
     {
-        public string curso { get; set; }
+        public string nomeCurso { get; set; }
         public List<Usuario> usuarios { get; set; }
     }
 }

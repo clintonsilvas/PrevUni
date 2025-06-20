@@ -26,7 +26,7 @@ namespace Front.Pages
         {
             var client = _httpClientFactory.CreateClient();
 
-            var resumoResponse = await client.GetAsync($"https://localhost:7232/api/Mongo/resumo-curso/{CursoNome}");
+            var resumoResponse = await client.GetAsync($"https://localhost:7232/api/Mongo/resumo-nomeCurso/{CursoNome}");
 
 
             if (!resumoResponse.IsSuccessStatusCode)
@@ -73,7 +73,7 @@ namespace Front.Pages
         {
             var client = _httpClientFactory.CreateClient();
 
-            var resumoResponse = await client.GetAsync($"https://localhost:7232/resumo-curso/{CursoNome}");
+            var resumoResponse = await client.GetAsync($"https://localhost:7232/resumo-nomeCurso/{CursoNome}");
             var resumoJson = await resumoResponse.Content.ReadAsStringAsync();
 
             if (string.IsNullOrWhiteSpace(resumoJson))
@@ -102,7 +102,7 @@ namespace Front.Pages
 
             var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
 
-            var iaResponse = await client.PostAsync("https://localhost:7232/pergunte-ia-curso", content);
+            var iaResponse = await client.PostAsync("https://localhost:7232/pergunte-ia-nomeCurso", content);
             var iaResult = await iaResponse.Content.ReadAsStringAsync();
 
             if (!iaResponse.IsSuccessStatusCode)

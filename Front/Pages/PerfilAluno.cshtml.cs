@@ -25,7 +25,7 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
 
     public record AlunoEngajamento(
         [property: JsonPropertyName("userId")] string UserId,
-        [property: JsonPropertyName("nome")] string Nome,
+        [property: JsonPropertyName("name")] string Nome,
         [property: JsonPropertyName("engajamento")] double Engajamento
     );
 
@@ -47,9 +47,9 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
         ListaDeCursos = AlunoLogs.Select(l => l.course_fullname).Distinct().OrderBy(c => c).ToList();
 
 
-        if (!string.IsNullOrWhiteSpace(Curso))
+        if (!string.IsNullOrWhiteSpace(curso))
         {
-            AlunoLogs = AlunoLogs.Where(log => log.course_fullname == Curso).ToList();
+            AlunoLogs = AlunoLogs.Where(log => log.course_fullname == curso).ToList();
         }
 
         if (!AlunoLogs.Any())
@@ -91,7 +91,7 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
 
 
     [BindProperty(SupportsGet = true)]
-    public string Curso { get; set; } = string.Empty;
+    public string curso { get; set; } = string.Empty;
 
 
     private void CalcularSemanasAcessoAluno()

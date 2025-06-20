@@ -106,7 +106,7 @@ namespace Backend.Controllers
             var resultado = await _mongoService.GetAcoesPorUsuarioAsync();
             return Ok(resultado);
         }
-        [HttpGet("logs-por-curso/{nomeCurso}")]
+        [HttpGet("logs-por-nomeCurso/{nomeCurso}")]
         public async Task<IActionResult> GetLogsPorCurso(string nomeCurso)
         {
             try

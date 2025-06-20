@@ -14,7 +14,13 @@
     {
         new Acoes { nome_acao = "Atividade", action = "graded", target = "user", component = "core" },
         new Acoes { nome_acao = "Fórum", action = "uploaded", target = "assessable", component = "mod_forum" },
-        new Acoes { nome_acao = "Quizz", action = "submitted", target = "attempt", component = "mod_quiz" },
+        new Acoes { nome_acao = "Quizz2", action = "submitted", target = "attempt", component = "mod_quiz" },
+
+        //new Acoes { nome_acao = "Aval Final?", action = "updated", target = "course_module_completion", component = "core" },
+
+    //       "action": "updated",
+    //"target": "course_module_completion",
+    //"component": "core",
 
         //new Acoes { nome_acao = "Visualizar Disciplina", action = "viewed", target = "course", component = "core" },
         //new Acoes { nome_acao = "Visualizar Tela com todos os Emblemas", action = "viewed", target = "badge_listing", component = "core" },
@@ -25,7 +31,7 @@
         //new Acoes { nome_acao = "Visualizar Fórum", action = "viewed", target = "course_module", component = "mod_forum" },
         //new Acoes { nome_acao = "Visualizou Respostas do Fórum", action = "viewed", target = "discussion", component = "mod_forum" },
 
-        //new Acoes { nome_acao = "Iniciou Quizz", action = "started", target = "attempt", component = "mod_quiz" },  
+        //new Acoes { nome_acao = "Quizz", action = "started", target = "attempt", component = "mod_quiz" },  
         //new Acoes { nome_acao = "Clicou em Recurso (PDF, vídeo...)", action = "viewed", target = "course_module", component = "mod_resource" },
         //new Acoes { nome_acao = "Clicou em Link de Unidade", action = "viewed", target = "course_module", component = "mod_url" },
         //new Acoes { nome_acao = "Criou Resposta no Fórum", action = "created", target = "discussion", component = "mod_forum" },

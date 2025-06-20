@@ -8,64 +8,108 @@
 
 <header class="linha welcome"
 style="
-            justify-content: space-between;
+            gap: 16px;
             width: 100%;
             height: fit-content;
+            justify-content: space-between;
 ">
-    <div class="coluna" style="--gap: 10px">
-        <h1 class="corPreta40B">Perfil de Aluno</h1>
-    </div>
-</header>
+    <div class="linha welcome"
+         style="
+            gap: 16px;
+            width: 100%;
+            height: fit-content;
+            flex: 1;
+            align-items: center
+">
 
+        <div class="iconAzul02">
+            <img src="~/css/icons/formando.svg" alt="Icone_Aluno" />
+        </div>
+        <div class="coluna" style="--gap: 10px">
+            <span class="SubH1 corAzul">Perfi do Aluno</span>
+            <div class="linha" style="align-items: center">
+                <h1 class="corPreta40B">@Model.User.name</h1>
+                <input type="checkbox" style="display: none" id="favCurso" @(FavoritoService.EhFavorito(@Model.User.name) ? "checked" : "")
+                       onchange="alunoFavorito(this)" />
+                <label for="favCurso">
+                    <img id="imgFavCurso" src="@Url.Content(FavoritoService.EhFavorito(@Model.User.user_id) ? "~/css/icons/estrela.svg" : "~/css/icons/estrela_inativa.svg")" height="20" />
+                </label>
 
-<div class="dashboard coluna" style="--gap: 16px">
+                <script>
+                    async function alunoFavorito(checkbox) {
+                    const checked = checkbox.checked;
+                    const aluno = '@Model.User.user_id';
+                    const nome = '@Model.User.name';
+                    const img = document.getElementById('imgFavCurso');
 
-    <div class="linha alt_li" style="flex: 1; height: fit-content">
-        <div class="linha CardsEngajamento QuadroCards">
+                    // Trocar a imagem já no clique
+                    img.src = checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
+
+                    const url = checked
+                    ? `/api/favoritos/adicionar_aluno?name=${encodeURIComponent(nome)}&id=${encodeURIComponent(aluno)}`
+                    : `/api/favoritos/remover_aluno?name=${encodeURIComponent(nome)}&id=${encodeURIComponent(aluno)}`;
+
+                    try {
+                    const response = await fetch(url, { method: 'POST' });
+                    if (!response.ok) {
+                    alert('Erro ao atualizar favoritos');
+                    checkbox.checked = !checked;
+                    img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
+                    }
+                    } catch (err) {
+                    alert('Erro na requisição');
+                    checkbox.checked = !checked;
+                    img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
+                    }
+                    }
+                </script>
+            </div>
+
+        </div>
+
+</div>
+    
+    <div class="linha QuadroCards" style="gap: 48px;">
+        <div class="linha" style="gap: 24px">
             <div class="linha engag" style="flex: 1; align-items: center">
-                <div class="iconAzul02">
-                    <img src="~/css/icons/formando.svg" alt="Icone_Aluno" />
-                </div>
-                <div class="coluna" style="--gap: 8px">
-                    <div class="linha" style="align-items: center">
-                        <h2 class="corPreta40B">@Model.User.name</h2>
-                        <input type="checkbox" style="display: none" id="favCurso" @(FavoritoService.EhFavorito(@Model.User.name) ? "checked" : "")
-                        onchange="alunoFavorito(this)" />
-                        <label for="favCurso">
-                            <img id="imgFavCurso" src="@Url.Content(FavoritoService.EhFavorito(@Model.User.user_id) ? "~/css/icons/estrela.svg" : "~/css/icons/estrela_inativa.svg")" height="20" />
-                        </label>
-
-                        <script>
-                            async function alunoFavorito(checkbox) {
-                            const checked = checkbox.checked;
-                            const aluno = '@Model.User.user_id';
-                            const nome = '@Model.User.name';
-                            const img = document.getElementById('imgFavCurso');
-
-                            // Trocar a imagem já no clique
-                            img.src = checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
-
-                            const url = checked
-                            ? `/api/favoritos/adicionar_aluno?nome=${encodeURIComponent(nome)}&id=${encodeURIComponent(aluno)}`
-                            : `/api/favoritos/remover_aluno?nome=${encodeURIComponent(nome)}&id=${encodeURIComponent(aluno)}`;
-
-                            try {
-                            const response = await fetch(url, { method: 'POST' });
-                            if (!response.ok) {
-                            alert('Erro ao atualizar favoritos');
-                            checkbox.checked = !checked;
-                            img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
-                            }
-                            } catch (err) {
-                            alert('Erro na requisição');
-                            checkbox.checked = !checked;
-                            img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
-                            }
-                            }
-                        </script>
+                @if (Model.Engajamento < 33)
+                {
+                    <div class="iconVermelho">
+                        <img src="~/css/icons/rostotriste.svg" alt="Icone_Aluno" />
                     </div>
+                    <div class="coluna" style="--gap: 4px">
+                        <h5 class="corCinza80B">Engajamento Baixo</h5>
+                        <h2 class="corVermelha">@Model.Engajamento%</h2>
+                    </div>
+                }
+                else if (Model.Engajamento < 66)
+                {
+                    <div class="iconAzul">
+                        <img src="~/css/icons/rostosememocao.svg" alt="Icone_Aluno" />
+                    </div>
+                    <div class="coluna" style="--gap: 4px">
+                        <h5 class="corCinza80B">Engajamento Médio</h5>
+                        <h2 class="corAzul">@Model.Engajamento%</h2>
+                    </div>
+                }
+                else
+                {
+                    <div class="iconVerde">
+                        <img src="~/css/icons/rostofeliz.svg" alt="Icone_Aluno" />
+                    </div>
+                    <div class="coluna" style="--gap: 4px">
+                        <h5 class="corCinza80B">Engajamento Alto</h5>
+                        <h2 class="corVerde">@Model.Engajamento%</h2>
+                    </div>
+                }
 
 
+            </div>
+
+        </div>
+        <div class="linha engag" style="flex: 1; align-items: center">
+
+                <div class="coluna" style="--gap: 8px">
                     @if (Model.AlunoLogs.Any())
                     {
                         var ultimoLog = Model.AlunoLogs
@@ -77,7 +121,7 @@ style="
                             <span class="corCinza80B">Último Acesso:</span> Dia @ultimo_acesso.Day de @ultimo_acesso.ToString("MMMM") às @ultimo_acesso.Hour:@ultimo_acesso.Minute
 
                         </h5>
-                        
+
                         <form method="get" class="linha" style="align-items: center">
                             <h5 class="corCinza80B">Com base em: </h5>
                             <select class="cursoComboBox" name="curso" onchange="this.form.submit()">
@@ -89,48 +133,20 @@ style="
                             </select>
                         </form>
                     }
-                </div>
-            </div>
-
-            <div class="linha" style="gap: 24px">
-                <div class="linha engag" style="flex: 1; align-items: center">
-                    @if(Model.Engajamento < 33)
-                    {
-                        <div class="iconVermelho">
-                            <img src="~/css/icons/rostotriste.svg" alt="Icone_Aluno" />
-                        </div>
-                        <div class="coluna" style="--gap: 4px">
-                            <h5 class="corCinza80B">Engajamento Baixo</h5>
-                            <h2 class="corVermelha">@Model.Engajamento%</h2>
-                        </div>
-                    }
-                    else if(Model.Engajamento <66)
-                    {
-                        <div class="iconAzul">
-                            <img src="~/css/icons/rostosememocao.svg" alt="Icone_Aluno" />
-                        </div>
-                        <div class="coluna" style="--gap: 4px">
-                            <h5 class="corCinza80B">Engajamento Médio</h5>
-                            <h2 class="corAzul">@Model.Engajamento%</h2>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="iconVerde">
-                            <img src="~/css/icons/rostofeliz.svg" alt="Icone_Aluno" />
-                        </div>
-                        <div class="coluna" style="--gap: 4px">
-                            <h5 class="corCinza80B">Engajamento Alto</h5>
-                            <h2 class="corVerde">@Model.Engajamento%</h2>
-                        </div>
-                    }
-
 
                 </div>
-
             </div>
-        </div>
     </div>
+    
+</header>
+
+
+
+
+
+<div class="dashboard coluna" style="--gap: 16px">
+
+    
 
     <div class="ImputIA linha">
         <img src="~/css/icons/estrelaIA.svg"

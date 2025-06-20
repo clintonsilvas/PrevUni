@@ -15,41 +15,15 @@ style="
     <div class="coluna" style="--gap: 10px">
         <span class="SubH1 corAzul">Bem Vindo(a)</span>
         <div class="linha" style="align-items: center">
-            <h1 class="corPreta40B">@Model.Cursos.curso</h1>
-            <input type="checkbox" style="display: none" id="favCurso" @(FavoritoService.EhFavorito(Model.Cursos.curso) ? "checked" : "")
+            <h1 class="corPreta40B">@Model.Cursos.nomeCurso</h1>
+            <input type="checkbox" style="display: none" id="favCurso" @(FavoritoService.EhFavorito(Model.Cursos.nomeCurso) ? "checked" : "")
             onchange="toggleFavorito(this)" />
             <label for="favCurso">
-                <img id="imgFavCurso" src="@Url.Content(FavoritoService.EhFavorito(Model.Cursos.curso) ? "~/css/icons/estrela.svg" : "~/css/icons/estrela_inativa.svg")" height="20" />
+                <img id="imgFavCurso" src="@Url.Content(FavoritoService.EhFavorito(Model.Cursos.nomeCurso) ? "~/css/icons/estrela.svg" : "~/css/icons/estrela_inativa.svg")" height="20" />
 
             </label>
 
-            <script>
-                async function toggleFavorito(checkbox) {
-                const checked = checkbox.checked;
-                const curso = '@Model.Cursos.curso';
-                const img = document.getElementById('imgFavCurso');
 
-                // Trocar a imagem já no clique
-                img.src = checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
-
-                const url = checked
-                ? `/api/favoritos/adicionar_curso?curso=${encodeURIComponent(curso)}`
-                : `/api/favoritos/remover_curso?curso=${encodeURIComponent(curso)}`;
-
-                try {
-                const response = await fetch(url, { method: 'POST' });
-                if (!response.ok) {
-                alert('Erro ao atualizar favoritos');
-                checkbox.checked = !checked;
-                img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
-                }
-                } catch (err) {
-                alert('Erro na requisição');
-                checkbox.checked = !checked;
-                img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
-                }
-                }
-            </script>
         </div>
 
     </div>
@@ -58,21 +32,9 @@ style="
 
         <button onclick="location.reload()" class="botaoatualiza">Atualizar</button>
     </div>
-
-
-
 </header>
-<!--
-<div class="linha Endereco" style="align-items: center">
-<img src="~/css/icons/casa.svg" alt="ÍconeHome" width="14" height="14" />
-<span class="SubH3">></span>
-<a class="SubH3">Cursos</a>
-<span class="SubH3">></span>
-<a class="SubH3">Ciênca da Computação</a>
-<span class="SubH3">></span>
-<a class="SubH3">Metodologias Ágeis</a>
-</div>
--->
+
+
 <div class="dashboard coluna" style="--gap: 10px">
     <div class="ImputIA linha">
         <img src="~/css/icons/estrelaIA.svg"
@@ -83,7 +45,7 @@ style="
         id="IaPergunta"
         name="nome"
         placeholder="Pergunte a inteligência Artifical!" />
-        <a asp-page="/IaChatCurso" asp-route-cursoNome="@Model.Cursos.curso">Gerar</a>
+        <a asp-page="/IaChatCurso" asp-route-cursoNome="@Model.Cursos.nomeCurso">Gerar</a>
     </div>
 
     <div class="abas">
@@ -109,13 +71,7 @@ style="
                             <div class="coluna" style="--gap: 4px">
                                 <h5 class="corCinza70B">Engajamento Alto</h5>
                                 <h2 class="corVerde">
-                                    @{
-                                        var total_ = Model.AlunosEngajamento.Count;
-                                        var engagAlto = total_ == 0 ? 0 : (int)((Model.AlunosEngajamento.Count(l => l.Engajamento > 66) * 100.0) / total_);
-                                        var engagMedio = total_ == 0 ? 0 : (int)((Model.AlunosEngajamento.Count(l => l.Engajamento <= 66 && l.Engajamento >= 33) * 100.0) / total_);
-                                        var engagBaixo = total_ == 0 ? 0 : (int)((Model.AlunosEngajamento.Count(l => l.Engajamento < 33) * 100.0) / total_);
-
-                                    } @engagAlto%</h2>
+                                    @Model.EngajamentoAlto%</h2>
                             </div>
                         </div>
                         <div class="linha engag" style="flex: 1; align-items: center">
@@ -124,7 +80,7 @@ style="
                             </div>
                             <div class="coluna" style="--gap: 4px">
                                 <h5 class="corCinza70B">Engajamento Médio</h5>
-                                <h2 class="corAzul">@engagMedio%</h2>
+                                <h2 class="corAzul">@Model.EngajamentoMedio%</h2>
                             </div>
                         </div>
 
@@ -134,7 +90,7 @@ style="
                             </div>
                             <div class="coluna" style="--gap: 4px">
                                 <h5 class="corCinza70B">Engajamento Baixo</h5>
-                                <h2 class="corVermelha">@engagBaixo%</h2>
+                                <h2 class="corVermelha">@Model.EngajamentoBaixo%</h2>
                             </div>
                         </div>
                     </div>
@@ -144,7 +100,7 @@ style="
                         </div>
                         <div class="coluna" style="--gap: 4px">
                             <h4 class="corCinza100B">Alunos</h4>
-                            <h2 class="corCinza100B">@Model.Cursos.alunos</h2>
+                            <h2 class="corCinza100B">@Model.Cursos.usuarios.Count()</h2>
                         </div>
                     </div>
                 </div>
@@ -523,7 +479,7 @@ style="
                                         <tr class="linha @(posicao > 5 ? "escondido" : "")">
                                             <td style="width: 14px">@posicao</td>
                                             <td style="flex: 1">
-                                                <a asp-page="/PerfilAluno" asp-route-userId="@l.UserId" asp-route-curso="@Model.Cursos.curso">@l.Nome</a>
+                                                <a asp-page="/PerfilAluno" asp-route-userId="@l.UserId" asp-route-curso="@Model.Cursos.nomeCurso">@l.Name</a>
                        
                                             </td>
                                             <td>@engajamentoFormatado</td>
@@ -538,7 +494,6 @@ style="
                                 <div class="linha" style="flex-direction: row-reverse; margin-top: 16px"><button id="btn-carregar" onclick="carregarMais()">Ver mais</button></div>
                             }
                         </div>
-
                     </div>
 
 
@@ -585,7 +540,7 @@ style="
                             @{
                                 System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("pt-BR");
                                 int i = 0;
-                                foreach (var al in Model.Alunos.OrderBy(c => c.nome))
+                                foreach (var al in Model.Cursos.usuarios.OrderBy(c => c.name))
                                 {
                                     i++;
                                     <tr>
@@ -593,13 +548,13 @@ style="
                                         <td>
                                             <a asp-page="/PerfilAluno"
                                                asp-route-userId="@al.user_id"
-                                               asp-route-curso="@Model.Cursos.curso">
-                                                @al.nome
+                                               asp-route-curso="@Model.Cursos.nomeCurso">
+                                                @al.name
                                             </a>
                                         </td>
                                         <td>
                                             @{
-                                                var data = DateTime.Parse(al.ultimo_acesso);
+                                                var data = DateTime.Parse(al.user_lastaccess);
                                                 var dataFormatada = $"Dia {data:dd} do mês de {data:MMMM} de {data:yyyy} às {data:HH:mm}";
                                             }
                                             @dataFormatada
@@ -648,7 +603,6 @@ style="
                 </div>
 
             </div>
-
             <div class="conteudo" id="conteudo3">
 
                 @foreach (var l in Model.Cursos.Logs)
@@ -661,6 +615,37 @@ style="
     </div>
 
 </div>
+
+<!--SCRIPT DOS FAVORITOS-->
+<script>
+    async function toggleFavorito(checkbox) {
+        const checked = checkbox.checked;
+        const curso = @Html.Raw(Json.Serialize(Model.Cursos.nomeCurso));
+        console.log("Curso recebido:", curso);
+        const img = document.getElementById('imgFavCurso');
+
+        img.src = checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
+
+        const url = checked
+        ? `/api/favoritos/adicionar_curso?nomeCurso=${encodeURIComponent(curso)}`
+        : `/api/favoritos/remover_curso?nomeCurso=${encodeURIComponent(curso)}`;
+
+        try {
+            const response = await fetch(url, { method: 'POST' });
+            if (!response.ok) {
+                alert('Erro ao atualizar favoritos');
+                checkbox.checked = !checked;
+                img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
+            }
+        } catch (err) {
+            alert('Erro na requisição');
+            checkbox.checked = !checked;
+            img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
+        }
+    }
+</script>
+
+
 <script>
     const estadoOrdenacao = {};
 

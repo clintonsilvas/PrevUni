@@ -26,7 +26,7 @@ namespace Front.Pages
             [JsonPropertyName("userId")]
             public string UserId { get; set; }
 
-            [JsonPropertyName("nome")]
+            [JsonPropertyName("name")]
             public string Nome { get; set; }
 
             [JsonPropertyName("engajamento")]
@@ -47,7 +47,7 @@ namespace Front.Pages
 
             foreach (var c in Cursos)
             {
-                var alunos = cursosComAlunos.Where(l => l.curso == c.curso).FirstOrDefault();
+                var alunos = cursosComAlunos.Where(l => l.nomeCurso == c.nomeCurso).FirstOrDefault();
 
                 var alunosEngajamento = Engajamentos
                     .Where(a => alunos.usuarios.Any(u => u.user_id == a.UserId))
