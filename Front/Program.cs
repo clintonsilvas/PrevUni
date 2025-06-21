@@ -8,8 +8,14 @@ builder.Services.AddRazorPages();
 builder.Services.AddHttpClient();
 builder.Services.AddSingleton<FavoritoService>();
 
-var app = builder.Build();
+builder.Services.AddSession();
+builder.Services
+       .AddRazorPages()
+       .AddSessionStateTempDataProvider();   // mantém TempData em sessão se quiser
 
+
+var app = builder.Build();
+app.UseSession();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
@@ -64,6 +70,8 @@ app.MapPost("/api/favoritos/remover_aluno", (HttpRequest request) =>
     FavoritoService.RemoverAluno(nome, id);
     return Results.Ok();
 });
+
+
 
 
 app.Run();

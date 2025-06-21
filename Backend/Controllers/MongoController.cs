@@ -40,7 +40,7 @@ namespace Backend.Controllers
             return Ok(resumo.ToJson());
         }
 
-        [HttpGet("resumo-nomeCurso/{nomeCurso}")]
+        [HttpGet("resumo-curso/{nomeCurso}")]
         public async Task<IActionResult> ResumoCurso(string nomeCurso)
         {
             var resumo = await _mongoService.GerarResumoCursoIAAsync(nomeCurso);

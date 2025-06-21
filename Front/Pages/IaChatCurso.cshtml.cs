@@ -1,5 +1,6 @@
-using Microsoft.AspNetCore.Mvc;
+Ôªøusing Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 
@@ -13,96 +14,121 @@ namespace Front.Pages
         {
             _httpClientFactory = httpClientFactory;
         }
+
+        /* --------------------------------------------------
+         * Bindings vindos da rota/formul√°rio
+         * -------------------------------------------------*/
         [BindProperty(SupportsGet = true)]
-        public string CursoNome { get; set; }
+        public string CursoNome { get; set; } = string.Empty;
+
         [BindProperty]
-        public string Prompt { get; set; }
+        public string Prompt { get; set; } = string.Empty;
 
-        public string Resposta { get; set; }
+        /* --------------------------------------------------
+         * Dados expostos √† view
+         * -------------------------------------------------*/
+        public string Resposta { get; set; } = string.Empty;
+        public Dictionary<string, JsonElement>? DadosCurso { get; set; }
 
-        public Dictionary<string, object> DadosCurso { get; set; }
-
+        /* ==================================================
+         * GET: carrega resumo para exibir na tela
+         * =================================================*/
         public async Task OnGetAsync()
         {
             var client = _httpClientFactory.CreateClient();
 
-            var resumoResponse = await client.GetAsync($"https://localhost:7232/api/Mongo/resumo-nomeCurso/{CursoNome}");
-
-
-            if (!resumoResponse.IsSuccessStatusCode)
+            try
             {
-                DadosCurso = new Dictionary<string, object> {
-            { "erro", $"Erro na requisiÁ„o: {resumoResponse.StatusCode}" }
-        };
-                return;
-            }
+                var resumoJson = await client.GetStringAsync(
+                    $"https://localhost:7232/api/Mongo/resumo-curso/{CursoNome}");
 
-            var resumoJson = await resumoResponse.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(resumoJson);
 
-            if (!string.IsNullOrWhiteSpace(resumoJson))
-            {
-                try
+                // Se for objeto, converte em dicion√°rio para renderizar na view
+                if (doc.RootElement.ValueKind == JsonValueKind.Object)
                 {
-                    using var doc = JsonDocument.Parse(resumoJson);
-
-                    if (doc.RootElement.ValueKind == JsonValueKind.Object)
-                    {
-                        DadosCurso = doc.RootElement.EnumerateObject()
-                            .ToDictionary(p => p.Name, p => (object)p.Value.ToString());
-                    }
-                    else
-                    {
-                        DadosCurso = new Dictionary<string, object> { { "dados", resumoJson } };
-                    }
+                    DadosCurso = doc.RootElement.EnumerateObject()
+                        .ToDictionary(p => p.Name, p => p.Value);
                 }
-                catch (JsonException ex)
+                else
                 {
-                    DadosCurso = new Dictionary<string, object> {
-                { "erro", $"Erro ao processar JSON: {ex.Message}" }
-            };
+                    DadosCurso = new Dictionary<string, JsonElement>
+                    {
+                        { "dados", doc.RootElement }
+                    };
                 }
             }
-            else
+            catch (HttpRequestException ex)
             {
-                DadosCurso = new Dictionary<string, object> {
-            { "erro", "Resposta da API est· vazia." }
-        };
+                DadosCurso = new()
+                {
+                    { "erro", JsonDocument.Parse($"\"Erro de rede: {ex.Message}\"").RootElement }
+                };
+            }
+            catch (JsonException ex)
+            {
+                DadosCurso = new()
+                {
+                    { "erro", JsonDocument.Parse($"\"Erro ao processar JSON: {ex.Message}\"").RootElement }
+                };
             }
         }
+
+        /* ==================================================
+         * POST: envia pergunta + resumo para a IA
+         * =================================================*/
         public async Task<IActionResult> OnPostAsync()
         {
             var client = _httpClientFactory.CreateClient();
 
-            var resumoResponse = await client.GetAsync($"https://localhost:7232/resumo-nomeCurso/{CursoNome}");
-            var resumoJson = await resumoResponse.Content.ReadAsStringAsync();
-
-            if (string.IsNullOrWhiteSpace(resumoJson))
+            string resumoJson;
+            try
             {
-                Resposta = "Erro: a resposta do resumo veio vazia.";
+                resumoJson = await client.GetStringAsync(
+                    $"https://localhost:7232/api/Mongo/resumo-curso/{CursoNome}");
+            }
+            catch (HttpRequestException ex)
+            {
+                Resposta = $"Erro ao buscar resumo: {ex.Message}";
                 return Page();
             }
 
-            object resumoObjeto;
+            if (string.IsNullOrWhiteSpace(resumoJson))
+            {
+                Resposta = "Erro: o resumo veio vazio.";
+                return Page();
+            }
 
+            JsonDocument resumoDoc;
             try
             {
-                resumoObjeto = JsonSerializer.Deserialize<object>(resumoJson);
+                resumoDoc = JsonDocument.Parse(resumoJson);
             }
             catch (JsonException ex)
             {
-                Resposta = $"Erro ao processar o resumo JSON: {ex.Message}";
+                Resposta = $"Erro ao interpretar resumo: {ex.Message}";
                 return Page();
             }
 
             var requestBody = JsonSerializer.Serialize(new
             {
-                Prompt = Prompt,
-                DadosCurso = resumoObjeto?.ToString() ?? ""
+                Prompt,
+                DadosCurso = resumoDoc.RootElement
             });
 
             var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
 
-            var iaResponse = await client.PostAsync("https://localhost:7232/pergunte-ia-nomeCurso", content);
+            HttpResponseMessage iaResponse;
+            try
+            {
+                iaResponse = await client.PostAsync("https://localhost:7232/pergunte-ia-nomeCurso", content);
+            }
+            catch (HttpRequestException ex)
+            {
+                Resposta = $"Erro ao chamar IA: {ex.Message}";
+                return Page();
+            }
+
             var iaResult = await iaResponse.Content.ReadAsStringAsync();
 
             if (!iaResponse.IsSuccessStatusCode)
@@ -114,7 +140,7 @@ namespace Front.Pages
             try
             {
                 using var doc = JsonDocument.Parse(iaResult);
-                Resposta = doc.RootElement.GetProperty("respostaIA").GetString();
+                Resposta = doc.RootElement.GetProperty("respostaIA").GetString() ?? string.Empty;
             }
             catch (JsonException ex)
             {
@@ -123,7 +149,6 @@ namespace Front.Pages
 
             return Page();
         }
-
 
     }
 }

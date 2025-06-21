@@ -146,19 +146,41 @@ style="
 
 <div class="dashboard coluna" style="--gap: 16px">
 
-    
+
 
     <div class="ImputIA linha">
         <img src="~/css/icons/estrelaIA.svg"
-        alt="ÍconeHome"
-        width="18"
-        height="18" />
+             alt="ÍconeHome"
+             width="18"
+             height="18" />
+
         <input type="text"
-        id="IaPergunta"
-        name="nome"
-        placeholder="Pergunte a inteligência Artifical!" />
-        <a asp-page="/IaChatAluno" asp-route-userId="@Model.User.user_id">Gerar</a>
+               id="IaPergunta"
+               name="Prompt"
+               placeholder="Pergunte à inteligência artificial!" />
+
+
+
+        <a href="#" onclick="enviarPergunta()">Gerar</a>
     </div>
+
+
+    <script>
+        function enviarPergunta() {
+            const input = document.getElementById('IaPergunta');
+            const pergunta = input.value.trim();
+
+            if (!pergunta) {
+                input.focus(); // só foca no campo vazio
+                return; // não redireciona
+            }
+
+            const userId = '@Model.User.user_id';
+            const url = `/IaChatAluno/${encodeURIComponent(userId)}?Prompt=${encodeURIComponent(pergunta)}`;
+            window.location.href = url;
+        }
+    </script>
+
     @{
         var abaSelecionada = Request.Query["aba"].ToString();
         if (string.IsNullOrEmpty(abaSelecionada)) abaSelecionada = "1";
