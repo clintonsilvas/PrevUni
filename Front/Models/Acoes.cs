@@ -1,4 +1,8 @@
-﻿namespace Front.Models
+﻿using System.Text.Json.Serialization;
+
+
+
+namespace Front.Models
 {
     public class Acoes
     {
@@ -67,4 +71,23 @@
     }
 
 
+    public class AlunoEngajamento
+    {
+        [JsonPropertyName("userId")]
+        public string UserId { get; set; } = "";
+
+        [JsonPropertyName("nome")]
+        public string Name { get; set; } = "";
+
+        [JsonPropertyName("engajamento")]
+        public double Engajamento { get; set; }
+    }
+
+
+
+    public class AcaoResumo
+    {
+        public string Acao { get; set; } = "";
+        public int Quantidade { get; set; }
+    }
 }

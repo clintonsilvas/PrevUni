@@ -158,6 +158,7 @@
     padding: 24px;
     background-color: var(--Branco);
     border-radius: 10px;
+    border: 1px solid var(--Azul10S);  
 }
 
 

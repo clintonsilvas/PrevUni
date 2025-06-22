@@ -46,15 +46,22 @@ namespace Front.Pages
         public async Task OnGetAsync(string curso)
         {
             Cursos = new Curso { nomeCurso = curso };
-            using var httpClient = new HttpClient();
+        }
 
-            await CarregarAlunosAsync(httpClient, curso);
+        public async Task<PartialViewResult> OnGetCarregamentoAsync(string curso)
+        {
+            Cursos = new Curso { nomeCurso = curso };
+            using var http = new HttpClient();
+
+            await CarregarAlunosAsync(http, curso);
             await Cursos.AtualizaSemanas();
             CalcularSemanas();
 
-            await CarregarEngajamentoAsync(httpClient);
+            await CarregarEngajamentoAsync(http);
             CalcularEngajamento();
             CalcularDesistentes();
+
+            return Partial("Cursos/_Graficos_Curso", this);
         }
 
         private async Task CarregarAlunosAsync(HttpClient httpClient, string curso)
