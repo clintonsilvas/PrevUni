@@ -13,6 +13,8 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
 
     [BindProperty(SupportsGet = true)] public string UserId { get; set; } = string.Empty;
     [BindProperty(SupportsGet = true)] public string curso { get; set; } = string.Empty;
+    [BindProperty(SupportsGet = true)] public string nome { get; set; } = string.Empty;
+
 
     public Usuario User { get; private set; } = new();
     public List<LogUsuario> AlunoLogs { get; private set; } = [];
@@ -29,6 +31,18 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
     public string Labels { get; private set; } = string.Empty;
     public string Dados { get; private set; } = string.Empty;
 
+    public async Task<IActionResult> OnGetCarregamentoAsync()
+    {
+                if (string.IsNullOrWhiteSpace(UserId))
+            return NotFound("ID do aluno não fornecido.");
+
+        var resultado = await ObterDadosAlunoAsync(UserId);
+        if (!resultado)
+            return NotFound("Nenhum log encontrado para o aluno.");
+        return Partial("Alunos/GraficoPerfilAluno", this);
+    }
+
+
     public record AlunoEngajamento(
         [property: JsonPropertyName("userId")] string UserId,
         [property: JsonPropertyName("name")] string Nome,
@@ -42,13 +56,6 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
 
     public async Task<IActionResult> OnGetAsync()
     {
-        if (string.IsNullOrWhiteSpace(UserId))
-            return NotFound("ID do aluno não fornecido.");
-
-        var resultado = await ObterDadosAlunoAsync(UserId);
-        if (!resultado)
-            return NotFound("Nenhum log encontrado para o aluno.");
-
         return Page();
     }
 

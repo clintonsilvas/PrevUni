@@ -111,7 +111,7 @@
                                         <tr class="linha @(posicao > 5 ? "escondido" : "")">
                                             <td style="width: 14px">@posicao</td>
                                             <td style="flex: 1">
-                                                <a asp-page="/PerfilAluno" asp-route-userId="@l.UserId" asp-route-curso="@Model.Cursos.nomeCurso">@l.Name</a>
+                                        <a asp-page="/PerfilAluno" asp-route-userId="@l.UserId" asp-route-curso="@Model.Cursos.nomeCurso" asp-route-nome="@l.Name">@l.Name</a>
                                             </td>
                                             <td>@engajamentoFormatado</td>
                                         </tr>
@@ -125,7 +125,6 @@
                             }
                         </div>
                     </div>
-
 
                 </div>
             </div>
@@ -183,7 +182,8 @@
                                     <td>
                                         <a asp-page="/PerfilAluno"
                                            asp-route-userId="@al.user_id"
-                                           asp-route-curso="@Model.Cursos.nomeCurso">
+                                           asp-route-curso="@Model.Cursos.nomeCurso"
+                                           asp-route-nome="@al.name">
                                             @al.name
                                         </a>
                                     </td>
