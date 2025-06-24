@@ -7,731 +7,97 @@
 
 
 <header class="linha welcome"
-style="
+        style="
             justify-content: space-between;
             width: 100%;
             height: fit-content;
 ">
     <div class="coluna" style="--gap: 10px">
-        <span class="SubH1 corAzul">Bem Vindo(a)</span>
+        <span class="SubH1 corAzul">Dashboard do Curso</span>
         <div class="linha" style="align-items: center">
-            <h1 class="corPreta40B">@Model.Cursos.curso</h1>
-            <input type="checkbox" style="display: none" id="favCurso" @(FavoritoService.EhFavorito(Model.Cursos.curso) ? "checked" : "")
-            onchange="toggleFavorito(this)" />
+            <h1 class="corPreta40B">@Model.Cursos.nomeCurso</h1>
+            <input type="checkbox" style="display: none" id="favCurso" @(FavoritoService.EhFavorito(Model.Cursos.nomeCurso) ? "checked" : "")
+                   onchange="toggleFavorito(this)" />
             <label for="favCurso">
-                <img id="imgFavCurso" src="@Url.Content(FavoritoService.EhFavorito(Model.Cursos.curso) ? "~/css/icons/estrela.svg" : "~/css/icons/estrela_inativa.svg")" height="20" />
-
+                <img id="imgFavCurso" src="@Url.Content(FavoritoService.EhFavorito(Model.Cursos.nomeCurso) ? "~/css/icons/estrela.svg" : "~/css/icons/estrela_inativa.svg")" height="20" />
             </label>
-
-            <script>
-                async function toggleFavorito(checkbox) {
-                const checked = checkbox.checked;
-                const curso = '@Model.Cursos.curso';
-                const img = document.getElementById('imgFavCurso');
-
-                // Trocar a imagem já no clique
-                img.src = checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
-
-                const url = checked
-                ? `/api/favoritos/adicionar_curso?curso=${encodeURIComponent(curso)}`
-                : `/api/favoritos/remover_curso?curso=${encodeURIComponent(curso)}`;
-
-                try {
-                const response = await fetch(url, { method: 'POST' });
-                if (!response.ok) {
-                alert('Erro ao atualizar favoritos');
-                checkbox.checked = !checked;
-                img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
-                }
-                } catch (err) {
-                alert('Erro na requisição');
-                checkbox.checked = !checked;
-                img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
-                }
-                }
-            </script>
         </div>
-
     </div>
-    <div class="linha">
-
-
-        <button onclick="location.reload()" class="botaoatualiza">Atualizar</button>
-    </div>
-
-
-
 </header>
-<!--
-<div class="linha Endereco" style="align-items: center">
-<img src="~/css/icons/casa.svg" alt="ÍconeHome" width="14" height="14" />
-<span class="SubH3">></span>
-<a class="SubH3">Cursos</a>
-<span class="SubH3">></span>
-<a class="SubH3">Ciênca da Computação</a>
-<span class="SubH3">></span>
-<a class="SubH3">Metodologias Ágeis</a>
-</div>
--->
+
+
 <div class="dashboard coluna" style="--gap: 10px">
     <div class="ImputIA linha">
         <img src="~/css/icons/estrelaIA.svg"
-        alt="ÍconeHome"
-        width="18"
-        height="18" />
+             alt="ÍconeHome"
+             width="18"
+             height="18" />
         <input type="text"
-        id="IaPergunta"
-        name="nome"
-        placeholder="Pergunte a inteligência Artifical!" />
-        <a asp-page="/IaChatCurso" asp-route-cursoNome="@Model.Cursos.curso">Gerar</a>
+               id="IaPergunta"
+               name="nome"
+               placeholder="Pergunte a inteligência Artifical!" />
+        <a asp-page="/IaChatCurso" asp-route-cursoNome="@Model.Cursos.nomeCurso">Gerar</a>
     </div>
 
-    <div class="abas">
-        <input type="radio" name="aba" id="aba1" checked />
-        <input type="radio" name="aba" id="aba2" />
-        <input type="radio" name="aba" id="aba3" />
-
-        <div class="botoes">
-            <label for="aba1">Dashboard</label>
-            <label for="aba2">Alunos</label>
-            <label for="aba3">Relatórios</label>
-            <div class="underline"></div>
-        </div>
-
-        <div class="conteudos">
-            <div class="conteudo" id="conteudo1">
-                <div class="linha alt_li" style="flex: 1; height: fit-content">
-                    <div class="linha CardsEngajamento QuadroCards">
-                        <div class="linha engag" style="flex: 1; align-items: center">
-                            <div class="iconVerde">
-                                <img src="~/css/icons/rostofeliz.svg" alt="Icone_Aluno" />
-                            </div>
-                            <div class="coluna" style="--gap: 4px">
-                                <h5 class="corCinza70B">Engajamento Alto</h5>
-                                <h2 class="corVerde">
-                                    @{
-                                        var total_ = Model.AlunosEngajamento.Count;
-                                        var engagAlto = total_ == 0 ? 0 : (int)((Model.AlunosEngajamento.Count(l => l.Engajamento > 66) * 100.0) / total_);
-                                        var engagMedio = total_ == 0 ? 0 : (int)((Model.AlunosEngajamento.Count(l => l.Engajamento <= 66 && l.Engajamento >= 33) * 100.0) / total_);
-                                        var engagBaixo = total_ == 0 ? 0 : (int)((Model.AlunosEngajamento.Count(l => l.Engajamento < 33) * 100.0) / total_);
-
-                                    } @engagAlto%</h2>
-                            </div>
-                        </div>
-                        <div class="linha engag" style="flex: 1; align-items: center">
-                            <div class="iconAzul">
-                                <img src="~/css/icons/rostosememocao.svg" alt="Icone_Aluno" />
-                            </div>
-                            <div class="coluna" style="--gap: 4px">
-                                <h5 class="corCinza70B">Engajamento Médio</h5>
-                                <h2 class="corAzul">@engagMedio%</h2>
-                            </div>
-                        </div>
-
-                        <div class="linha engag" style="flex: 1; align-items: center">
-                            <div class="iconVermelho">
-                                <img src="~/css/icons/rostotriste.svg" alt="Icone_Aluno" />
-                            </div>
-                            <div class="coluna" style="--gap: 4px">
-                                <h5 class="corCinza70B">Engajamento Baixo</h5>
-                                <h2 class="corVermelha">@engagBaixo%</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="linha QuantAlunos">
-                        <div class="iconEscuro">
-                            <img src="~/css/icons/formando.svg" alt="Icone_Aluno" />
-                        </div>
-                        <div class="coluna" style="--gap: 4px">
-                            <h4 class="corCinza100B">Alunos</h4>
-                            <h2 class="corCinza100B">@Model.Cursos.alunos</h2>
-                        </div>
-                    </div>
-                </div>
-                <div class="linha alt_li" style="flex: 1">
-                    <div class="QuadroCards GraficoEvolucao linha"
-                    style="flex: 1; --gap: 16px">
-
-
-
-                        <div class="coluna graf_caixa" style="--gap: 16px; flex: 1">
-                            <div class="linha" style="--gap: 10px; align-items: center">
-                                <img src="~/css/icons/graficos.svg" />
-                                <h4 class="corPreta50B">Ações Realizadas</h4>
-                            </div>
-
-                            @using System.Globalization
-
-                            @{
-                                var acoesFixas = new Acoes().ListarAcoes();
-
-                                string AcaoDe(string a, string t, string c) =>
-                                acoesFixas.FirstOrDefault(x => x.action == a && x.target == t && x.component == c)?.nome_acao ?? "Outros";
-
-                                var cal = CultureInfo.CurrentCulture.Calendar;
-
-                                // Processa todos os logs de uma vez só
-                                var logsProcessados = Model.Cursos.Logs
-                                .Select(l => new
-                                {
-                                    Semana = cal.GetWeekOfYear(DateTime.Parse(l.date), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday),
-                                    Ano = DateTime.Parse(l.date).Year,
-                                    Nome = AcaoDe(l.action, l.target, l.component)
-                                })
-                                .ToList();
-
-                                // Agrupamento por semana (gráfico de barras empilhadas)
-                                var grupos = logsProcessados
-                                .GroupBy(x => new { x.Ano, x.Semana, x.Nome })
-                                .Select(g => new
-                                {
-                                    g.Key.Ano,
-                                    g.Key.Semana,
-                                    Acao = g.Key.Nome,
-                                    Qtde = g.Count()
-                                })
-                                .OrderBy(g => g.Ano).ThenBy(g => g.Semana)
-                                .ToList();
-
-                                var semanasOrdenadas = grupos
-                                .Select(g => new { g.Ano, g.Semana })
-                                .Distinct()
-                                .OrderBy(s => s.Ano).ThenBy(s => s.Semana)
-                                .ToList();
-
-                                var labels1 = semanasOrdenadas.Select((s, i) => (i + 1).ToString()).ToList();
-                                var nomesAcoes = grupos.Select(g => g.Acao).Distinct().ToList();
-
-                                var datasets = nomesAcoes.Select((nome, idx) => new
-                                {
-                                    label = nome,
-                                    data = semanasOrdenadas.Select(s =>
-                                    grupos.FirstOrDefault(g =>
-                                    g.Ano == s.Ano && g.Semana == s.Semana && g.Acao == nome
-                                    )?.Qtde ?? 0).ToList(),
-                                    backgroundColor = $"hsl({idx * 60},70%,60%)",
-                                    stack = "stack1",
-                                    borderRadius = 10,
-                                    barPercentage = 0.5,
-                                    categoryPercentage = 0.8
-                                }).ToList();
-
-                                var anosArray = semanasOrdenadas.Select(s => s.Ano).ToList();
-                                var semanasArray = semanasOrdenadas.Select(s => s.Semana).ToList();
-
-                                var lblJson = System.Text.Json.JsonSerializer.Serialize(labels1);
-                                var dsJson = System.Text.Json.JsonSerializer.Serialize(datasets);
-                                var anosJson = System.Text.Json.JsonSerializer.Serialize(anosArray);
-                                var semanasJson = System.Text.Json.JsonSerializer.Serialize(semanasArray);
-
-                                // Agrupamento simples por ação (gráfico de pizza, por exemplo)
-                                var acoes = logsProcessados
-                                //.Where(x => x.Nome != "Outros") // remover filtro para incluir "Outros"
-                                .GroupBy(x => x.Nome)
-                                .Select(g => new
-                                {
-                                    Acao = g.Key,
-                                    Quantidade = g.Count()
-                                })
-                                .ToList();
-
-                                var labels = string.Join(",", acoes.Select(a => $"'{a.Acao}'"));
-                                var dados = string.Join(",", acoes.Select(a => a.Quantidade));
-                            }
-
-
-
-
-                            <canvas id="graficoLogs"></canvas>
-
-                        </div>
-
-                        <div class="coluna graf_caixa" style="--gap: 16px; flex: 1">
-                            <div class="linha" style="--gap: 10px; align-items: center">
-                                <img src="~/css/icons/graficos.svg" />
-                                <h4 class="corPreta50B">Ações Realizadas</h4>
-                            </div>
-
-
-
-
-                            <div style="max-width: 400px; margin: auto; position: relative;">
-                                <canvas id="graficoPizza" width="900" height="240"></canvas>
-                            </div>
-
-                            <script>
-                                const toggle = document.getElementById('toggleTheme');
-                                const ctxBarras = document.getElementById('graficoLogs')?.getContext('2d');
-                                const ctxPizza = document.getElementById('graficoPizza')?.getContext('2d');
-
-                                // Dados do backend
-                                const anos = @Html.Raw(anosJson);
-                                const semanas = @Html.Raw(semanasJson);
-
-                                // Incluindo "Outros" no agrupamento para o gráfico de pizza
-                                const acoesComOutros = [
-                                @foreach (var acao in acoes)
-                                {
-                                    @: { label: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(acao.Acao)), quantidade: @acao.Quantidade },
-                                }
-                                ];
-
-                                // Para pegar o total de "Outros"
-                                const totalAcoes = @acoes.Sum(a => a.Quantidade);
-                                const totalLog = @Model.Cursos.Logs.Count;
-                                const quantidadeOutros = totalLog - totalAcoes;
-
-                                if (quantidadeOutros > 0) {
-                                acoesComOutros.push({ label: 'Outros', quantidade: quantidadeOutros });
-                                }
-
-                                const labelsPizza = acoesComOutros.map(a => a.label);
-                                const dadosPizza = acoesComOutros.map(a => a.quantidade);
-
-                                const coresClaro = ['#002899', '#0036cc', '#99b4ff', '#ccd9ff', '#e0eaff'];
-                                const coresEscuro = ['#7AAEFF', '#5A8BDD', '#3A69BB', '#1A4799', '#555555'];
-
-                                function getDateRange(year, week) {
-                                const simple = new Date(year, 0, 1 + (week - 1) * 7);
-                                const dow = simple.getDay();
-                                const ISOweekStart = new Date(simple);
-                                if (dow <= 4)
-                                ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
-                                else
-                                ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
-
-                                const ISOweekEnd = new Date(ISOweekStart);
-                                ISOweekEnd.setDate(ISOweekStart.getDate() + 6);
-
-                                const f = d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
-                                return `${f(ISOweekStart)} à ${f(ISOweekEnd)}`;
-                                }
-
-                                let graficoBarras;
-                                let graficoPizza;
-
-                                function criarGraficos() {
-                                const isDarkMode = document.documentElement.classList.contains('dark');
-                                const cores = isDarkMode ? coresEscuro : coresClaro;
-                                const corTexto = '#8F98B2';
-
-                                // Gráfico de Barras
-                                if (ctxBarras) {
-                                if (graficoBarras) graficoBarras.destroy();
-
-                                const chartData = {
-                                labels: @Html.Raw(lblJson),
-                                datasets: @Html.Raw(dsJson)
-                                };
-
-                                chartData.datasets.forEach((ds, i) => {
-                                ds.backgroundColor = cores[i % cores.length];
-                                ds.borderWidth = 0;
-                                });
-
-                                const totaisPorSemana = chartData.labels.map((_, i) =>
-                                chartData.datasets.reduce((soma, ds) => soma + ds.data[i], 0)
-                                );
-
-                                graficoBarras = new Chart(ctxBarras, {
-                                type: 'bar',
-                                data: chartData,
-                                options: {
-                                responsive: true,
-                                maintainAspectRatio: true,
-                                plugins: {
-                                tooltip: {
-                                mode: 'index',
-                                intersect: false,
-                                callbacks: {
-                                title: context => {
-                                const index = context[0].dataIndex;
-                                return `(${getDateRange(anos[index], semanas[index])})`;
-                                },
-                                label: context => {
-                                const valor = context.parsed.y;
-                                if (valor === 0) return null;
-                                const total = context.chart.data.datasets.reduce((soma, ds) => soma + ds.data[context.dataIndex], 0);
-                                const porcentagem = total > 0 ? ((valor / total) * 100).toFixed(1) : 0;
-                                return `${context.dataset.label}: ${valor} (${porcentagem}%)`;
-                                }
-                                }
-                                },
-                                legend: { display: false }
-                                },
-                                scales: {
-                                x: {
-                                stacked: true,
-                                grid: { display: false },
-                                ticks: {
-                                color: corTexto,
-                                font: { family: 'Inter, sans-serif', size: 10, weight: '500' }
-                                }
-                                },
-                                y: {
-                                stacked: true,
-                                beginAtZero: true,
-                                grid: { display: false },
-                                ticks: {
-                                color: corTexto,
-                                font: { family: 'Inter, sans-serif', size: 10, weight: '500' },
-                                callback: valor => {
-                                const max = Math.max(...totaisPorSemana);
-                                const porcentagem = max > 0 ? (valor / max) * 100 : 0;
-                                return porcentagem.toFixed(0) + '%';
-                                }
-                                }
-                                }
-                                }
-                                },
-                                });
-                                }
-
-                                // Gráfico de Pizza
-                                if (ctxPizza) {
-                                if (graficoPizza) graficoPizza.destroy();
-
-                                graficoPizza = new Chart(ctxPizza, {
-                                type: 'doughnut',
-                                data: {
-                                labels: labelsPizza,
-                                datasets: [{
-                                data: dadosPizza,
-                                backgroundColor: cores.slice(0, labelsPizza.length),
-                                borderWidth: 0,
-                                }]
-                                },
-                                options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                rotation: 270,
-                                circumference: 360,
-                                cutout: '70%',
-                                plugins: {
-                                legend: {
-                                display: true,
-                                position: 'right',
-                                labels: {
-                                boxWidth: 12,
-                                usePointStyle: true,
-                                pointStyle: 'rectRounded',
-                                color: corTexto,
-                                font: { size: 14, family: 'Inter' },
-                                padding: 20
-                                },
-                                onClick: (e, legendItem) => {
-                                const label = legendItem.text;
-                                const indexPizza = graficoPizza.data.labels.findIndex(l => l === label);
-                                const metaPizza = graficoPizza.getDatasetMeta(0).data[indexPizza];
-                                metaPizza.hidden = !metaPizza.hidden;
-                                graficoPizza.update();
-
-                                const indexBarras = graficoBarras.data.datasets.findIndex(ds => ds.label === label);
-                                if (indexBarras !== -1) {
-                                const ds = graficoBarras.data.datasets[indexBarras];
-                                ds.hidden = !ds.hidden;
-                                graficoBarras.update();
-                                }
-                                }
-                                }
-                                }
-                                },
-                                plugins: [{
-                                id: 'centerText',
-                                beforeDraw(chart) {
-                                const { ctx, chartArea: { left, right, top, bottom } } = chart;
-                                const x = (left + right) / 2;
-                                const y = (top + bottom) / 2;
-
-                                ctx.save();
-                                ctx.font = 'bold 16px Arial, Inter, sans-serif';
-                                ctx.fillStyle = corTexto;
-                                ctx.textAlign = 'center';
-                                ctx.textBaseline = 'middle';
-
-                                const totalAcoes = dadosPizza.reduce((a, b) => a + b, 0);
-                                ctx.fillText(`${totalAcoes} Ações`, x, y);
-                                ctx.restore();
-                                }
-                                }]
-                                });
-                                }
-                                }
-
-                                // Aplica tema salvo ao carregar
-                                if (localStorage.getItem('theme') === 'dark') {
-                                document.documentElement.classList.add('dark');
-                                if (toggle) toggle.checked = true;
-                                }
-
-                                criarGraficos();
-
-                                if (toggle) {
-                                toggle.addEventListener('change', function () {
-                                if (this.checked) {
-                                document.documentElement.classList.add('dark');
-                                localStorage.setItem('theme', 'dark');
-                                } else {
-                                document.documentElement.classList.remove('dark');
-                                localStorage.setItem('theme', 'light');
-                                }
-                                criarGraficos();
-                                });
-                                }
-                            </script>
-
-
-
-
-
-
-                        </div>
-
-
-
-
-
-
-
-
-
-
-                    </div>
-                    <div class="QuadroCards Unidades coluna">
-                        <div class="linha" style="--gap: 10px; align-items: center">
-                            <img src="~/css/icons/alunosDesistentes.png" />
-                            <h4 class="corPreta50B">Posíveis Desistentes</h4>
-                        </div>
-                        <div class="tabela-card">
-                            <table>
-                                <tbody id="tabela-alunos">
-                                    @{
-                                        var alunosMenosAtivos = Model.AlunosEngajamento
-                                        .Where(a => a.Engajamento < 30)
-                                        .OrderBy(a => a.Engajamento)
-                                        .ToList();
-
-                                        int posicao = 1;
-                                    }
-
-                                    @foreach (var l in alunosMenosAtivos)
-                                    {
-                                        var engajamentoFormatado = l.Engajamento < 0
-                                        ? $"{l.Engajamento.ToString("0.0")}%"
-                                        : $"{l.Engajamento.ToString("0")}%";
-
-                                        <tr class="linha @(posicao > 5 ? "escondido" : "")">
-                                            <td style="width: 14px">@posicao</td>
-                                            <td style="flex: 1">
-                                                <a asp-page="/PerfilAluno" asp-route-userId="@l.UserId" asp-route-curso="@Model.Cursos.curso">@l.Nome</a>
-                       
-                                            </td>
-                                            <td>@engajamentoFormatado</td>
-                                        </tr>
-                                        posicao++;
-                                    }
-                                </tbody>
-
-                            </table>
-                            @if (alunosMenosAtivos.Count > 10)
-                            {
-                                <div class="linha" style="flex-direction: row-reverse; margin-top: 16px"><button id="btn-carregar" onclick="carregarMais()">Ver mais</button></div>
-                            }
-                        </div>
-
-                    </div>
-
-
-                </div>
-            </div>
-            <div class="conteudo" id="conteudo2">
-                <div class="tabela-card QuadroCards" style="padding: 0; overflow: hidden">
-                    <table id="tabelaAlunos">
-                        <thead>
-                            <tr>
-                                <th>
-                                    <span class="bot_tab">#</span>
-                                </th>
-                                <th>
-                                    <button onclick="ordenarTabela(1)" class="bot_tab">
-                                        Nome <img src="~/css/icons/Ordenar.svg" />
-                                    </button>
-                                </th>
-                                <th>
-                                    <button onclick="ordenarTabela(2)" class="bot_tab">
-                                        Último Acesso <img src="~/css/icons/Ordenar.svg" />
-                                    </button>
-                                </th>
-                                @{
-                                    int ind = 3;
-                                }
-                                @foreach(var ac in acoesFixas)
-                                {
-                                    <th>
-                                        <button onclick="ordenarTabela(@ind)" class="bot_tab">
-                                            @ac.nome_acao <img src="~/css/icons/Ordenar.svg" />
-                                        </button>
-                                    </th>
-                                    ind++;
-                                }
-                                <th>
-                                    <button onclick="ordenarTabela(@ind)" class="bot_tab">
-                                        Engajamento <img src="~/css/icons/Ordenar.svg" />
-                                    </button>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @{
-                                System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("pt-BR");
-                                int i = 0;
-                                foreach (var al in Model.Alunos.OrderBy(c => c.nome))
-                                {
-                                    i++;
-                                    <tr>
-                                        <td>@i</td>
-                                        <td>
-                                            <a asp-page="/PerfilAluno"
-                                               asp-route-userId="@al.user_id"
-                                               asp-route-curso="@Model.Cursos.curso">
-                                                @al.nome
-                                            </a>
-                                        </td>
-                                        <td>
-                                            @{
-                                                var data = DateTime.Parse(al.ultimo_acesso);
-                                                var dataFormatada = $"Dia {data:dd} do mês de {data:MMMM} de {data:yyyy} às {data:HH:mm}";
-                                            }
-                                            @dataFormatada
-                                        </td>
-                                        @foreach (var ac in acoesFixas)
-                                        {
-                                            <td>
-                                                @Model.Cursos.Logs.Where(l => l.user_id == al.user_id && l.action == ac.action && l.target == ac.target && l.component == ac.component).ToList().Count()
-                                            </td>
-                                        }
-
-                                        @{
-                                            var engajamento = Model.AlunosEngajamento
-                                            .FirstOrDefault(e => e.UserId == al.user_id)?.Engajamento;
-
-                                            var engajamentoFormatado = engajamento.HasValue
-                                            ? (engajamento < 1 ? $"{engajamento.Value:0.00}%" : $"{engajamento.Value:0}%")
-                                            : "N/A";
-                                            if (engajamento < 33)
-                                            {
-                                                <td class="corVermelha">
-                                                    @engajamentoFormatado
-                                                </td>
-                                            }
-                                            else if (engajamento >= 33 && engajamento <= 66)
-                                            {
-                                                <td class="corAzul">
-                                                    @engajamentoFormatado
-                                                </td>
-                                            }
-                                            else
-                                            {
-                                                <td class="corVerde">
-                                                    @engajamentoFormatado
-                                                </td>
-                                            }
-                                        }
-
-
-
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-                    </table>
-                </div>
-
-            </div>
-
-            <div class="conteudo" id="conteudo3">
-
-                @foreach (var l in Model.Cursos.Logs)
-                {
-                    <span>@l.date</span>
+    <div class="abas" id="us_cont">
+        <div class="spinner"><img src="~/css/icons/loadGif.gif" alt="Carregando..." width="40" /></div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const curso = "@Model.Cursos.nomeCurso";
+            const container = document.getElementById("us_cont");
+
+            const res = await fetch(`/Dashboard/${curso}?handler=Carregamento`);
+            const html = await res.text();
+            container.innerHTML = html;
+
+            const scripts = container.querySelectorAll("script");
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement("script");
+                if (oldScript.src) {
+                    newScript.src = oldScript.src;
+                    newScript.async = false;
+                } else {
+                    newScript.text = oldScript.textContent;
                 }
-
-            </div>
-        </div>
-    </div>
-
-</div>
-<script>
-    const estadoOrdenacao = {};
-
-    function ordenarTabela(coluna) {
-        const tabela = document.getElementById("tabelaAlunos");
-        const tbody = tabela.querySelector("tbody");
-        const linhas = Array.from(tbody.querySelectorAll("tr"));
-        const crescente = estadoOrdenacao[coluna] ?? true;
-
-        linhas.sort((a, b) => {
-            let valA = a.children[coluna].innerText.trim();
-            let valB = b.children[coluna].innerText.trim();
-
-            // Detectar tipo de dado
-            const isPercentual = valA.includes('%');
-            const isDataCustom = valA.startsWith("Dia ");
-            const isNumero = !isNaN(parseFloat(valA.replace(',', '.')));
-
-            if (isPercentual) {
-                valA = parseFloat(valA.replace('%', '').replace(',', '.')) || 0;
-                valB = parseFloat(valB.replace('%', '').replace(',', '.')) || 0;
-            } else if (isDataCustom) {
-                valA = parseDataPersonalizada(valA);
-                valB = parseDataPersonalizada(valB);
-            } else if (isNumero) {
-                valA = parseFloat(valA.replace(',', '.'));
-                valB = parseFloat(valB.replace(',', '.'));
-            }
-
-            if (!isNaN(valA) && !isNaN(valB)) {
-                return crescente ? valA - valB : valB - valA;
-            }
-
-            return crescente
-                ? valA.localeCompare(valB)
-                : valB.localeCompare(valA);
+                document.body.appendChild(newScript);
+            });
         });
+    </script>
+</div>
 
-        linhas.forEach(linha => tbody.appendChild(linha));
-        estadoOrdenacao[coluna] = !crescente;
+<script>
+    // --------- CONSTANTES ---------
+    const iconeAtivo = '/css/icons/estrela.svg';
+    const iconeInativo = '/css/icons/estrela_inativa.svg';
+    // --------- FUNÇÕES FAVORITOS ---------
+    async function toggleFavorito(checkbox) {
+        const checked = checkbox.checked;
+        const curso = @Html.Raw(Json.Serialize(Model.Cursos.nomeCurso));
+        const img = document.getElementById('imgFavCurso');
+
+        atualizarFavoritoVisual(checkbox, img);
+
+        const url = checked
+            ? `/api/favoritos/adicionar_curso?nomeCurso=${encodeURIComponent(curso)}`
+            : `/api/favoritos/remover_curso?nomeCurso=${encodeURIComponent(curso)}`;
+
+        try {
+            const response = await fetch(url, { method: 'POST' });
+            if (!response.ok) throw new Error();
+        } catch {
+            checkbox.checked = !checked;
+            atualizarFavoritoVisual(checkbox, img);
+            alert('Erro ao atualizar favoritos');
+        }
     }
 
-    function parseDataPersonalizada(texto) {
-        const regex = /Dia (\d{1,2}) do mês de (\w+) de (\d{4}) às (\d{2}):(\d{2})/;
-        const meses = {
-            'janeiro': 0, 'fevereiro': 1, 'março': 2, 'abril': 3,
-            'maio': 4, 'junho': 5, 'julho': 6, 'agosto': 7,
-            'setembro': 8, 'outubro': 9, 'novembro': 10, 'dezembro': 11
-        };
-
-        const match = texto.match(regex);
-        if (!match) return 0;
-
-        const dia = parseInt(match[1]);
-        const mes = meses[match[2].toLowerCase()] ?? 0;
-        const ano = parseInt(match[3]);
-        const hora = parseInt(match[4]);
-        const minuto = parseInt(match[5]);
-
-        return new Date(ano, mes, dia, hora, minuto).getTime();
-    }
-    let exibidos = 10;
-    function carregarMais() {
-        const linhas = document.querySelectorAll('.linha.escondido');
-        for (let i = 0; i < 10 && i < linhas.length; i++) {
-            linhas[i].classList.remove('escondido');
-            exibidos++;
-        }
-        if (document.querySelectorAll('.linha.escondido').length === 0) {
-            document.getElementById('btn-carregar').style.display = 'none';
-        }
+    function atualizarFavoritoVisual(checkbox, img) {
+        img.src = checkbox.checked ? iconeAtivo : iconeInativo;
     }
 
 </script>
+
+
+

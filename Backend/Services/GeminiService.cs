@@ -14,7 +14,7 @@ namespace Backend.Services
             _apiKey = configuration["Gemini:ApiKey"];
         }
 
-        public async Task<string> EnviarPromptAsync(string prompt, string dadosAluno)
+        public async Task<string> EnviarPromptAsync(string prompt, string dadosAluno, int pos)
         {
             var url = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={_apiKey}";
 
@@ -28,28 +28,24 @@ namespace Backend.Services
                         {
                             new
                             {
-                                text = @$"
-                                    Você é um assistente especializado em análise de desempenho de alunos no ensino a distância, notavelmente no que tange à evasão escolar.
-                                    Sempre responda as perguntas que lhe forem feitas de forma clara, objetiva e baseada apenas nos dados fornecidos, sendo sempre o mais conciso possível, mas mantendo um grau de informatividade razoável.
-                                    Sua resposta precisa ser de uma forma que os dados sejam visualizados e entendidos de forma fácil, rápida e eficaz por quem estiver lendo-as, otimizando o tempo do analista para que ele possa saber quais medidas devem ser tomadas.
-                                    Isso inclui dizer que dados irrelevantes para o leitor da sua resposta, tais como o ID do aluno no sistema, devem ser deixados de fora dela.
-                                    No final de sua conclusão, inclua sempre um veredito da situação daquele aluno com base nas variáveis em questão, a fim de facilitar ao máximo a compreensão do problema abordado.
-                                    Além disso, siga sempre o mesmo padrão de resposta, mantendo as informações sempre enxutas.
+text = @$"
+Você é um assistente especializado em análise de desempenho de alunos EAD, focado na evasão escolar.
+Responda de forma clara, objetiva e concisa, baseada apenas nos dados fornecidos.
+Otimize a resposta para que o professor entenda rápido e saiba quais medidas tomar.
+Não repita dados técnicos, como IDs, e evite números redundantes.
 
-                                    Abaixo estão os dados do aluno que você deve analisar neste caso:
-                                    {dadosAluno}
+Dados do aluno para análise:
+{dadosAluno}
 
-                                    E esta é a pergunta que você deve responder agora:
-                                    {prompt}
+Pergunta atual:
+{prompt}
 
-                                    Por fim, responda a pergunta com base nos dados acima, tendo como princípio básico que:
+Responda com base nos dados. Se o assunto for fora do seu escopo, diga: 'Os dados fornecidos não permitem responder a essa pergunta com precisão.'
+Sempre entregue uma análise precisa, mesmo que os dados não sejam ideais.
+"
 
-                                    Caso a pergunta seja de um assunto completamente diferente da sua especialização nesta conversa, responda: 'Os dados fornecidos não permitem responder a essa pergunta com precisão.'
-                                    No entanto, caso a pergunta caiba no escopo no qual você foi inserido, sempre dê uma resposta concreta e que satisfaça absolutamente todos os requisitos estabelecidos.
-                                    Lembre-se que, ainda que os dados passados como parâmetro de análise não sejam absolutamente ideais para uma resposta perfeita, eles são o máximo que é possível extrair, então uma análise minuciosa deles é necessária para que seja possível obter uma análise palpável da situação de cada aluno, conforme requisitado.
-                                "
-                            }
-                        }
+        }
+    }
                     }
                 }
             };

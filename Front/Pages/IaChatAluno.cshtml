@@ -1,31 +1,26 @@
 ﻿@page "{userId}"
 @model Front.Pages.IaChatAlunoModel
 @{
-    ViewData["Title"] = "Chat com IA";
+    ViewData["Title"] = "Conversa com IA";
     ViewData["OcultarSombra"] = true;
 }
 
 <header class="linha welcome" style="justify-content: space-between; width: 100%;">
     <div class="coluna" style="gap: 10px;">
-        <span class="SubH1 corAzul">Aluno: @Model.DadosAluno.GetValueOrDefault("Nome")</span>
+        <span class="SubH1 corAzul">Aluno: @Model.User.name</span>
         <h1 class="corPreta40B">Inteligência Artificial</h1>
     </div>
 </header>
 
-@if (Model.DadosAluno != null)
-{
-    <div class="card-aluno" style="padding: 20px; background-color: #f9f9f9; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;">
+
+
+@*     <div class="card-aluno" style="padding: 20px; background-color: #f9f9f9; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;">
         <h3 style="margin-bottom: 10px;">📄 Dados do Aluno</h3>
         <ul style="list-style: none; padding: 0;">
-            @foreach (var item in Model.DadosAluno)
-            {
-                <li style="margin-bottom: 6px;">
-                    <strong>@item.Key:</strong> @item.Value
-                </li>
-            }
+            <span>@Model.DadosAlunoString</span>
         </ul>
-    </div>
-}
+    </div> 
+ *@
 
 <div class="dashboard coluna" style="gap: 10px; height: 100%; flex-direction: column-reverse;">
     <form method="post" id="formIA">
@@ -40,19 +35,15 @@
             <button type="submit" id="btnGerar">Gerar</button>
         </div>
     </form>
-
     <div id="chatContainer" class="coluna chat" style="gap: 10px; width: 100%; height: fit-content; overflow: auto; flex-direction: column-reverse;">
-        @if (!string.IsNullOrEmpty(Model.Resposta))
+        @foreach (var msg in Model.Mensagens.AsEnumerable().Reverse())
         {
             <div class="card-resposta">
-                <span><strong>IA:</strong><br>@Html.Raw(Model.RespostaFormatada)</span>
+                <span><strong>IA:</strong><br />@Html.Raw(msg.Resposta)</span>
             </div>
-        }
-        @if (!string.IsNullOrEmpty(Model.UltimaPergunta))
-        {
             <div style="width: 100%; display: flex; flex-direction: row-reverse;">
                 <div class="card-pergunta">
-                    <span><strong>Você:</strong><br />@Model.UltimaPergunta</span>
+                    <span><strong>Você:</strong><br />@msg.Pergunta</span>
                 </div>
             </div>
         }

@@ -4,7 +4,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] PrevUni</title>
+    <title>@ViewData["Title"]</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -79,6 +79,7 @@
             </a>
             <div class="linha links_nav" style="gap: 24px">
                 <a asp-area="" asp-page="/Cursos">Cursos</a>
+                <a asp-area="" asp-page="/Alunos">Alunos</a>
             </div>
         </div>
         <div class="linha" style="align-items:center">
@@ -119,7 +120,7 @@
                     List<AlunoNome> alunos = FavoritoService.ListarAluno();
                     foreach (AlunoNome c in alunos)
                     {
-                        <a class="curso_tab_fav" asp-page="/PerfilAluno" asp-route-userId="@c.UserId">@c.Nome</a>
+                        <a class="curso_tab_fav" asp-page="/PerfilAluno" asp-route-userId="@c.UserId" asp-route-nome="@c.Nome">@c.Nome</a>
                     }
                 }
             </div>

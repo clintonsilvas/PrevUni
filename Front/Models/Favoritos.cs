@@ -70,7 +70,7 @@ namespace Front.Models
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Erro ao adicionar curso: {ex.Message}");
+                Console.WriteLine($"Erro ao adicionar nomeCurso: {ex.Message}");
                 throw;
             }
         }

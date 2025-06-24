@@ -174,7 +174,7 @@ namespace Backend.Services
             new BsonDocument("$project", new BsonDocument
             {
                 { "_id", 0 },
-                { "curso", "$_id" }
+                { "nomeCurso", "$_id" }
             })
             };
 
@@ -183,7 +183,7 @@ namespace Backend.Services
             var cursos = new List<string>();
             await resultado.ForEachAsync(doc =>
             {
-                cursos.Add(doc["curso"].AsString);
+                cursos.Add(doc["nomeCurso"].AsString);
             });
 
             return cursos;
@@ -198,21 +198,21 @@ namespace Backend.Services
                 {
                     { "_id", new BsonDocument
                         {
-                            { "curso", "$logs.course_fullname" },
-                            { "aluno", "$logs.user_id" }
+                            { "nomeCurso", "$logs.course_fullname" },
+                            { "quantAlunos", "$logs.user_id" }
                         }
                     }
                 }),
                 new BsonDocument("$group", new BsonDocument
                 {
-                    { "_id", "$_id.curso" },
-                    { "alunos", new BsonDocument("$sum", 1) }
+                    { "_id", "$_id.nomeCurso" },
+                    { "quantAlunos", new BsonDocument("$sum", 1) }
                 }),
                 new BsonDocument("$project", new BsonDocument
                 {
                     { "_id", 0 },
-                    { "curso", "$_id" },
-                    { "alunos", 1 }
+                    { "nomeCurso", "$_id" },
+                    { "quantAlunos", 1 }
                 })
             };
 
@@ -223,14 +223,14 @@ namespace Backend.Services
             {
                 cursos.Add(new CursoComQtdAlunos
                 {
-                    Curso = doc["curso"].AsString,
-                    Alunos = doc["alunos"].AsInt32
+                    nomeCurso = doc["nomeCurso"].AsString,
+                    quantAlunos = doc["quantAlunos"].AsInt32
                 });
             });
 
             return cursos;
         }
-        public async Task<List<AlunoResumo>> GetAlunosPorCursoAsync(string nomeCurso)
+        public async Task<List<Usuario>> GetAlunosPorCursoAsync(string nomeCurso)
         {
             var pipeline = new BsonDocument[]
             {
@@ -239,35 +239,31 @@ namespace Backend.Services
         new BsonDocument("$group", new BsonDocument
         {
             { "_id", "$logs.user_id" },
-            { "nome", new BsonDocument("$first", "$logs.name") },
-            { "ultimo_acesso", new BsonDocument("$max", "$logs.user_lastaccess") }
+            { "name", new BsonDocument("$first", "$logs.name") },
+            { "user_lastaccess", new BsonDocument("$max", "$logs.user_lastaccess") }
         }),
         new BsonDocument("$project", new BsonDocument
         {
             { "_id", 0 },
             { "user_id", "$_id" },
-            { "nome", 1 },
-            { "ultimo_acesso", 1 }
+            { "name", 1 },
+            { "user_lastaccess", 1 }
         })
             };
 
             var resultado = await _collection.AggregateAsync<BsonDocument>(pipeline);
 
-            var alunos = new List<AlunoResumo>();
+            var alunos = new List<Usuario>();
             await resultado.ForEachAsync(doc =>
             {
-                var aluno = new AlunoResumo
+                var aluno = new Usuario
                 {
                     user_id = doc.GetValue("user_id", "").AsString,
-                    nome = doc.GetValue("nome", "").AsString,
-                    ultimo_acesso = doc.GetValue("ultimo_acesso").BsonType == BsonType.DateTime
-    ? doc.GetValue("ultimo_acesso").ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")
-    : doc.GetValue("ultimo_acesso").ToString(),
+                    name = doc.GetValue("name", "").AsString,
+                    user_lastaccess = doc.GetValue("user_lastaccess").BsonType == BsonType.DateTime
+    ? doc.GetValue("user_lastaccess").ToUniversalTime().ToString("yyyy-MM-dd HH:mm:ss")
+    : doc.GetValue("user_lastaccess").ToString(),
 
-                    total_acessos = 0,
-                    dias_ativos = 0,
-                    interacoes_por_componente = new Dictionary<string, int>(),
-                    cursos_acessados = new List<string>()
                 };
 
                 alunos.Add(aluno);
@@ -278,37 +274,37 @@ namespace Backend.Services
         public async Task<List<CursoComAlunos>> GetAlunosPorTodosOsCursosAsync()
         {
             var pipeline = new[]
+{
+    new BsonDocument("$unwind", "$logs"),
+    new BsonDocument("$group", new BsonDocument
+    {
+        { "_id", new BsonDocument
             {
-        new BsonDocument("$unwind", "$logs"),
-        new BsonDocument("$group", new BsonDocument
-        {
-            { "_id", new BsonDocument
-                {
-                    { "course_fullname", "$logs.course_fullname" },
-                    { "user_id", "$logs.user_id" }
-                }
-            },
-            { "nome", new BsonDocument("$first", "$logs.name") },
-            { "ultimo_acesso", new BsonDocument("$max", "$logs.user_lastaccess") }
-        }),
-        new BsonDocument("$group", new BsonDocument
-        {
-            { "_id", "$_id.course_fullname" },
-            { "alunos", new BsonDocument("$push", new BsonDocument
-                {
-                    { "user_id", "$_id.user_id" },
-                    { "nome", "$nome" },
-                    { "ultimo_acesso", "$ultimo_acesso" }
-                })
+                { "course_fullname", "$logs.course_fullname" },
+                { "user_id", "$logs.user_id" }
             }
-        }),
-        new BsonDocument("$project", new BsonDocument
-        {
-            { "_id", 0 },
-            { "curso", "$_id" },
-            { "alunos", 1 }
-        })
-    };
+        },
+        { "name", new BsonDocument("$first", "$logs.name") },
+        { "ultimo_acesso", new BsonDocument("$max", "$logs.user_lastaccess") }
+    }),
+    new BsonDocument("$group", new BsonDocument
+    {
+        { "_id", "$_id.course_fullname" },
+        { "alunos", new BsonDocument("$push", new BsonDocument
+            {
+                { "user_id", "$_id.user_id" },
+                { "nome", "$name" }, // corrigido
+                { "ultimo_acesso", "$ultimo_acesso" } // corrigido
+            })
+        }
+    }),
+    new BsonDocument("$project", new BsonDocument
+    {
+        { "_id", 0 },
+        { "nomeCurso", "$_id" },
+        { "alunos", 1 }
+    })
+};
 
             var cursos = new List<CursoComAlunos>();
 
@@ -322,12 +318,12 @@ namespace Backend.Services
                     {
                         user_id = a["user_id"].AsString,
                         name = a["nome"].AsString,
-                        user_lastaccess = a["ultimo_acesso"].AsString
+                        user_lastaccess = a["ultimo_acesso"].ToString() // <-- Ajustado
                     }).ToList();
 
                     cursos.Add(new CursoComAlunos
                     {
-                        curso = doc.GetValue("curso", "").AsString,
+                        nomeCurso = doc.GetValue("nomeCurso", "").AsString,
                         usuarios = alunos
                     });
                 }
@@ -506,7 +502,7 @@ namespace Backend.Services
             sb.AppendLine($"Último Acesso: {ultimoAcesso:yyyy-MM-dd}");
             sb.AppendLine();
 
-            sb.AppendLine("Interações por Curso:");
+            sb.AppendLine("Interações por nomeCurso:");
             foreach (var curso in cursoInteracoes)
                 sb.AppendLine($"- {curso.Key}: {curso.Value} interações");
 
@@ -579,7 +575,7 @@ namespace Backend.Services
         {
             var logs = await GetLogsPorCursoAsync(nomeCurso);
             if (logs == null || logs.Count == 0)
-                return "Curso não encontrado ou sem atividades.";
+                return "nomeCurso não encontrado ou sem atividades.";
 
             var totalAcessos = logs.Count;
             var alunosUnicos = logs.Select(l => l.user_id).Distinct().Count();
@@ -669,19 +665,19 @@ namespace Backend.Services
                 .Select(g => $"{g.Key.name} ({g.Count()})")
                 .ToList();
 
-            // Alunos com apenas 1 acesso
+            // quantAlunos com apenas 1 acesso
             var alunos1Acesso = logs
                 .GroupBy(l => l.user_id)
                 .Count(g => g.Count() == 1);
 
-            // Alunos inativos há mais de 30 dias
+            // quantAlunos inativos há mais de 30 dias
             var alunosInativos = logs
                 .GroupBy(l => l.user_id)
                 .Where(g => g.Max(l => DateTime.TryParse(l.date, out var d) ? d : DateTime.MinValue) < limite30dias)
                 .Select(g => g.Key)
                 .Count();
 
-            // Alunos que nunca realizaram ações de engajamento
+            // quantAlunos que nunca realizaram ações de engajamento
             var alunosSemEngajamento = logs
                 .GroupBy(l => l.user_id)
                 .Count(g => !g.Any(l => acoesEngajamento.Contains(l.action)));
@@ -711,22 +707,22 @@ namespace Backend.Services
 
             var resumoStr = string.Join(" / ", new[]
             {
-        $"Curso: {nomeCurso}",
-        $"Total de Alunos: {alunosUnicos}",
+        $"nomeCurso: {nomeCurso}",
+        $"Total de quantAlunos: {alunosUnicos}",
         $"Total de Acessos: {totalAcessos}",
         $"Média de Acessos por Aluno: {mediaAcessosPorAluno:F2}",
         $"Dias Ativos: {diasAtivos}",
         $"Duração Estimada do Uso: {duracaoDias} dias",
-        $"Alunos Ativos nos Últimos 30 dias: {alunosAtivos30Dias}",
-        $"Alunos Inativos >30 dias: {alunosInativos}",
-        $"% Alunos com >5 Acessos: {percentualAlunosEngajados:F2}%",
-        $"Alunos com apenas 1 acesso: {alunos1Acesso}",
-        $"Alunos sem Engajamento: {alunosSemEngajamento}",
+        $"quantAlunos Ativos nos Últimos 30 dias: {alunosAtivos30Dias}",
+        $"quantAlunos Inativos >30 dias: {alunosInativos}",
+        $"% quantAlunos com >5 Acessos: {percentualAlunosEngajados:F2}%",
+        $"quantAlunos com apenas 1 acesso: {alunos1Acesso}",
+        $"quantAlunos sem Engajamento: {alunosSemEngajamento}",
         $"Interações por Componente: {string.Join(", ", percentualPorComponente)}",
         $"Ações Mais Comuns: {string.Join(", ", acoesMaisComuns)}",
         $"Top Ações de Engajamento: {string.Join(", ", acoesEngajamentoTop)}",
         $"Ações Passivas: {totalPassivas}, Ativas: {totalAtivas}",
-        $"Alunos com acesso em >1 dia: {alunosMultiplosDias}",
+        $"quantAlunos com acesso em >1 dia: {alunosMultiplosDias}",
         $"Top 3 Usuários com Mais Acessos: {string.Join(", ", topUsuarios)}",
         $"Top 10 Piores Usuários (menos acessos): {string.Join(", ", pioresUsuarios)}",
         $"Média de dias entre 1º e último acesso por aluno: {mediaDiasPermanencia:F2} dias"
