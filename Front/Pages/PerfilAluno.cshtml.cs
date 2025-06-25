@@ -63,7 +63,8 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
     private async Task<bool> ObterDadosAlunoAsync(string userId)
     {
         var logsTask = GetFromApiAsync<List<LogUsuario>>($"https://localhost:7232/api/Moodle/logs/{userId}");
-        var engajamentosTask = GetFromApiAsync<List<AlunoEngajamento>>("https://localhost:7232/api/Mongo/engajamento-alunos");
+        var engajamentosTask = GetFromApiAsync<List<AlunoEngajamento>>($"https://localhost:7232/api/engajamento/curso/{Uri.EscapeDataString(CursoSelecionado)}");
+
 
         await Task.WhenAll(logsTask, engajamentosTask);
         List<LogUsuario> AlunoLogsAux = new List<LogUsuario>();
@@ -101,8 +102,8 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
         user_id = userId,
         user_lastaccess = ultimoLog.user_lastaccess
     };
-
-    private float ObterEngajamento(List<AlunoEngajamento>? engajamentos, string userId) =>
+   
+    private float ObterEngajamento(List<AlunoEngajamento>? engajamentos, string userId) =>  // OLHAR AQUI DPS 
         (float)(engajamentos?.FirstOrDefault(e => e.UserId == userId)?.Engajamento ?? 0);
 
     private async Task<T?> GetFromApiAsync<T>(string url)
