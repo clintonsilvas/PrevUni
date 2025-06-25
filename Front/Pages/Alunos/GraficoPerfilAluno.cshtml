@@ -250,75 +250,38 @@
     </div>
 </div>
 
-
-
 <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        const userId = '@Model.User.user_id';
-        const userName = '@Model.User.name';
-        const toggle = document.getElementById('toggleTheme');
-        const ctxBarras = document.getElementById('graficoLogs')?.getContext('2d');
-        const ctxPizza = document.getElementById('graficoPizza')?.getContext('2d');
-        const imgFav = document.getElementById('imgFavCurso');
-        const inputPergunta = document.getElementById('IaPergunta');
+    const coresClaro = ['#002899', '#0036cc', '#99b4ff', '#ccd9ff', '#e0eaff'];
+    const coresEscuro = ['#7AAEFF', '#5A8BDD', '#3A69BB', '#1A4799', '#555555'];
+    const toggle = document.getElementById('toggleTheme');
+    const ctxBarras = document.getElementById('graficoLogs')?.getContext('2d');
+    const ctxPizza = document.getElementById('graficoPizza')?.getContext('2d');
+    let graficoBarras, graficoPizza;
 
-        const coresClaro = ['#002899', '#0036cc', '#99b4ff', '#ccd9ff', '#e0eaff'];
-        const coresEscuro = ['#7AAEFF', '#5A8BDD', '#3A69BB', '#1A4799', '#555555'];
 
-        // Variáveis globais dos gráficos para poder destruir antes de recriar
-        let graficoBarras = null;
-        let graficoPizza = null;
+    // --------- GRÁFICOS ---------
+    function criarGraficos() {
+        const isDarkMode = document.documentElement.classList.contains('dark');
+        const cores = isDarkMode ? coresEscuro : coresClaro;
+        const corTexto = '#8F98B2';
 
-            console.log('anos:', anos);
-    console.log('semanas:', semanas);
-    console.log('labels:', chartData.labels);
-    console.log('datasets:', chartData.datasets);
+        const anos = @Html.Raw(Model.AnosJson);
+        const semanas = @Html.Raw(Model.SemanasJson);
+        const chartData = {
+            labels: @Html.Raw(Model.LblJson),
+            datasets: @Html.Raw(Model.DsJson)
+        };
 
-        // Função auxiliar para pegar intervalo da semana
-        function getDateRange(year, week) {
-            const base = new Date(year, 0, 1 + (week - 1) * 7);
-            const dow = base.getDay();
-            const start = new Date(base.setDate(base.getDate() - dow + (dow <= 4 ? 1 : 8)));
-            const end = new Date(start);
-            end.setDate(start.getDate() + 6);
-            return `${start.toLocaleDateString('pt-BR')} à ${end.toLocaleDateString('pt-BR')}`;
-        }
+        chartData.datasets.forEach((ds, i) => {
+            ds.backgroundColor = cores[i % cores.length];
+            ds.borderWidth = 0;
+        });
 
-        // Função que cria e atualiza os gráficos
-        function criarGraficos() {
-            if (!ctxBarras) return console.warn('Canvas gráfico barras não encontrado.');
-            if (!ctxPizza) return console.warn('Canvas gráfico pizza não encontrado.');
+        const totaisPorSemana = chartData.labels.map((_, i) =>
+            chartData.datasets.reduce((soma, ds) => soma + ds.data[i], 0)
+        );
 
-            const isDarkMode = document.documentElement.classList.contains('dark');
-            const cores = isDarkMode ? coresEscuro : coresClaro;
-            const corTexto = '#8F98B2';
-
-            // Dados do Razor, já parseados em JS nativo com Json.Raw
-            const anos = @Html.Raw(Model.AnosJson ?? "[]");
-            const semanas = @Html.Raw(Model.SemanasJson ?? "[]");
-            const chartData = {
-                labels: @Html.Raw(Model.LblJson ?? "[]"),
-                datasets: @Html.Raw(Model.DsJson ?? "[]")
-            };
-
-            // Se não tiver dados, sai
-            if (!chartData.labels.length || !chartData.datasets.length) {
-                console.warn('Dados do gráfico incompletos.');
-                return;
-            }
-
-            // Define cores dos datasets
-            chartData.datasets.forEach((ds, i) => {
-                ds.backgroundColor = cores[i % cores.length];
-                ds.borderWidth = 0;
-            });
-
-            // Calcula totais para tooltips e escala Y
-            const totaisPorSemana = chartData.labels.map((_, i) =>
-                chartData.datasets.reduce((soma, ds) => soma + (ds.data[i] ?? 0), 0)
-            );
-
-            // Destroi gráficos antigos se existirem
+        if (ctxBarras) {
             if (graficoBarras) graficoBarras.destroy();
             graficoBarras = new Chart(ctxBarras, {
                 type: 'bar',
@@ -363,15 +326,15 @@
                     }
                 }
             });
+        }
 
-            // --- Gráfico Pizza ---
+        if (ctxPizza) {
+            if (graficoPizza) graficoPizza.destroy();
 
-            // Total ações e logs para cálculo do "Outros"
             const totalAcoes = @Model.AcoesResumo.Sum(a => a.Quantidade);
             const totalLog = @Model.AlunoLogs.Count;
             const quantidadeOutros = totalLog - totalAcoes;
 
-            // Construir array com as ações + "Outros"
             const acoesComOutros = [
     @foreach (var acao in Model.AcoesResumo)
     {
@@ -386,7 +349,6 @@
             const labelsPizza = acoesComOutros.map(a => a.label);
             const dadosPizza = acoesComOutros.map(a => a.quantidade);
 
-            if (graficoPizza) graficoPizza.destroy();
             graficoPizza = new Chart(ctxPizza, {
                 type: 'doughnut',
                 data: {
@@ -428,21 +390,21 @@
                                     }));
                                 }
                             },
-                            onClick: (e, legendItem) => {
-                                const index = legendItem.index;
+                                onClick: (e, legendItem) => {
+                                    const index = legendItem.index;
 
-                                // Toggle fatias da pizza
-                                const metaPizza = graficoPizza.getDatasetMeta(0).data[index];
-                                metaPizza.hidden = !metaPizza.hidden;
-                                graficoPizza.update();
+                                    // Toggle na pizza
+                                    const metaPizza = graficoPizza.getDatasetMeta(0).data[index];
+                                    metaPizza.hidden = !metaPizza.hidden;
+                                    graficoPizza.update();
 
-                                // Toggle datasets da barra
-                                const dsBarra = graficoBarras.data.datasets[index];
-                                if (dsBarra) {
-                                    dsBarra.hidden = !dsBarra.hidden;
-                                    graficoBarras.update();
+                                    // Toggle na barra
+                                    const dsBarra = graficoBarras.data.datasets[index];
+                                    if (dsBarra) {
+                                        dsBarra.hidden = !dsBarra.hidden;
+                                        graficoBarras.update();
+                                    }
                                 }
-                            }
                         }
                     }
                 },
@@ -463,16 +425,234 @@
                 }]
             });
         }
+    }
+
+    function getDateRange(year, week) {
+        const base = new Date(year, 0, 1 + (week - 1) * 7);
+        const dow = base.getDay();
+        const start = new Date(base);
+        start.setDate(base.getDate() - dow + (dow <= 4 ? 1 : 8));
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        const f = d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+        return `${f(start)} à ${f(end)}`;
+    }
+
+    // --------- INICIALIZAÇÃO ---------
+    if (localStorage.getItem('theme') === 'dark') {
+        document.documentElement.classList.add('dark');
+        if (toggle) toggle.checked = true;
+    }
+
+    criarGraficos();
+
+    if (toggle) {
+        toggle.addEventListener('change', function () {
+            document.documentElement.classList.toggle('dark', this.checked);
+            localStorage.setItem('theme', this.checked ? 'dark' : 'light');
+            criarGraficos();
+        });
+    }
+</script>
+
+<script>
+    const cores = {
+        claro: ['#002899', '#0036cc', '#99b4ff', '#ccd9ff', '#e0eaff'],
+        escuro: ['#7AAEFF', '#5A8BDD', '#3A69BB', '#1A4799', '#555555']
+    };
+
+    let graficoBarras, graficoPizza;
+
+    function getDateRange(year, week) {
+        const base = new Date(year, 0, 1 + (week - 1) * 7);
+        const dow = base.getDay();
+        const start = new Date(base.setDate(base.getDate() - dow + (dow <= 4 ? 1 : 8)));
+        const end = new Date(start);
+        end.setDate(start.getDate() + 6);
+        return `${start.toLocaleDateString('pt-BR')} à ${end.toLocaleDateString('pt-BR')}`;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        const ctxBarras = document.getElementById('graficoLogs')?.getContext('2d');
+        const ctxPizza = document.getElementById('graficoPizza')?.getContext('2d');
+        const toggle = document.getElementById('toggleTheme');
+        const userId = '@Model.User.user_id';
+        const userName = '@Model.User.name';
+        const imgFav = document.getElementById('imgFavCurso');
+        const inputPergunta = document.getElementById('IaPergunta');
+
+        function criarGraficos() {
+            const isDark = document.documentElement.classList.contains('dark');
+            const paleta = isDark ? cores.escuro : cores.claro;
+            const corTexto = '#8F98B2';
+
+            const anos = @Html.Raw(Model.AnosJson);
+            const semanas = @Html.Raw(Model.SemanasJson);
+            const chartData = {
+                labels: @Html.Raw(Model.LblJson),
+                datasets: @Html.Raw(Model.DsJson)
+            };
+
+            const totaisPorSemana = chartData.labels.map((_, i) =>
+                chartData.datasets.reduce((soma, ds) => soma + ds.data[i], 0)
+            );
+
+            chartData.datasets.forEach((ds, i) => {
+                ds.backgroundColor = paleta[i % paleta.length];
+                ds.borderWidth = 0;
+            });
+
+            // Gráfico de barras
+            if (ctxBarras) {
+                if (graficoBarras) graficoBarras.destroy();
+                graficoBarras = new Chart(ctxBarras, {
+                    type: 'bar',
+                    data: chartData,
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            tooltip: {
+                                mode: 'index',
+                                callbacks: {
+                                    title: ctx => `(${getDateRange(anos[ctx[0].dataIndex], semanas[ctx[0].dataIndex])})`,
+                                    label: ctx => {
+                                        const valor = ctx.parsed.y;
+                                        if (valor === 0) return null;
+                                        const total = totaisPorSemana[ctx.dataIndex];
+                                        const pct = total ? ((valor / total) * 100).toFixed(1) : 0;
+                                        return `${ctx.dataset.label}: ${valor} (${pct}%)`;
+                                    }
+                                }
+                            },
+                            legend: { display: false }
+                        },
+                        scales: {
+                            x: {
+                                stacked: true,
+                                ticks: { color: corTexto, font: { size: 10, weight: '500' } },
+                                grid: { display: false }
+                            },
+                            y: {
+                                stacked: true,
+                                beginAtZero: true,
+                                ticks: {
+                                    color: corTexto,
+                                    font: { size: 10, weight: '500' },
+                                    callback: val => {
+                                        const max = Math.max(...totaisPorSemana);
+                                        return max ? `${((val / max) * 100).toFixed(0)}%` : '0%';
+                                    }
+                                },
+                                grid: { display: false }
+                            }
+                        }
+                    }
+                });
+            }
+
+            // Gráfico de pizza
+            if (ctxPizza) {
+                if (graficoPizza) graficoPizza.destroy();
+
+                const totalAcoes = @Model.AcoesResumo.Sum(a => a.Quantidade);
+                const totalLog = @Model.AlunoLogs.Count;
+                const quantidadeOutros = totalLog - totalAcoes;
+
+                const acoesComOutros = [
+    @foreach (var acao in Model.AcoesResumo)
+    {
+        @: { label: @Html.Raw(System.Text.Json.JsonSerializer.Serialize(acao.Acao)), quantidade: @acao.Quantidade },
+    }
+                ];
+
+                if (quantidadeOutros > 0) {
+                    acoesComOutros.push({ label: 'Outros', quantidade: quantidadeOutros });
+                }
+
+                const labelsPizza = acoesComOutros.map(a => a.label);
+                const dadosPizza = acoesComOutros.map(a => a.quantidade);
+
+                graficoPizza = new Chart(ctxPizza, {
+                    type: 'doughnut',
+                    data: {
+                        labels: labelsPizza,
+                        datasets: [{
+                            data: dadosPizza,
+                            backgroundColor: paleta.slice(0, labelsPizza.length),
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        rotation: 270,
+                        cutout: '70%',
+                        plugins: {
+                            legend: {
+                                position: 'right',
+                                labels: {
+                                    usePointStyle: true,
+                                    pointStyle: 'rectRounded',
+                                    color: corTexto,
+                                    font: { size: 14, family: 'Inter' },
+                                    padding: 20,
+                                    boxWidth: 12,
+                                    generateLabels: chart => {
+                                        const { data } = chart;
+                                        const cores = data.datasets[0].backgroundColor;
+                                        return data.labels.map((label, i) => ({
+                                            text: `${label} (${data.datasets[0].data[i]})`,
+                                            fillStyle: cores[i],
+                                            strokeStyle: cores[i],
+                                            index: i,
+                                            hidden: chart.getDatasetMeta(0).data[i]?.hidden ?? false,
+                                            pointStyle: 'rectRounded',
+                                            boxWidth: 12
+                                        }));
+                                    }
+                                },
+                                onClick: (e, legendItem) => {
+                                    const index = legendItem.index;
+                                    const metaPizza = graficoPizza.getDatasetMeta(0).data[index];
+                                    metaPizza.hidden = !metaPizza.hidden;
+                                    graficoPizza.update();
+
+                                    const dsBarra = graficoBarras?.data.datasets[index];
+                                    if (dsBarra) {
+                                        dsBarra.hidden = !dsBarra.hidden;
+                                        graficoBarras.update();
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    plugins: [{
+                        id: 'centerText',
+                        beforeDraw(chart) {
+                            const { ctx, chartArea: { left, right, top, bottom } } = chart;
+                            const x = (left + right) / 2;
+                            const y = (top + bottom) / 2;
+                            ctx.save();
+                            ctx.font = 'bold 16px Inter';
+                            ctx.fillStyle = corTexto;
+                            ctx.textAlign = 'center';
+                            ctx.textBaseline = 'middle';
+                            ctx.fillText(`${dadosPizza.reduce((a, b) => a + b, 0)} Ações`, x, y);
+                            ctx.restore();
+                        }
+                    }]
+                });
+            }
+        }
 
         // Tema inicial
         if (localStorage.getItem('theme') === 'dark') {
             document.documentElement.classList.add('dark');
-            if (toggle) toggle.checked = true;
+            toggle?.checked = true;
         }
 
         criarGraficos();
 
-        // Evento para alternar tema e recriar gráficos
         toggle?.addEventListener('change', e => {
             const dark = e.target.checked;
             document.documentElement.classList.toggle('dark', dark);
@@ -480,9 +660,33 @@
             criarGraficos();
         });
 
-        // Funções extras que o script usa podem ser adicionadas aqui, tipo enviarPergunta, alunoFavorito etc.
+        // Favoritar
+        window.alunoFavorito = async checkbox => {
+            const { checked } = checkbox;
+            imgFav.src = `/css/icons/${checked ? 'estrela.svg' : 'estrela_inativa.svg'}`;
+            const url = `/api/favoritos/${checked ? 'adicionar_aluno' : 'remover_aluno'}?name=${encodeURIComponent(userName)}&id=${encodeURIComponent(userId)}`;
+
+            try {
+                const res = await fetch(url, { method: 'POST' });
+                if (!res.ok) throw new Error();
+            } catch {
+                alert('Erro ao atualizar favoritos');
+                checkbox.checked = !checked;
+                imgFav.src = `/css/icons/${checkbox.checked ? 'estrela.svg' : 'estrela_inativa.svg'}`;
+            }
+        };
+
+        // Enviar pergunta para IA
+        window.enviarPergunta = () => {
+            const pergunta = inputPergunta.value.trim();
+            if (!pergunta) return inputPergunta.focus();
+            window.location.href = `/IaChatAluno/${encodeURIComponent(userId)}?Prompt=${encodeURIComponent(pergunta)}`;
+        };
     });
 </script>
+
+
+
 
 
 <!--SCRIPT DO CALENDARIO-->
