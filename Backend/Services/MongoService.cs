@@ -17,41 +17,49 @@ namespace Backend.Services
         {
             public string UserId { get; set; }
             public string Nome { get; set; }
+            public string CursoNome { get; set; }
             public double Engajamento { get; set; } // 0 a 100
         }
 
         public class AcaoQuantidade
         {
-            public string Acao { get; set; }
+            public string Component { get; set; }
+            public string Target { get; set; }
+            public string Action { get; set; }
             public int Quantidade { get; set; }
         }
+
+
 
         public class EngajamentoService
         {
             private readonly IMongoCollection<BsonDocument> _logs;
-
-
+            private readonly IMongoCollection<ConfiguracaoEngajamento> _configCollection;
 
             public EngajamentoService(IMongoDatabase database)
             {
                 _logs = database.GetCollection<BsonDocument>("logs");
+                _configCollection = database.GetCollection<ConfiguracaoEngajamento>("configuracoesEngajamento");
             }
 
-            public async Task<List<AlunoEngajamento>> CalcularEngajamentoAlunosAsync()
+            public async Task<List<AlunoEngajamento>> CalcularEngajamentoAlunosPorCursoAsync(string nomeCurso)
             {
+                var config = await ObterConfiguracaoAsync();
+
                 var pipeline = new[]
                 {
         new BsonDocument("$unwind", "$logs"),
+        new BsonDocument("$match", new BsonDocument("logs.course_fullname", nomeCurso)),
         new BsonDocument("$group", new BsonDocument
         {
             { "_id", new BsonDocument
                 {
                     { "user_id", "$logs.user_id" },
                     { "nome", "$logs.name" },
-                    { "acao", "$logs.action" },
-                    { "target", "$logs.target"},
-                    {"component", $"logs.component" }
-
+                    { "cursoNome", "$logs.course_fullname" },
+                    { "component", "$logs.component" },
+                    { "target", "$logs.target" },
+                    { "action", "$logs.action" }
                 }
             },
             { "qtd", new BsonDocument("$sum", 1) }
@@ -59,24 +67,27 @@ namespace Backend.Services
     };
 
                 using var cursor = await _logs.AggregateAsync<BsonDocument>(pipeline);
-
                 var resultados = await cursor.ToListAsync();
 
                 var agrupados = resultados
                     .GroupBy(d => new
                     {
-                        UserId = d["_id"].AsBsonDocument.TryGetValue("user_id", out var userId) ? userId.AsString : "undefined",
-                        Nome = d["_id"].AsBsonDocument.TryGetValue("nome", out var nome) ? nome.AsString : "undefined"
+                        UserId = d["_id"]["user_id"].AsString,
+                        Nome = d["_id"]["nome"].AsString,
+                        CursoNome = d["_id"]["cursoNome"].AsString
                     })
                     .Select(g => new AlunoEngajamento
                     {
                         UserId = g.Key.UserId,
                         Nome = g.Key.Nome,
+                        CursoNome = g.Key.CursoNome,
                         Engajamento = CalcularLES(g.Select(x => new AcaoQuantidade
                         {
-                            Acao = x["_id"].AsBsonDocument.TryGetValue("acao", out var acao) ? acao.AsString : "undefined",
+                            Component = x["_id"]["component"].AsString,
+                            Target = x["_id"]["target"].AsString,
+                            Action = x["_id"]["action"].AsString,
                             Quantidade = x["qtd"].ToInt32()
-                        }).ToList())
+                        }).ToList(), config)
                     })
                     .ToList();
 
@@ -84,38 +95,46 @@ namespace Backend.Services
             }
 
 
-
-            private double CalcularLES(List<AcaoQuantidade> acoes)
+            private async Task<ConfiguracaoEngajamento> ObterConfiguracaoAsync()
             {
-                int totalVisualizacao = Soma(acoes, new List<string> { "viewed" });
-                int totalEntrega = Soma(acoes, new List<string> { "submitted", "uploaded" });
-                int totalForum = Soma(acoes, new List<string> { "created", "uploaded", "viewed" });
-                int totalAcesso = Soma(acoes, new List<string> { "viewed" });
-                int totalAvaliacao = Soma(acoes, new List<string> { "graded", "reviewed" });
-                int totalTempo = totalVisualizacao;
+                var config = await _configCollection.Find(_ => true).FirstOrDefaultAsync();
+                return config ?? new ConfiguracaoEngajamento(); // fallback para padrão se não encontrar
+            }
 
-                double notaVisualizacao = NotaPorFaixa(totalVisualizacao, 500);
-                double notaEntrega = NotaPorFaixa(totalEntrega, 20);
+            private double CalcularLES(List<AcaoQuantidade> acoes, ConfiguracaoEngajamento config)
+            {
+                int totalVisualizacoes = Soma(acoes, "core", "course", "viewed");
+                int totalForum = Soma(acoes, "mod_forum", "discussion", "created") +
+                                 Soma(acoes, "mod_forum", "discussion", "viewed");
+                int totalEntrega = Soma(acoes, "mod_assign", "submission", "submitted");
+                int totalQuestionario = Soma(acoes, "mod_quiz", "attempt", "submitted");
+                int totalAvaliacao = Soma(acoes, "mod_assign", "submission", "graded") +
+                                     Soma(acoes, "mod_quiz", "attempt", "graded");
+
+                double notaVisualizacao = NotaPorFaixa(totalVisualizacoes, 100);
                 double notaForum = NotaPorFaixa(totalForum, 30);
-                double notaAcesso = NotaPorFaixa(totalAcesso, 100);
-                double notaAvaliacao = NotaPorFaixa(totalAvaliacao, 20);
-                double notaTempo = NotaPorFaixa(totalTempo, 500);
+                double notaEntrega = NotaPorFaixa(totalEntrega, 20);
+                double notaQuiz = NotaPorFaixa(totalQuestionario, 10);
+                double notaAvaliacao = NotaPorFaixa(totalAvaliacao, 10);
 
                 double les =
-                    notaEntrega * 0.30 +
-                    notaVisualizacao * 0.20 +
-                    notaForum * 0.15 +
-                    notaTempo * 0.15 +
-                    notaAcesso * 0.10 +
-                    notaAvaliacao * 0.10;
+                    notaEntrega * config.PesoEntrega +
+                    notaForum * config.PesoForum +
+                    notaVisualizacao * config.PesoVisualizacao +
+                    notaQuiz * config.PesoQuiz +
+                    notaAvaliacao * config.PesoAvaliacao;
 
                 return Math.Round(les * 10, 2);
             }
 
-
-            private int Soma(List<AcaoQuantidade> acoes, List<string> nomes)
+            private int Soma(List<AcaoQuantidade> acoes, string component, string target, string action)
             {
-                return acoes.Where(a => nomes.Contains(a.Acao)).Sum(a => a.Quantidade);
+                return acoes
+                    .Where(a =>
+                        a.Component == component &&
+                        a.Target == target &&
+                        a.Action == action)
+                    .Sum(a => a.Quantidade);
             }
 
             private double NotaPorFaixa(int valor, int maxEsperado)
@@ -126,9 +145,7 @@ namespace Backend.Services
         }
 
 
-
-
-        public class UsuarioComAcoes
+            public class UsuarioComAcoes
         {
             public string UserId { get; set; }
             public string Nome { get; set; }

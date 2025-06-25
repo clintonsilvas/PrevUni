@@ -17,11 +17,12 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
 
 
     public Usuario User { get; private set; } = new();
-    public List<LogUsuario> AlunoLogs { get; private set; } = [];
-    public List<string> ListaDeCursos { get; private set; } = [];
-    public List<int> SemanasAcessoAluno { get; private set; } = [];
-    public Dictionary<string, int> InteracoesPorComponente { get; private set; } = [];
-    public List<AcaoResumo> AcoesResumo { get; private set; } = [];
+    public List<LogUsuario> AlunoLogs { get; private set; } = new List<LogUsuario>();
+    public List<string> ListaDeCursos { get; private set; } = new List<string>();
+    public List<int> SemanasAcessoAluno { get; private set; } = new List<int>();
+    public Dictionary<string, int> InteracoesPorComponente { get; private set; } = new Dictionary<string, int>();
+    public List<AcaoResumo> AcoesResumo { get; private set; } = new List<AcaoResumo>();
+    private string CursoSelecionado { get; set; } = string.Empty;
     public float Engajamento { get; private set; }
 
     public string LblJson { get; private set; } = string.Empty;
@@ -31,16 +32,7 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
     public string Labels { get; private set; } = string.Empty;
     public string Dados { get; private set; } = string.Empty;
 
-    public async Task<IActionResult> OnGetCarregamentoAsync()
-    {
-                if (string.IsNullOrWhiteSpace(UserId))
-            return NotFound("ID do aluno não fornecido.");
 
-        var resultado = await ObterDadosAlunoAsync(UserId);
-        if (!resultado)
-            return NotFound("Nenhum log encontrado para o aluno.");
-        return Partial("Alunos/GraficoPerfilAluno", this);
-    }
 
 
     public record AlunoEngajamento(
@@ -54,33 +46,65 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
         public int Quantidade { get; set; }
     }
 
-    public async Task<IActionResult> OnGetAsync()
+    public async Task<IActionResult> OnGetCarregamentoAsync(string? curso = null)
     {
-        return Page();
+        if (string.IsNullOrWhiteSpace(UserId))
+            return NotFound("ID do aluno não fornecido.");
+
+        if (!string.IsNullOrWhiteSpace(curso))
+            CursoSelecionado = curso.Trim();
+
+        var resultado = await ObterDadosAlunoAsync(UserId);
+        Console.WriteLine($"Partial {UserId},{curso}");
+
+        return Partial("Alunos/GraficoPerfilAluno", this);
+    }
+    public async Task<IActionResult> OnGetCalendarioParcialAsync(int mes, int ano)
+    {
+        if (string.IsNullOrWhiteSpace(UserId))
+            return NotFound("ID do aluno não fornecido.");
+
+        await ObterDadosAlunoAsync(UserId);
+
+        ViewData["mes"] = mes;
+        ViewData["ano"] = ano;
+
+        return Partial("Alunos/Calendario", this);
     }
 
     private async Task<bool> ObterDadosAlunoAsync(string userId)
     {
         var logsTask = GetFromApiAsync<List<LogUsuario>>($"https://localhost:7232/api/Moodle/logs/{userId}");
-        var engajamentosTask = GetFromApiAsync<List<AlunoEngajamento>>("https://localhost:7232/api/Mongo/engajamento-alunos");
+        var engajamentosTask = GetFromApiAsync<List<AlunoEngajamento>>($"https://localhost:7232/api/engajamento/curso/{Uri.EscapeDataString(CursoSelecionado)}");
+
 
         await Task.WhenAll(logsTask, engajamentosTask);
+        List<LogUsuario> AlunoLogsAux = new List<LogUsuario>();
 
-        AlunoLogs = logsTask.Result ?? [];
+        AlunoLogsAux = logsTask.Result ?? new List<LogUsuario>();
         var engajamentos = engajamentosTask.Result;
 
-        if (!AlunoLogs.Any()) return false;
+        if (!AlunoLogsAux.Any()) return false;
 
-        ListaDeCursos = AlunoLogs.Select(l => l.course_fullname).Distinct().OrderBy(c => c).ToList();
-        if (!string.IsNullOrWhiteSpace(curso))
-            AlunoLogs = AlunoLogs.Where(l => l.course_fullname == curso).ToList();
+        ListaDeCursos = AlunoLogsAux.Select(l => l.course_fullname).Distinct().OrderBy(c => c).ToList();
+
+        if (!string.IsNullOrWhiteSpace(CursoSelecionado))
+        {
+            AlunoLogs = AlunoLogsAux
+                .Where(log => string.Equals(log.course_fullname?.Trim(), CursoSelecionado.Trim(), StringComparison.OrdinalIgnoreCase))
+                .ToList();
+        }
+        else
+        {
+            AlunoLogs = AlunoLogsAux;
+        }
 
         if (!AlunoLogs.Any()) return false;
+        CalcularSemanas();
 
         User = CriarUsuario(AlunoLogs[^1], userId);
         Engajamento = ObterEngajamento(engajamentos, userId);
 
-        CalcularSemanas();
         return true;
     }
 
@@ -90,8 +114,8 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
         user_id = userId,
         user_lastaccess = ultimoLog.user_lastaccess
     };
-
-    private float ObterEngajamento(List<AlunoEngajamento>? engajamentos, string userId) =>
+   
+    private float ObterEngajamento(List<AlunoEngajamento>? engajamentos, string userId) =>  // OLHAR AQUI DPS 
         (float)(engajamentos?.FirstOrDefault(e => e.UserId == userId)?.Engajamento ?? 0);
 
     private async Task<T?> GetFromApiAsync<T>(string url)
@@ -110,29 +134,40 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
         new Acoes().ListarAcoes()
             .FirstOrDefault(x => x.action == a && x.target == t && x.component == c)?.nome_acao ?? "Outros";
 
+
+
     private void CalcularSemanas()
     {
+        var acoesFixas = new Acoes().ListarAcoes();
+        string AcaoDe(string a, string t, string c) => acoesFixas.FirstOrDefault(x => x.action == a && x.target == t && x.component == c)?.nome_acao ?? "Outros";
+
         var cal = CultureInfo.CurrentCulture.Calendar;
-        var logsProcessados = AlunoLogs.Select(l => new
+
+        var logsProcessados = AlunoLogs.Select(l =>
         {
-            Semana = cal.GetWeekOfYear(DateTime.Parse(l.date), CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday),
-            Ano = DateTime.Parse(l.date).Year,
-            Nome = AcaoDe(l.action, l.target, l.component)
+            var data = DateTime.Parse(l.date);
+            return new
+            {
+                Semana = cal.GetWeekOfYear(data, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday),
+                Ano = data.Year,
+                Nome = AcaoDe(l.action, l.target, l.component)
+            };
         }).ToList();
 
-        var grupos = logsProcessados
-            .GroupBy(x => new { x.Ano, x.Semana, x.Nome })
+        var grupos = logsProcessados.GroupBy(x => new { x.Ano, x.Semana, x.Nome })
             .Select(g => new { g.Key.Ano, g.Key.Semana, Acao = g.Key.Nome, Qtde = g.Count() })
             .OrderBy(g => g.Ano).ThenBy(g => g.Semana).ToList();
 
-        var semanas = grupos.Select(g => new { g.Ano, g.Semana }).Distinct().OrderBy(s => s.Ano).ThenBy(s => s.Semana).ToList();
-        var labels = semanas.Select((_, i) => (i + 1).ToString()).ToList();
+        var semanasOrdenadas = grupos.Select(g => new { g.Ano, g.Semana }).Distinct().OrderBy(s => s.Ano).ThenBy(s => s.Semana).ToList();
+
+        var labels = semanasOrdenadas.Select((s, i) => (i + 1).ToString()).ToList();
         var nomesAcoes = grupos.Select(g => g.Acao).Distinct().ToList();
 
         var datasets = nomesAcoes.Select((nome, idx) => new
         {
             label = nome,
-            data = semanas.Select(s => grupos.FirstOrDefault(g => g.Ano == s.Ano && g.Semana == s.Semana && g.Acao == nome)?.Qtde ?? 0).ToList(),
+            data = semanasOrdenadas.Select(s =>
+                grupos.FirstOrDefault(g => g.Ano == s.Ano && g.Semana == s.Semana && g.Acao == nome)?.Qtde ?? 0).ToList(),
             backgroundColor = $"hsl({idx * 60},70%,60%)",
             stack = "stack1",
             borderRadius = 10,
@@ -142,11 +177,10 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
 
         LblJson = JsonSerializer.Serialize(labels);
         DsJson = JsonSerializer.Serialize(datasets);
-        AnosJson = JsonSerializer.Serialize(semanas.Select(s => s.Ano));
-        SemanasJson = JsonSerializer.Serialize(semanas.Select(s => s.Semana));
+        AnosJson = JsonSerializer.Serialize(semanasOrdenadas.Select(s => s.Ano));
+        SemanasJson = JsonSerializer.Serialize(semanasOrdenadas.Select(s => s.Semana));
 
-        AcoesResumo = logsProcessados
-            .GroupBy(x => x.Nome)
+        AcoesResumo = logsProcessados.GroupBy(x => x.Nome)
             .Select(g => new AcaoResumo { Acao = g.Key, Quantidade = g.Count() })
             .ToList();
 
