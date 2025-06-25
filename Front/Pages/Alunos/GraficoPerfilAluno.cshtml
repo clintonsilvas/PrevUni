@@ -259,6 +259,44 @@
     let graficoBarras, graficoPizza;
 
 
+                    async function alunoFavorito(checkbox) {
+                    const checked = checkbox.checked;
+                    const aluno = '@Model.User.user_id';
+                    const nome = '@Model.User.name';
+                    const img = document.getElementById('imgFavCurso');
+
+                    // Trocar a imagem já no clique
+                    img.src = checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
+
+                    const url = checked
+                    ? `/api/favoritos/adicionar_aluno?name=${encodeURIComponent(nome)}&id=${encodeURIComponent(aluno)}`
+                    : `/api/favoritos/remover_aluno?name=${encodeURIComponent(nome)}&id=${encodeURIComponent(aluno)}`;
+
+                    try {
+                    const response = await fetch(url, { method: 'POST' });
+                    if (!response.ok) {
+                    alert('Erro ao atualizar favoritos');
+                    checkbox.checked = !checked;
+                    img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
+                    }
+                    } catch (err) {
+                    alert('Erro na requisição');
+                    checkbox.checked = !checked;
+                    img.src = checkbox.checked ? '/css/icons/estrela.svg' : '/css/icons/estrela_inativa.svg';
+                    }
+                    }
+
+
+                            function enviarPergunta() {
+            const input = document.getElementById('IaPergunta');
+            const pergunta = input.value.trim();
+
+
+            const userId = '@Model.User.user_id';
+            const url = `/IaChatAluno/${encodeURIComponent(userId)}?Prompt=${encodeURIComponent(pergunta)}`;
+            window.location.href = url;
+        }
+
     // --------- GRÁFICOS ---------
     function criarGraficos() {
         const isDarkMode = document.documentElement.classList.contains('dark');
