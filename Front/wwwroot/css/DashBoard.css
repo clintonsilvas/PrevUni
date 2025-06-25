@@ -1,247 +1,627 @@
-@import url("Cores.css");
+﻿@import url("Cores.css");
+
+
+:root {
+    --colunaDireita: 350px;
+}
 
 .CardsEngajamento {
-  flex: 1;
-  align-items: center;
+    flex: 1;
+    align-items: center;
 }
 
 .QuantAlunos {
-  height: fit-content;
-  width: 260px;
-  padding: 24px;
-  background-color: var(--Preto40B);
-  border-radius: 8px;
-  align-items: center;
+    height: fit-content;
+    width: var(--colunaDireita);
+    padding: 24px;
+    background-color: var(--Preto40B);
+    border-radius: 8px;
+    align-items: center;
 }
 
 .iconEscuro {
-  border-radius: 8px;
-  height: 54px;
-  width: 54px;
-  background-color: var(--Preto50B);
-  justify-content: center;
-  align-items: center;
-  display: flex;
+    border-radius: 8px;
+    height: 54px;
+    width: 54px;
+    background-color: var(--Preto50B);
+    justify-content: center;
+    align-items: center;
+    display: flex;
 }
 
 .iconVerde {
-  border-radius: 8px;
-  height: 54px;
-  width: 54px;
-  background-color: var(--verde_trasparente);
-  justify-content: center;
-  align-items: center;
-  display: flex;
+    border-radius: 8px;
+    height: 54px;
+    width: 54px;
+    background-color: var(--verde_trasparente);
+    justify-content: center;
+    align-items: center;
+    display: flex;
 }
+
 .iconVermelho {
-  border-radius: 8px;
-  height: 54px;
-  width: 54px;
-  background-color: var(--vermelho_transparenre);
-  justify-content: center;
-  align-items: center;
-  display: flex;
+    border-radius: 8px;
+    height: 54px;
+    width: 54px;
+    background-color: var(--vermelho_transparenre);
+    justify-content: center;
+    align-items: center;
+    display: flex;
 }
 
 .iconAzul {
-  border-radius: 8px;
-  height: 54px;
-  width: 54px;
-  background-color: var(--Azul10S);
-  justify-content: center;
-  align-items: center;
-  display: flex;
+    border-radius: 8px;
+    height: 54px;
+    width: 54px;
+    background-color: var(--Azul10S);
+    justify-content: center;
+    align-items: center;
+    display: flex;
 }
 
 .iconAzul02 {
-  border-radius: 8px;
-  height: 54px;
-  width: 54px;
-  background-color: var(--Azul-principal);
-  justify-content: center;
-  align-items: center;
-  display: flex;
+    border-radius: 8px;
+    height: 54px;
+    width: 54px;
+    background-color: var(--Azul-principal);
+    justify-content: center;
+    align-items: center;
+    display: flex;
 }
 
 .Unidades {
-  width: 260px;
-  height: 100%;
-  overflow: hidden;
+    width: var(--colunaDireita);
+    height: 100%;
+    overflow: hidden;
 }
 
 .grafContainer {
-  position: relative;
-  width: 10px;
-  height: 100%;
-  overflow: hidden;
+    position: relative;
+    width: 10px;
+    height: 100%;
+    overflow: hidden;
 }
 
-.grafContainer:hover .grafAzul {
-  transform: scale(1.03);
-}
+    .grafContainer:hover .grafAzul {
+        transform: scale(1.03);
+    }
 
-.grafContainer:hover .grafCinza {
-  background-color: var(--Azul10S);
-}
+    .grafContainer:hover .grafCinza {
+        background-color: var(--Azul10S);
+    }
 
 .grafCinza {
-  width: 10px;
-  height: 100%;
-  background-color: var(--Cinza100B);
-  border-radius: 6px;
+    width: 10px;
+    height: 100%;
+    background-color: var(--Cinza100B);
+    border-radius: 6px;
 }
 
 .grafAzul {
-  position: absolute;
-  bottom: 0;
-  width: 10px;
-  background-color: var(--Azul-principal);
-  border-radius: 6px;
-  animation: preencherAzul 1s ease-in-out forwards;
+    position: absolute;
+    bottom: 0;
+    width: 10px;
+    background-color: var(--Azul-principal);
+    border-radius: 6px;
+    animation: preencherAzul 1s ease-in-out forwards;
 }
 
 @keyframes preencherAzul {
-  from {
-    height: 0%;
-  }
-  to {
-    height: var(--Porcentagem, 50%);
-  }
+    from {
+        height: 0%;
+    }
+
+    to {
+        height: var(--Porcentagem, 50%);
+    }
 }
 
 .tabela-card {
-  font-family: "Inter";
-  font-size: 12pt;
-  font-weight: 600;
-  color: var(--Cinza70B);
-  text-decoration: none;
+    font-family: "Inter";
+    font-size: 10pt;
+    font-weight: 600;
+    color: var(--Cinza70B);
 }
 
-.tabela-card a {
-  color: var(--Cinza70B);
-  text-decoration: none;
-}
+    .tabela-card thead {
+        background-color: var(--Cinza100B);
+        border-bottom: 1px solid var(--Azul10S);
+    }
 
-.tabela-card tr:hover a {
-  color: var(--Azul-principal);
-}
 
-.tabela-card table {
-  width: 100%;
-  border-collapse: collapse;
-}
+        .tabela-card thead th {
+            padding: 20px;
+        }
 
-.tabela-card thead th {
-  text-align: left;
-  font-weight: bold;
-}
+
+    .tabela-card a {
+        color: var(--Cinza70B);
+        text-decoration: none;
+    }
+
+    .tabela-card tr:hover a {
+        color: var(--Azul-principal);
+    }
+
+    .tabela-card table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+
+    .tabela-card thead th {
+        text-align: left;
+        font-weight: bold;
+        align-items: end;
+    }
+
     .tabela-card td,
     .tabela-card th {
-        padding: 8px;
+        padding: 10px 20px;
         width: fit-content;
     }
 
-.tabela-card tr {
-  border-radius: 20px;
-}
-
-.tabela-card tr:hover {
-  background-color: var(--Cinza100B);
-}
-
-    .tabela-card th:last-child {
-        align-items:end;
-        text-align: right;
-        font-weight: bold;
+    .tabela-card tr:hover {
+        background-color: var(--Cinza100B);
     }
 
-.tabela-card td:last-child {
-  text-align: right;
-  font-weight: bold;
-}
+    .tabela-card th:last-child button,
+    .tabela-card td:last-child {
+        text-align: right;
+        margin-left: auto;
+    }
 
+    .tabela-card td:first-child {
+        color: var(--Azul-principal);
+        font-weight: 800;
+        width: 10px;
+    }
+/* Bot�o de ordena��o */
 .bot_tab {
     border: none;
     background-color: transparent;
     display: flex;
-    flex-direction: row;
     align-items: center;
-    justify-content: center;
-    gap: 8px;
+    justify-content: flex-end;
+    gap: 6px;
     color: var(--Cinza60B);
+    cursor: pointer;
 }
 
 
 
-.tabela-card td:first-child {
-    color: var(--Azul-principal);
-    font-weight: 800;
-    width: 10px;
-}
 
 .caixaProgresso {
-  display: flex;
-  width: 100%;
-  background-color: var(--Cinza100B);
-  height: 12px;
-  border-radius: 26px;
-  padding: 2px;
+    display: flex;
+    width: 100%;
+    background-color: var(--Cinza100B);
+    height: 12px;
+    border-radius: 26px;
+    padding: 2px;
 }
 
 .barraProgresso {
-  display: flex;
-  width: var(--Porcentagem, 50%);
-  height: 100%;
-  background-color: var(--Azul-principal);
-  animation: preencher 1s ease-in-out forwards;
-  border-radius: 26px;
+    display: flex;
+    width: var(--Porcentagem, 50%);
+    height: 100%;
+    background-color: var(--Azul-principal);
+    animation: preencher 1s ease-in-out forwards;
+    border-radius: 26px;
 }
 
 @keyframes preencher {
-  from {
-    width: 0%;
-  }
-  to {
-    width: var(--Porcentagem, 50%);
-  }
+    from {
+        width: 0%;
+    }
+
+    to {
+        width: var(--Porcentagem, 50%);
+    }
 }
+
 .titProgresso {
-  font-family: "Inter";
-  font-size: 12pt;
-  font-weight: 600;
-  color: var(--Cinza70B);
-  text-decoration: none;
+    font-family: "Inter";
+    font-size: 12pt;
+    font-weight: 600;
+    color: var(--Cinza70B);
+    text-decoration: none;
 }
 
 .unid {
-  margin-top: 16px;
-  margin-bottom: 16px;
+    margin-top: 16px;
+    margin-bottom: 16px;
 }
+
 .graf_caixa {
-  width: 50%;
+    width: 50%;
 }
 
 @media (max-width: 768px) {
-  .CardsEngajamento {
+    .CardsEngajamento {
+        flex-direction: column;
+        gap: 24px;
+    }
+
+    .QuantAlunos {
+        width: 100%;
+    }
+
+    .engag {
+        width: 100%;
+    }
+
+    .GraficoEvolucao {
+        flex-direction: column;
+    }
+
+    .Unidades {
+        width: 100%;
+    }
+
+    .graf_caixa {
+        width: 100%;
+    }
+
+    #graf01 {
+        width: 100%;
+    }
+}
+
+
+.escondido {
+    display: none;
+}
+
+
+#btn-carregar {
+    color: var(--Branco);
+    background-color: var(--Azul40S);
+    border: none;
+    padding: 8px 16px;
+    display: flex;
+    flex-direction: row;
+    height: fit-content;
+    border-radius: 42px;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-size: 10pt;
+    font-style: normal;
+    font-weight: Bold;
+    text-transform: uppercase;
+    text-decoration: none;
+}
+
+
+.btn_config_azul {
+    color: var(--Branco);
+    background-color: var(--Azul-principal);
+    border: none;
+    padding: 8px 16px;
+    display: flex;
+    flex-direction: row;
+    height: fit-content;
+    width: fit-content;
+    border-radius: 42px;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-size: 10pt;
+    font-style: normal;
+    font-weight: 500;
+    text-transform: uppercase;
+    text-decoration: none;
+    margin: 0px
+}
+
+.dark .btn_config_azul {
+    color: #fff
+}
+
+.btn_config_branco {
+    color: var(--Azul-principal);
+    background-color: transparent;
+    border: 1px solid var(--Azul-principal);
+    padding: 8px 16px;
+    display: flex;
+    flex-direction: row;
+    height: fit-content;
+    width: fit-content;
+    border-radius: 42px;
+    font-family: "Inter", sans-serif;
+    font-optical-sizing: auto;
+    font-size: 10pt;
+    font-style: normal;
+    font-weight: 500;
+    text-transform: uppercase;
+    text-decoration: none;
+    margin: 0px
+}
+
+.hr_trac {
+    border: none;
+    border-top: 1px solid var(--Cinza90B);
+    opacity: 50%;
+}
+
+.progress-container {
+    width: 400px;
+    height: 80px;
+    background-color: var(--Cinza100B);
+    border-radius: 16px;
+    overflow: hidden;
+    height: 30px;
+    background-image: url('icons/ProgressBarBG.svg');
+    background-size: cover;
+
+    padding: 2px;
+    display: flex;
+}
+
+.dark .progress-container {
+    background-image: url('icons/ProgressBarBG_Dark.svg');
+}
+
+.progress-bar {
+    display: flex;
+    height: 100%;
+    background-color: var(--Verde);
+    text-align: center;
+    line-height: 30px;
+    border-radius: 20px;
+    font-weight: bold;
+}
+
+    .progress-bar span {
+        flex: 1;
+        color: #fff;
+        font-family: "Inter", sans-serif;
+        font-size: 10pt;
+        font-style: normal;
+        font-weight: 500;
+        text-transform: uppercase;
+        text-decoration: none;
+    }
+
+
+
+
+
+.calendario-logs {
+    display: flex;
     flex-direction: column;
-    gap: 24px;
-  }
-  .QuantAlunos {
+    gap: 8px;
+}
+
+.item-log {
+    background: #f5f5f5;
+    padding: 8px 12px;
+    border-radius: 8px;
+    display: flex;
+    justify-content: space-between;
+}
+
+    .item-log .data {
+        color: #333;
+        font-weight: 600;
+    }
+
+    .item-log .acao {
+        color: #555;
+    }
+
+
+.caixaResumo {
+    border: 1px solid #ccc;
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 12px;
+    background: #f9f9f9;
+}
+
+.toggleButton {
+    background: none;
+    border: none;
     width: 100%;
-  }
-  .engag {
-    width: 100%;
-  }
-  .GraficoEvolucao {
+    text-align: left;
+    padding: 0;
+    cursor: pointer;
+}
+
+    .toggleButton h5 {
+        margin: 0;
+        color: #333;
+    }
+
+.conteudoResumo {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+}
+
+    .conteudoResumo.aberto {
+        max-height: 500px; /* Define um m�ximo grande o suficiente */
+    }
+
+
+
+
+
+
+.grid-calendario {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+    gap: 16px;
+}
+
+
+.item-log
+{
+    display: flex;
     flex-direction: column;
-  }
-  .Unidades {
+    gap: 8px;
+    background-color: var(--Azul10S);
+    padding:8px;
+    height: fit-content;
+    flex: 1;
+    padding-bottom: 40px;
+}
+
+
+.diaMesAberto .item-log {
+    padding-bottom: 8px;
+}
+
+.item-log .acao {
     width: 100%;
-  }
-  .graf_caixa {
-    width: 100%;
-  }
-  #graf01 {
-    width: 100%;
-  }
+    font-size: 10pt;
+    font-weight: 600;
+    color: var(--Preto40B);
+}
+
+    .item-log .curso {
+        width: 100%;
+        font-size: 8pt;
+        font-weight: 600;
+        color: var(--Azul-principal);
+    }
+
+    .item-log .acao,
+    .item-log .curso {
+        white-space: nowrap; /* impede quebra de linha */
+        overflow: hidden; /* esconde o que passa da largura */
+        text-overflow: ellipsis; /* coloca os três pontos (...) */
+    }
+
+
+
+.grid-calendario2 {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 8px;
+}
+.diaMes {
+    background-color: var(--Cinza100B);
+    max-height: 136px;
+    min-height: 136px; /* Troca height por max-height */
+    overflow: hidden;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+    padding: 16px;
+    border-radius: 8px;
+    transition: max-height 0.3s ease, padding 0.3s ease;
+    border-top: 4px solid var(--Azul10S)
+}
+
+    .diaMes:hover {
+        border-top: 4px solid var(--Azul30S)
+    }
+
+
+.diaMesAberto {
+    border-top: 4px solid var(--Azul-principal);
+    background-color: var(--Azul10S);
+    max-height: 10000px;
+    overflow: hidden;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px;
+    border-radius: 8px;
+    min-height: 160px;
+}
+
+
+.diaMes,
+.diaMesAberto {
+    transition: all 0.15s ease-in-out; /* ou só o que for mudar, tipo background-color */
+}
+
+
+.diaspan {
+color: var(--Preto50B);
+}
+
+
+
+.diaMesInativo
+{
+
+}
+
+
+
+.mais_dia
+{
+    color: var(--Branco);
+    background-color: var(--Azul-principal);
+    align-items: center;
+    text-align: center;
+    border-radius: 40px;
+    font-weight: 600;
+    justify-content: center;
+    height: 22px;
+    width: fit-content;
+    padding: 0px 8px;
+
+    align-items: center;
+}
+
+    .mais_dia span {
+        color: var(--Branco);
+
+        font-size: 8pt;
+        font-weight: 800;
+
+        height: 22px;
+        width: fit-content;
+    }
+
+.NomeDiaSemana {
+    flex: 1;
+    text-align: center;
+    text-transform: uppercase;
+    color: var(--Cinza70B);
+    font-size: 12pt;
+    font-weight: 500;
+    background-color: var(--Cinza100B);
+    padding: 4px;
+    border-radius: 100px
+}
+
+.btn_seta
+{
+    background-color: var(--Azul10S);
+    border: none;
+    color: var(--Azul-principal);
+    padding: 10px;
+    border-radius: 8px;
+
+}
+
+    .btn_seta:hover {
+        background-color: var(--Azul20S);
+    }
+
+
+
+
+.cursoComboBox {
+    background-color: var(--Cinza100B);
+    color: var(--Cinza70B);
+    border: 1px solid var(--Azul10S);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 16px;
+    width: auto;
+    min-width: 150px;
+
+    -webkit-appearance: none; /* Remove estilo padrão no Chrome/Safari */
+    -moz-appearance: none; /* Remove estilo padrão no Firefox */
+    appearance: none; /* Remove estilo padrão geral */
+    background-image: url('data:image/svg+xml;utf8,<svg fill="%23007bff" height="30" viewBox="0 0 24 24" width="30" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+    background-repeat: no-repeat;
+    background-position: right 12px center;
+    background-size: 16px;
+    cursor: pointer;
 }

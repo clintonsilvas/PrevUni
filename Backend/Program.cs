@@ -1,21 +1,41 @@
-using Backend;
+using Backend.Services;
+using MongoDB.Driver;
+using static Backend.Services.MongoService;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Lê configurações MongoDB do appsettings.json
+var mongoSettings = builder.Configuration.GetSection("MongoSettings");
+var connectionString = mongoSettings.GetValue<string>("ConnectionString");
+var databaseName = mongoSettings.GetValue<string>("Database");
+
+// Configura MongoClient e IMongoDatabase no DI container
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    return new MongoClient(connectionString);
+});
+
+builder.Services.AddSingleton<IMongoDatabase>(sp =>
+{
+    var client = sp.GetRequiredService<IMongoClient>();
+    return client.GetDatabase(databaseName);
+});
+
+// Registra seus serviços
+builder.Services.AddSingleton<MongoService>();
+builder.Services.AddScoped<EngajamentoService>();
+
+// Serviços padrão
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddHttpClient<ApiService>();
-builder.Services.AddScoped<ApiService>();
-builder.Services.AddSingleton<MongoService>();
+// Exemplo: adicionando GeminiService e ApiService, se quiser
+builder.Services.AddSingleton<ApiService>();
 builder.Services.AddHttpClient<GeminiService>();
-
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -23,11 +43,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
-
 app.MapControllers();
-
 app.Run();
-
-

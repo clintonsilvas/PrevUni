@@ -1,53 +1,93 @@
-﻿@page
+﻿@page "{userId}"
 @model Front.Pages.IaChatAlunoModel
 @{
-    ViewData["Title"] = "Chat com IA";
-}
-@{
+    ViewData["Title"] = "Conversa com IA";
     ViewData["OcultarSombra"] = true;
 }
 
-
-<header class="linha welcome"
-        style="
-            justify-content: space-between;
-            width: 100%;
-            height: fit-content;
-">
-    <div class="coluna" style="--gap: 10px">
-        <span class="SubH1 corAzul">Bem Vindo(a)</span>
+<header class="linha welcome" style="justify-content: space-between; width: 100%;">
+    <div class="coluna" style="gap: 10px;">
+        <span class="SubH1 corAzul">Aluno: @Model.User.name</span>
         <h1 class="corPreta40B">Inteligência Artificial</h1>
     </div>
-    <button class="botaoatualiza">Atualizar</button>
 </header>
-<div class="dashboard coluna"
-     style="--gap: 10px; height: 100%; flex-direction: column-reverse; z-index:1">
 
-    @if (Model.Resposta != null)
-    {
-        <div class="resposta">
-            <h3>Resposta da IA:</h3>
-            <pre>@Model.Resposta</pre>
-        </div>
-    }
 
-    <form method="post">
-        <div>
-            <label>UserId:</label>
-            <input asp-for="UserId" />
-        </div>
 
+@*     <div class="card-aluno" style="padding: 20px; background-color: #f9f9f9; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;">
+        <h3 style="margin-bottom: 10px;">📄 Dados do Aluno</h3>
+        <ul style="list-style: none; padding: 0;">
+            <span>@Model.DadosAlunoString</span>
+        </ul>
+    </div> 
+ *@
+
+<div class="dashboard coluna" style="gap: 10px; height: 100%; flex-direction: column-reverse;">
+    <form method="post" id="formIA">
         <div class="ImputIA linha" onclick="document.getElementById('IaPergunta').focus()">
-            <img src="~/css/icons/estrelaIA.svg"
-                 alt="ÍconeHome"
-                 width="18"
-                 height="18" />
+            <img src="~/css/icons/estrelaIA.svg" alt="Ícone IA" width="18" height="18" />
             <input asp-for="Prompt"
                    type="text"
                    id="IaPergunta"
-                   placeholder="Pergunte à Inteligência Artificial!" />
-            <button type="submit">Gerar</button>
+                   placeholder="Pergunte à Inteligência Artificial!"
+                   required
+                   autocomplete="off" />
+            <button type="submit" id="btnGerar">Gerar</button>
         </div>
-
     </form>
+    <div id="chatContainer" class="coluna chat" style="gap: 10px; width: 100%; height: fit-content; overflow: auto; flex-direction: column-reverse;">
+        @foreach (var msg in Model.Mensagens.AsEnumerable().Reverse())
+        {
+            <div class="card-resposta">
+                <span><strong>IA:</strong><br />@Html.Raw(msg.Resposta)</span>
+            </div>
+            <div style="width: 100%; display: flex; flex-direction: row-reverse;">
+                <div class="card-pergunta">
+                    <span><strong>Você:</strong><br />@msg.Pergunta</span>
+                </div>
+            </div>
+        }
+    </div>
 </div>
+<script>
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('perguntaInput');
+
+    async function enviarPergunta() {
+        const pergunta = input.value.trim();
+        if (!pergunta) return;
+        event.preventDefault();
+        adicionarMensagem('Você', pergunta);
+        input.value = '';
+
+        try {
+            const response = await fetch(window.location.pathname, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    userId: '@Model.UserId',
+                    prompt: pergunta
+                })
+            });
+
+            const result = await response.json();
+
+            if (result.sucesso) {
+                adicionarMensagem('IA', result.resposta);
+            } else {
+                adicionarMensagem('Erro', result.erro, true);
+            }
+        } catch (error) {
+            adicionarMensagem('Erro', 'Falha na conexão.', true);
+        }
+    }
+
+    function adicionarMensagem(remetente, mensagem, isErro = false) {
+        const div = document.createElement('div');
+        div.innerHTML = `<strong>${remetente}:</strong> ${mensagem}`;
+        if (isErro) div.style.color = 'red';
+
+        chat.appendChild(div);
+        chat.scrollTop = chat.scrollHeight;
+    }
+</script>

@@ -10,6 +10,8 @@
         public string component { get; set; }
         public string course_fullname { get; set; }
         public string user_lastaccess { get; set; }
+
+
         
     }
 }

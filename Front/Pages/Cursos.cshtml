@@ -3,55 +3,104 @@
 @{
     ViewData["Title"] = "Curso";
 }
+
 <header class="linha welcome" style="justify-content: space-between">
     <div class="coluna" style="--gap: 10px">
-        <span class="SubH1 corAzul">Bem Vinda Prof. Camila</span>
+        <span class="SubH1 corAzul">Bem Vindo(a)</span>
         <h1 class="corPreta40B">Cursos</h1>
     </div>
-    <button class="botaoatualiza" id="carregarUsuariosBtn">
-        Atualizar
-    </button>
 </header>
-<div class="dashboard coluna" style="--gap: 10px">
+
+<div class="dashboard coluna" style="--gap: 20px">
     <div class="ImputIA linha">
         <img src="~/css/icons/Lupa.svg" width="18" height="18" />
         <input type="text" id="filtroCursos" onkeyup="filtrarCursos()" class="input-filtro" name="nome" placeholder="O que você procura?" />
         <button onclick="filtrarCursos()">Pesquisar</button>
     </div>
 
+    <div class="linha" style="gap: 10px; align-items: center; margin-left: auto">
+        <span class="subH4 corCinza70B">Ordenar por:</span>
+        <div class="linha" style="flex-wrap: wrap; gap: 12px">
+            <label class="op_filtro">
+                <input type="radio" name="filtroAvancado" value="alfabetico" onchange="aplicarFiltroAvancado()" checked>
+                <span>(A-Z)</span>
+            </label>
+            <label class="op_filtro">
+                <input type="radio" name="filtroAvancado" value="maisAlunos" onchange="aplicarFiltroAvancado()">
+                <span>Mais alunos</span>
+            </label>
+            <label class="op_filtro">
+                <input type="radio" name="filtroAvancado" value="engajamentoAlto" onchange="aplicarFiltroAvancado()">
+                <span>Engajamento alto</span>
+            </label>
+            <label class="op_filtro">
+                <input type="radio" name="filtroAvancado" value="engajamentoMedio" onchange="aplicarFiltroAvancado()">
+                <span>Engajamento médio</span>
+            </label>
+            <label class="op_filtro">
+                <input type="radio" name="filtroAvancado" value="engajamentoBaixo" onchange="aplicarFiltroAvancado()">
+                <span>Engajamento baixo</span>
+            </label>
+        </div>
+    </div>
+
+    <!-- Container dos cards -->
     <div class="flex grid" id="us_cont">
-        @foreach (var curso in Model.Cursos)
-        {
-            <a asp-page="/Dashboard" asp-route-curso="@curso" asp-route-nome="@curso.curso" asp-route-quantidadeAlunos="@curso.alunos" class="card-curso" style="text-decoration: none">
-                <div class="flex QuadroCards_List coluna" style="gap: 24px">
-                    <div class="linha" style="align-items: center">
-                        <img src="~/css/icons/caderno.svg" height="16px" />
-                        <h4 class="corPreta40B">@curso.curso</h4>
-                    </div>
-                    <div class="coluna" style="gap: 4px">
-                        <span class="subH4 corCinza60B">Quant: @curso.alunos Alunos</span>
-                    </div>
-                    <div class="linha">
-                        <div class="linha cur_porcVerd" style="gap: 8px">
-                            <img src="~/css/icons/rostofeliz.svg" height="16px" />
-                            <span class="cur_porcFont corCinza80B">50%</span>
-                        </div>
-                        <div class="linha cur_porcAzul" style="gap: 8px">
-                            <img src="~/css/icons/rostosememocao.svg" height="16px" />
-                            <span class="cur_porcFont corCinza80B">50%</span>
-                        </div>
-                        <div class="linha cur_porcVerm" style="gap: 8px">
-                            <img src="~/css/icons/rostotriste.svg" height="16px" />
-                            <span class="cur_porcFont corCinza80B">50%</span>
-                        </div>
-                    </div>
-                </div>
-            </a>
-        }
+        <div class="spinner"><img src="~/css/icons/loadGif.gif" alt="Carregando..." width="40" /></div>
+        
     </div>
 </div>
 
 <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const container = document.getElementById("us_cont");
+        const res = await fetch("/Cursos?handler=Carregamento");
+        const html = await res.text();
+        container.innerHTML = html;
+    });
+
+    function aplicarFiltroAvancado() {
+        const tipoFiltro = document.querySelector('input[name="filtroAvancado"]:checked')?.value;
+        if (!tipoFiltro) return;
+
+        const container = document.getElementById("us_cont");
+        const cards = Array.from(container.querySelectorAll(".card-curso"));
+
+        let getValue = (card, selector) =>
+            parseFloat(card.querySelector(selector).innerText.replace('%', '').trim());
+
+        switch (tipoFiltro) {
+            case "alfabetico":
+                cards.sort((a, b) =>
+                    a.querySelector("h4").innerText.localeCompare(b.querySelector("h4").innerText)
+                );
+                break;
+            case "maisAlunos":
+                cards.sort((a, b) =>
+                    parseInt(b.innerText.match(/Quant: (\d+)/)[1]) -
+                    parseInt(a.innerText.match(/Quant: (\d+)/)[1])
+                );
+                break;
+            case "engajamentoAlto":
+                cards.sort((a, b) =>
+                    getValue(b, ".cur_porcVerd span") - getValue(a, ".cur_porcVerd span")
+                );
+                break;
+            case "engajamentoMedio":
+                cards.sort((a, b) =>
+                    getValue(b, ".cur_porcAzul span") - getValue(a, ".cur_porcAzul span")
+                );
+                break;
+            case "engajamentoBaixo":
+                cards.sort((a, b) =>
+                    getValue(b, ".cur_porcVerm span") - getValue(a, ".cur_porcVerm span")
+                );
+                break;
+        }
+
+        cards.forEach(card => container.appendChild(card));
+    }
+
     function filtrarCursos() {
         const filtro = document.getElementById("filtroCursos").value.toLowerCase();
         const cards = document.querySelectorAll("#us_cont .card-curso");
@@ -62,3 +111,4 @@
         });
     }
 </script>
+

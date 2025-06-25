@@ -3,16 +3,36 @@
     padding: 0;
     box-sizing: border-box;
     font-family: "Inter", sans-serif;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
 }
+
+
+
+    *::-webkit-scrollbar {
+        display: none;
+    }
 
 /*Propriedades*/
 body {
     background-color: var(--Branco);
     display: flex;
     height: 100vh;
-    flex-direction: column;
     gap: 16px;
-    padding: 16px;
+    background-color: var(--Branco);
+
+    flex-direction: column;
+    padding: 16px 16px 16px 0px;
+}
+
+
+.playground {
+    position: relative;
+    flex: 1;
+    height: 90vh;
+    background-color: var(--Cinza100B);
+    border-radius: 10px;
+    overflow: hidden; /* Esconde o que sair da área */
 }
 
 h1 {
@@ -135,3 +155,5 @@ input[type="text"] {
         padding: 12px 8px 8px 8px;
     }
 }
+
+

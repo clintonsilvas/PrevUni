@@ -16,7 +16,7 @@
     --Preto50B: #cfd5e5;
     --Cinza60B: #bec6ea;
     --Cinza70B: #abb4cc;
-    --Cinza80B: #1e293b;
+    --Cinza80B: #6B7799;
     --Cinza90B: #0f1933;
     --Cinza100B: #040e27;
     --Branco: #020817;
@@ -30,7 +30,7 @@
 
     .dark .QuadroCards {
         background-color: var(--Cinza90B);
-        border: solid 1px var(--Cinza80B);
+        border: solid 1px #1e293b;
     }
 
     .dark .botaoatualiza {
@@ -53,7 +53,12 @@
     /*IMPUT DA IA OU DE PESQUISA*/
     .dark .ImputIA {
         background-color: var(--Cinza90B);
-        border: solid 1px var(--Cinza80B);
+        border: solid 1px #1e293b;
+    }
+
+    .dark .ImputIA:hover {
+        background-color: var(--Cinza90B);
+        border: solid 1px var(--Azul-principal);
     }
 
         .dark .ImputIA:has(input:focus) {

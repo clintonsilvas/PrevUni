@@ -1,434 +1,103 @@
 ﻿@page "{curso}"
 @model Front.Pages.DashboardModel
+@using Front.Models;
 @{
     ViewData["Title"] = "Dashboard do Curso";
 }
 
 
 <header class="linha welcome"
-style="
+        style="
             justify-content: space-between;
             width: 100%;
             height: fit-content;
 ">
     <div class="coluna" style="--gap: 10px">
-        <span class="SubH1 corAzul">Bem Vindo(a)</span>
-        <h1 class="corPreta40B">@Model.Cursos.curso</h1>
+        <span class="SubH1 corAzul">Dashboard do Curso</span>
+        <div class="linha" style="align-items: center">
+            <h1 class="corPreta40B">@Model.Cursos.nomeCurso</h1>
+            <input type="checkbox" style="display: none" id="favCurso" @(FavoritoService.EhFavorito(Model.Cursos.nomeCurso) ? "checked" : "")
+                   onchange="toggleFavorito(this)" />
+            <label for="favCurso">
+                <img id="imgFavCurso" src="@Url.Content(FavoritoService.EhFavorito(Model.Cursos.nomeCurso) ? "~/css/icons/estrela.svg" : "~/css/icons/estrela_inativa.svg")" height="20" />
+            </label>
+        </div>
     </div>
-    <button class="botaoatualiza">Atualizar</button>
 </header>
-<!--
-<div class="linha Endereco" style="align-items: center">
-<img src="~/css/icons/casa.svg" alt="ÍconeHome" width="14" height="14" />
-<span class="SubH3">></span>
-<a class="SubH3">Cursos</a>
-<span class="SubH3">></span>
-<a class="SubH3">Ciênca da Computação</a>
-<span class="SubH3">></span>
-<a class="SubH3">Metodologias Ágeis</a>
-</div>
--->
+
+
 <div class="dashboard coluna" style="--gap: 10px">
     <div class="ImputIA linha">
         <img src="~/css/icons/estrelaIA.svg"
-        alt="ÍconeHome"
-        width="18"
-        height="18" />
+             alt="ÍconeHome"
+             width="18"
+             height="18" />
         <input type="text"
-        id="IaPergunta"
-        name="nome"
-        placeholder="Pergunte a inteligência Artifical!" />
-        <a asp-page="/IaChatAluno">Gerar</a>
+               id="IaPergunta"
+               name="nome"
+               placeholder="Pergunte a inteligência Artifical!" />
+        <a asp-page="/IaChatCurso" asp-route-cursoNome="@Model.Cursos.nomeCurso">Gerar</a>
     </div>
 
-    <div class="abas">
-        <input type="radio" name="aba" id="aba1" checked />
-        <input type="radio" name="aba" id="aba2" />
-        <input type="radio" name="aba" id="aba3" />
-
-        <div class="botoes">
-            <label for="aba1">Dashboard</label>
-            <label for="aba2">Alunos</label>
-            <label for="aba3">Relatórios</label>
-            <div class="underline"></div>
-        </div>
-
-        <div class="conteudos">
-            <div class="conteudo" id="conteudo1">
-                <div class="linha alt_li" style="flex: 1; height: fit-content">
-                    <div class="linha CardsEngajamento QuadroCards">
-                        <div class="linha engag" style="flex: 1; align-items: center">
-                            <div class="iconVerde">
-                                <img src="~/css/icons/rostofeliz.svg" alt="Icone_Aluno" />
-                            </div>
-                            <div class="coluna" style="--gap: 4px">
-                                <h5 class="corCinza80B">Engajamento Alto</h5>
-                                <h2 class="corVerde">63%</h2>
-                            </div>
-                        </div>
-
-                        <div class="linha engag" style="flex: 1; align-items: center">
-                            <div class="iconAzul">
-                                <img src="~/css/icons/rostosememocao.svg" alt="Icone_Aluno" />
-                            </div>
-                            <div class="coluna" style="--gap: 4px">
-                                <h5 class="corCinza80B">Engajamento Médio</h5>
-                                <h2 class="corAzul">63%</h2>
-                            </div>
-                        </div>
-
-                        <div class="linha engag" style="flex: 1; align-items: center">
-                            <div class="iconVermelho">
-                                <img src="~/css/icons/rostotriste.svg" alt="Icone_Aluno" />
-                            </div>
-                            <div class="coluna" style="--gap: 4px">
-                                <h5 class="corCinza80B">Engajamento Baixo</h5>
-                                <h2 class="corVermelha">63%</h2>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="linha QuantAlunos">
-                        <div class="iconEscuro">
-                            <img src="~/css/icons/formando.svg" alt="Icone_Aluno" />
-                        </div>
-                        <div class="coluna" style="--gap: 4px">
-                            <h4 class="corCinza100B">Alunos</h4>
-                            <h2 class="corCinza100B">@Model.Cursos.alunos</h2>
-                        </div>
-                    </div>
-                </div>
-                <div class="linha alt_li" style="flex: 1">
-                    <div class="QuadroCards GraficoEvolucao linha"
-                         style="flex: 1; --gap: 40px">
-
-
-                        <div class="coluna" style="--gap: 16px; height: 100%;">
-                            <div class="linha" style="--gap: 10px; align-items: center">
-                                <img src="~/css/icons/graficos.svg" />
-                                <h4 class="corPreta50B">Evolução</h4>
-                                @{
-                                    var logs = Model.Cursos.Logs;
-                                    if (logs.Any())
-                                    {
-                                        var datas = logs.Select(l => DateTime.Parse(l.date)).ToList();
-                                        var mesAntigo = datas.Min().ToString("MMMM", new System.Globalization.CultureInfo("pt-BR"));
-                                        var mesAtual = datas.Max().ToString("MMMM", new System.Globalization.CultureInfo("pt-BR"));
-                                        <span class="corCinza80B" style="margin-inline-start: auto;">@mesAntigo à @mesAtual</span>
-                                    }
-
-                                }
-
-                            </div>
-
-
-                            @{
-                                var semanas = Model.Cursos.Semanas;
-                                int total = semanas.Any() ? semanas.Max() : 0;
-                            }
-
-                            <div class="coluna" id="graf01" style="--gap: 8px">
-                                <div class="linha" style="height: 240px; justify-content: space-between">
-                                    <div class="coluna" style="width: 60px">
-                                        <p class="corCinza60B" style="margin-bottom: auto">100%</p>
-                                        <p class="corCinza60B" style="margin-bottom: auto">80%</p>
-                                        <p class="corCinza60B" style="margin-bottom: auto">60%</p>
-                                        <p class="corCinza60B" style="margin-bottom: auto">40%</p>
-                                        <p class="corCinza60B" style="margin-bottom: auto">20%</p>
-                                        <p class="corCinza60B">0%</p>
-                                    </div>
-                                    <div class="linha" style="flex: 1; justify-content: space-between">
-                                        @foreach (var s in semanas)
-                                        {
-                                            var porcentagem = total > 0 ? (int)Math.Round((s * 100.0) / total) : 0;
-                                            <div class="grafContainer">
-                                                <div class="grafCinza"></div>
-                                                <div class="grafAzul" style="--Porcentagem: @porcentagem%"></div>
-                                            </div>
-                                        }
-                                    </div>
-                                </div>
-                                <div class="linha">
-                                    <p class="corAzul" style="width: 60px"><strong>Semanas</strong></p>
-                                    <div class="linha" style="flex: 1; justify-content: space-between">
-                                        @for (int i2 = 1; i2 <= semanas.Count; i2++)
-                                        {
-                                            <p class="corCinza60B" style="text-align: center; width: 10px">@i2</p>
-                                        }
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-
-                        <div class="coluna graf_caixa" style="--gap: 16px">
-                            <div class="linha" style="--gap: 10px; align-items: center">
-                                <img src="~/css/icons/graficos.svg" />
-                                <h4 class="corPreta50B">Ações Realizadas</h4>
-                                <span class="corCinza80B" style="margin-inline-start: auto;">@Model.Cursos.Logs.Count() Ações</span>
-                            </div>
-                            @{
-                                var acoes = Model.Cursos.Logs
-                                .GroupBy(l => l.action)
-                                .Select(g => new
-                                {
-                                    Acao = g.Key,
-                                    Quantidade = g.Count()
-                                })
-                                .ToList();
-                               // acoes.RemoveAll(l => l.Acao == "viewed");
-
-                                var labels = string.Join(",", acoes.Select(a => $"'{a.Acao}'"));
-                                var dados = string.Join(",", acoes.Select(a => a.Quantidade));
-                            }
-                            <div id="graficoContainer" style="max-width: 400px; margin: auto; position: relative; height: 100%; overflow:visible">
-                                <canvas id="graficoPizza" width="240" height="240" style="overflow:visible"></canvas>
-                                <div id="legenda" style="display:none; position: absolute; bottom: 0; width: 100%; overflow:visible;"></div>
-                            </div>
-
-                            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-                            <script>
-                                                               const ctx = document.getElementById('graficoPizza').getContext('2d');
-                                const chart = new Chart(ctx, {
-                                    type: 'doughnut',
-                                    data: {
-                                        labels: [@Html.Raw(labels)],
-                                        datasets: [{
-                                            data: [@dados],
-                                backgroundColor: [
-                                                 '#001b66',
-                                                 '#002280',
-                                                 '#002899',
-                                                 '#002fb2',
-                                                 '#0036cc',
-                                                 '#668eff',
-                                                 '#99b4ff',
-                                                 '#b2c7ff',
-                                                 '#ccd9ff',
-                                                 '#e5ecff'
-                                ],
-
-                                            borderWidth: 0
-                                        }]
-                                    },
-                                   options: {
-                                        cutout: '50%',
-                                        
-                                        responsive: true,
-                                        plugins: {
-                                            legend: {
-                                                display: false
-                                            }
-                                        }
-                                    }
-                                });
-
-                                // Gera legenda customizada
-                                document.getElementById('legenda').innerHTML = chart.generateLegend();
-
-                                // Mostra a legenda só no hover do container
-                                const container = document.getElementById('graficoContainer');
-                                const legenda = document.getElementById('legenda');
-
-                                container.addEventListener('mouseenter', () => {
-                                    legenda.style.display = 'block';
-                                });
-                                container.addEventListener('mouseleave', () => {
-                                    legenda.style.display = 'none';
-                                });
-                            </script>
-                        </div>
-
-
-                        <div class="coluna graf_caixa" style="--gap: 16px">
-                            <div class="linha" style="--gap: 10px; align-items: center">
-                                <img src="~/css/icons/graficos.svg" />
-                                <h4 class="corPreta50B">Componentes Utilizados</h4>
-
-                            </div>
-                            @{
-                                var componentes = Model.Cursos.Logs
-                                .GroupBy(l => l.component)
-                                .Select(g => new
-                                {
-                                    Componente = g.Key,
-                                    Quantidade = g.Count()
-                                })
-                                .ToList();
-                                componentes.RemoveAll(c => string.IsNullOrEmpty(c.Componente));
-
-                                var labelsComponentes = string.Join(",", componentes.Select(c => $"'{c.Componente}'"));
-                                var dadosComponentes = string.Join(",", componentes.Select(c => c.Quantidade));
-                            }
-                            <div id="graficoComponentesContainer" style="max-width: 400px; margin: auto; position: relative; height: 100%">
-                                <canvas id="graficoPizzaComponentes" width="240" height="240" style=""></canvas>
-                                <div id="legendaComponentes" style="display:none; position: absolute; bottom: 0; width: 100%;"></div>
-                            </div>
-
-                            <script>
-                                const ctxComponentes = document.getElementById('graficoPizzaComponentes').getContext('2d');
-                                const chartComponentes = new Chart(ctxComponentes, {
-                                    type: 'doughnut',
-                                    data: {
-                                        labels: [@Html.Raw(labelsComponentes)],
-                                        datasets: [{
-                                            data: [@dadosComponentes],
-                                            backgroundColor: [
-                                                 '#001b66',
-                                                 '#002280',
-                                                 '#002899',
-                                                 '#002fb2',
-                                                 '#0036cc',
-                                                 '#668eff',
-                                                 '#99b4ff',
-                                                 '#b2c7ff',
-                                                 '#ccd9ff',
-                                                 '#e5ecff'
-                                            ],
-                                            borderWidth: 0
-                                        }]
-                                    },
-                                    options: {
-                                        cutout: '50%',
-                                        
-                                        responsive: true,
-                                        plugins: {
-                                            legend: {
-                                                display: false
-                                            }
-                                        }
-                                    }
-                                });
-
-                                document.getElementById('legendaComponentes').innerHTML = chartComponentes.generateLegend();
-
-                                const containerComponentes = document.getElementById('graficoComponentesContainer');
-                                const legendaComponentes = document.getElementById('legendaComponentes');
-
-                                containerComponentes.addEventListener('mouseenter', () => {
-                                    legendaComponentes.style.display = 'block';
-                                });
-                                containerComponentes.addEventListener('mouseleave', () => {
-                                    legendaComponentes.style.display = 'none';
-                                });
-                            </script>
-                        </div>
-
-                    </div>
-                    <div class="QuadroCards Unidades coluna">
-                        <div class="linha" style="--gap: 10px; align-items: center">
-                            <img src="~/css/icons/alunosDesistentes.png" />
-                            <h4 class="corPreta50B">Posíveis Desistentes</h4>
-                        </div>
-                        <div class="tabela-card">
-                            <table>
-                                <tbody>
-                                    <tr>
-                                        <td>1</td>
-                                        <td><a href="">Pedro Henrique</a></td>
-                                        <td>02%</td>
-                                    </tr>
-                                    <tr>
-                                        <td>2</td>
-                                        <td><a href="">Miguel Oliveira</a></td>
-
-                                        <td>02%</td>
-                                    </tr>
-                                    <tr>
-                                        <td>3</td>
-                                        <td><a href="">Vanessa Carvalho</a></td>
-
-                                        <td>03%</td>
-                                    </tr>
-                                    <!-- continue os outros -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="conteudo" id="conteudo2">
-                <div class="tabela-card QuadroCards">
-                    <table id="tabelaAlunos">
-                        <thead>
-                            <tr>
-                                <th>
-                                    <button onclick="ordenarTabela(0)" class="bot_tab">#</button>
-                                </th>
-                                <th>
-
-                                    <button onclick="ordenarTabela(1)" class="bot_tab">Nome<img src="~/css/icons/Ordenar.svg" /></button>
-                                </th>
-                                <th>
-                                    <button onclick="ordenarTabela(2)" class="bot_tab">Engajamento<img src="~/css/icons/Ordenar.svg" /></button>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @{
-                                int i = 0;
-                                foreach (var al in Model.Alunos) // ALTERAR
-                                {
-                                    i++;
-                                    <tr>
-                                        <td>@i</td>
-                                        <td>
-                                            <a asp-page="/PerfilAluno/@Model.Alunos">@al</a> 
-                                        </td>
-                                        <td>02%</td>
-                                    </tr>
-                                }
-                            }
-                        </tbody>
-
-
-
-                    </table>
-                </div>
-            </div>
-            <div class="conteudo" id="conteudo3">
-                
-                    @foreach(var l in Model.Cursos.Logs)
-                    {
-                        <span>@l.date</span>
-                    }
-                    
-            </div>
-        </div>
+    <div class="abas" id="us_cont">
+        <div class="spinner"><img src="~/css/icons/loadGif.gif" alt="Carregando..." width="40" /></div>
     </div>
 
-</div>
     <script>
-        const estadoOrdenacao = {
-            0: true,
-            1: true,
-            2: true
-        };
+        document.addEventListener("DOMContentLoaded", async () => {
+            const curso = "@Model.Cursos.nomeCurso";
+            const container = document.getElementById("us_cont");
 
-        function ordenarTabela(coluna) {
-            const tabela = document.getElementById("tabelaAlunos");
-            const tbody = tabela.querySelector("tbody");
-            const linhas = Array.from(tbody.querySelectorAll("tr"));
-            const crescente = estadoOrdenacao[coluna];
+            const res = await fetch(`/Dashboard/${curso}?handler=Carregamento`);
+            const html = await res.text();
+            container.innerHTML = html;
 
-            linhas.sort((a, b) => {
-                let valA = a.children[coluna].innerText.trim();
-                let valB = b.children[coluna].innerText.trim();
-
-                if (coluna === 2) { // % presença
-                    valA = parseFloat(valA.replace('%', '')) || 0;
-                    valB = parseFloat(valB.replace('%', '')) || 0;
+            const scripts = container.querySelectorAll("script");
+            scripts.forEach(oldScript => {
+                const newScript = document.createElement("script");
+                if (oldScript.src) {
+                    newScript.src = oldScript.src;
+                    newScript.async = false;
+                } else {
+                    newScript.text = oldScript.textContent;
                 }
-
-                if (!isNaN(valA) && !isNaN(valB)) {
-                    return crescente ? valA - valB : valB - valA;
-                }
-
-                return crescente
-                    ? valA.localeCompare(valB)
-                    : valB.localeCompare(valA);
+                document.body.appendChild(newScript);
             });
-
-            linhas.forEach(linha => tbody.appendChild(linha));
-            estadoOrdenacao[coluna] = !crescente; // alterna ordem
-        }
+        });
     </script>
+</div>
+
+<script>
+    // --------- CONSTANTES ---------
+    const iconeAtivo = '/css/icons/estrela.svg';
+    const iconeInativo = '/css/icons/estrela_inativa.svg';
+    // --------- FUNÇÕES FAVORITOS ---------
+    async function toggleFavorito(checkbox) {
+        const checked = checkbox.checked;
+        const curso = @Html.Raw(Json.Serialize(Model.Cursos.nomeCurso));
+        const img = document.getElementById('imgFavCurso');
+
+        atualizarFavoritoVisual(checkbox, img);
+
+        const url = checked
+            ? `/api/favoritos/adicionar_curso?nomeCurso=${encodeURIComponent(curso)}`
+            : `/api/favoritos/remover_curso?nomeCurso=${encodeURIComponent(curso)}`;
+
+        try {
+            const response = await fetch(url, { method: 'POST' });
+            if (!response.ok) throw new Error();
+        } catch {
+            checkbox.checked = !checked;
+            atualizarFavoritoVisual(checkbox, img);
+            alert('Erro ao atualizar favoritos');
+        }
+    }
+
+    function atualizarFavoritoVisual(checkbox, img) {
+        img.src = checkbox.checked ? iconeAtivo : iconeInativo;
+    }
+
+</script>
+
+
+

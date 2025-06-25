@@ -1,0 +1,118 @@
+﻿@page
+@model Front.Pages.ConfiguracaoModel
+@{
+    ViewData["Title"] = "Configuração de Importação";
+}
+
+<header class="linha welcome" style="justify-content: space-between; height: fit-content">
+    <div class="coluna" style="--gap: 10px">
+        <span class="SubH1 corAzul">Bem Vindo(a)</span>
+        <h1 class="corPreta40B">Configurações</h1>
+    </div>
+</header>
+
+
+
+
+<div class="QuadroCards coluna" style="gap: 24px">
+
+    <div class="linha" style="align-items: baseline">
+        <img src="~/css/icons/Dados.svg" />
+        <div class="coluna" style="gap: 10px">
+            <h4 class="corPreta50B">Importar dados dos alunos.</h4>
+            <span class="SubH5 corCinza60B">
+                Atualize os dados dos alunos. Este processo pode durar algum tempo, portanto não feche esta página após iniciar.
+            </span>
+
+            @if (!string.IsNullOrEmpty(Model.Message))
+            {
+                <div class="SubH5 corCinza60B">
+                    @Model.Message
+                </div>
+            }
+            <div class="linha" style="align-items: center">
+                @if (Model.CurrentStatus == null ||
+                (Model.CurrentStatus.Status != "Em andamento" && Model.CurrentStatus.Status != "Processando"))
+                {
+                    <form method="post" asp-page-handler="IniciarImportacao">
+                        <button type="submit" class="btn_config_azul">Iniciar Importação</button>
+                    </form>
+                }
+
+                @if (Model.CurrentStatus != null && Model.CurrentStatus.TotalUsuarios > 0)
+                {
+                    <div id="progressBarContainer" class="progress-container">
+                        @{
+                            var progressPercentage = (Model.CurrentStatus.ProgressoAtual / (double)Model.CurrentStatus.TotalUsuarios) * 100;
+                            if (double.IsNaN(progressPercentage) || double.IsInfinity(progressPercentage))
+                            {
+                                progressPercentage = 0;
+                            }
+                            else if (progressPercentage > 100)
+                            {
+                                progressPercentage = 100;
+                            }
+                            else if (progressPercentage < 0)
+                            {
+                                progressPercentage = 0;
+                            }
+                        }
+                        <div id="progressBar" class="progress-bar" style="width: @(progressPercentage.ToString("F0"))%;">
+                            <span>@(progressPercentage.ToString("F0"))%</span>
+                        </div>
+                    </div>
+                }
+                else if (Model.CurrentStatus != null && !string.IsNullOrEmpty(Model.CurrentStatus.Status))
+                {
+                    <p class="SubH5 corCinza60B">Processando: @Model.CurrentStatus.Status - @Model.CurrentStatus.Mensagem</p>
+                }
+
+            </div>
+
+        </div>
+    </div>
+
+
+    <hr class="hr_trac" />
+
+    <div class="linha" style="align-items: baseline">
+        <img src="~/css/icons/chave.svg" />
+        <div class="coluna" style="gap: 10px">
+            <h4 class="corPreta50B">Chave de API da Inteligência Artificial.</h4>
+            <span class="SubH5 corCinza60B">Chave Atual: AIzaSyC9ai_WOCBHL2bOK3XlWRsjws2_qMxAFVQ</span>
+            <button class="btn_config_branco">Editar</button>
+        </div>
+    </div>
+
+
+    <hr class="hr_trac" />
+
+    <div class="linha" style="align-items: baseline">
+        <img src="~/css/icons/avaliacao.svg" />
+        <div class="coluna" style="gap: 10px">
+            <h4 class="corPreta50B">Pesos de Avaliação.</h4>
+            <span class="SubH5 corCinza60B">
+                Atividade Concluidas: 50%<br />
+                Forum Postados: 25%<br />
+                Quizz Respondidos: 30%
+            </span>
+            <button class="btn_config_branco">Editar</button>
+        </div>
+    </div>
+
+
+</div>
+
+
+
+@section Scripts {
+    @if (Model.CurrentStatus != null && Model.CurrentStatus.Status != "Concluída" && Model.CurrentStatus.Status != "Erro")
+    {
+        <script>
+            // Recarrega a página a cada 5 segundos para obter o status atualizado
+            setTimeout(function() {
+                window.location.reload();
+            }, 2500);
+        </script>
+    }
+}

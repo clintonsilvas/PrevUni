@@ -1,0 +1,94 @@
+﻿@page
+@model Front.Pages.AlunosModel
+@using Front.Models
+@{
+}
+
+
+<header class="linha welcome" style="justify-content: space-between">
+    <div class="coluna" style="--gap: 10px">
+        <span class="SubH1 corAzul">Bem Vindo</span>
+        <h1 class="corPreta40B">Cursos</h1>
+    </div>
+    <button onclick="location.reload()" class="botaoatualiza">Atualizar</button>
+</header>
+<div class="dashboard coluna" style="--gap: 20px">
+    <div class="ImputIA linha">
+        <img src="~/css/icons/Lupa.svg" width="18" height="18" />
+        <input type="text" id="filtroCursos" onkeyup="filtrarCursos()" class="input-filtro" name="nome" placeholder="O que você procura?" />
+        <button onclick="filtrarCursos()">Pesquisar</button>
+    </div>
+
+    <div class="tabela-card QuadroCards" style="padding: 0; overflow: hidden">
+        <table id="tabelaAlunos">
+            @{var acoesFixas = new Acoes().ListarAcoes();}
+             <thead>
+                <tr>
+                    <th>
+                        <span class="bot_tab">#</span>
+                    </th>
+                    <th>
+                        <button onclick="ordenarTabela(1)" class="bot_tab">
+                            Nome <img src="~/css/icons/Ordenar.svg" />
+                        </button>
+                    </th>
+                    <th>
+                        <button onclick="ordenarTabela(2)" class="bot_tab">
+                            Último Acesso <img src="~/css/icons/Ordenar.svg" />
+                        </button>
+                    </th>
+                    @{
+                        int ind = 3;
+                    }
+                    @foreach (var ac in acoesFixas)
+                    {
+                        <th>
+                            <button onclick="ordenarTabela(@ind)" class="bot_tab">
+                                @ac.nome_acao <img src="~/css/icons/Ordenar.svg" />
+                            </button>
+                        </th>
+                        ind++;
+                    }
+                    <th>
+                        <button onclick="ordenarTabela(@ind)" class="bot_tab">
+                            Engajamento <img src="~/css/icons/Ordenar.svg" />
+                        </button>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("pt-BR");
+                    int i = 0;
+                    
+                    foreach (Usuario al in Model.users.OrderBy(c => c.name))
+                    {
+                        i++;
+                        <tr>
+                            <td>@i</td>
+                            <td>
+                                <a asp-page="/PerfilAluno"
+                                   asp-route-userId="@al.user_id">
+                                    @al.name
+                                </a>
+                            </td>
+                            <td>
+                                @{
+                                    var data = DateTime.Parse(al.user_lastaccess);
+                                    var dataFormatada = $"Dia {data:dd} do mês de {data:MMMM} de {data:yyyy} às {data:HH:mm}";
+                                }
+                                @dataFormatada
+                            </td>
+
+
+
+
+
+
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

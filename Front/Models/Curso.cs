@@ -1,55 +1,69 @@
 ﻿using System.Net.Http;
 using System.Text.Json;
 using Front.Models;
-
 namespace Front.Models
 {
+
     public class Curso
     {
-        public string curso { get; set; }
-        public int alunos { get; set; }
-
+        private readonly FavoritoService _favoritoService;
+        public string nomeCurso { get; set; }
+        public int quantAlunos { get; set; }
         public List<LogUsuario> Logs { get; set; } = new();
+        public List<int> Semanas { get; set; } = new(new int[10]);
+        public List<Usuario> usuarios { get; set; } = new();
 
-        // Lista para armazenar as contagens de cada semana, iniciada com 10 semanas zeradas
-        public List<int> Semanas { get; set; } = new List<int>(new int[10]);
+        public bool IsFavorito { get; set; }
+
+
+        public int engagAlto = 0;
+        public int engagMedio = 0;
+        public int engagBaixo = 0;
 
         public async Task AtualizaSemanas()
         {
             using var httpClient = new HttpClient();
-            var responseLogs = await httpClient.GetAsync($"https://localhost:7232/api/Moodle/logs-por-curso/{this.curso}");
-            if (responseLogs.IsSuccessStatusCode)
+            var response = await httpClient.GetAsync($"https://localhost:7232/api/Moodle/logs-por-nomeCurso/{nomeCurso}");
+
+            if (!response.IsSuccessStatusCode) return;
+
+            var json = await response.Content.ReadAsStringAsync();
+            Logs = JsonSerializer.Deserialize<List<LogUsuario>>(json) ?? [];
+
+            if (Logs.Count == 0) return;
+
+            var primeiroAcesso = Logs.Min(l => DateTime.Parse(l.date));
+            Semanas = new List<int>(new int[10]); // Resetar
+
+            foreach (var log in Logs)
             {
-                var json = await responseLogs.Content.ReadAsStringAsync();
-                Logs = JsonSerializer.Deserialize<List<LogUsuario>>(json) ?? new();
-            }
+                var data = DateTime.Parse(log.date);
+                var dias = (data - primeiroAcesso).TotalDays;
+                var semanaIndex = (int)(dias / 7);
 
-            if (Logs == null || !Logs.Any())
-                return;
-
-            DateTime PrimeiroAcesso = Logs.Min(l => DateTime.Parse(l.date));
-
-            // Resetar semanas para garantir contagem correta a cada atualização
-            for (int i = 0; i < Semanas.Count; i++)
-                Semanas[i] = 0;
-
-            foreach (LogUsuario l in Logs)
-            {
-                var dataLog = DateTime.Parse(l.date);
-                var diasDesdePrimeiroAcesso = (dataLog - PrimeiroAcesso).TotalDays;
-                int semana = (int)(diasDesdePrimeiroAcesso / 7) + 1;
-
-                int semanaIndex = semana - 1;
-
-                // Aumenta a lista se precisar de mais semanas
                 if (semanaIndex >= Semanas.Count)
-                {
-                    while (Semanas.Count <= semanaIndex)
-                        Semanas.Add(0);
-                }
+                    Semanas.AddRange(Enumerable.Repeat(0, semanaIndex - Semanas.Count + 1));
 
                 Semanas[semanaIndex]++;
             }
         }
+
+        public async Task AtualizaAlunos()
+        {
+            using var httpClient = new HttpClient();
+            var response = await httpClient.GetAsync($"https://localhost:7232/api/Moodle/quantAlunos-por-nomeCurso/{nomeCurso}");
+
+            if (!response.IsSuccessStatusCode) return;
+
+            var json = await response.Content.ReadAsStringAsync();
+            usuarios = JsonSerializer.Deserialize<List<Usuario>>(json) ?? [];
+        }
+    }
+
+
+    public class CursoComAlunos
+    {
+        public string nomeCurso { get; set; }
+        public List<Usuario> usuarios { get; set; }
     }
 }

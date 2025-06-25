@@ -1,0 +1,80 @@
+﻿@page "{cursoNome}"
+@model Front.Pages.IaChatCursoModel
+@{
+    ViewData["Title"] = "Chat com IA";
+}
+@{
+    ViewData["OcultarSombra"] = true;
+}
+
+
+<header class="linha welcome"
+        style="
+            justify-content: space-between;
+            width: 100%;
+            height: fit-content;
+">
+    <div class="coluna" style="--gap: 10px">
+        <span class="SubH1 corAzul">@Model.CursoNome</span>
+        <h1 class="corPreta40B">Inteligência Artificial</h1>
+    </div>
+</header>
+
+@if (Model.DadosCurso != null)
+{
+    <div class="card-curso" style="padding: 20px; background-color: #f9f9f9; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;">
+        <h3 style="margin-bottom: 10px;">📄 Dados do Curso</h3>
+        <ul style="list-style: none; padding: 0;">
+            @foreach (var item in Model.DadosCurso)
+            {
+                <li style="margin-bottom: 6px;">
+                    <strong>@item.Key:</strong> @item.Value
+                </li>
+            }
+        </ul>
+    </div>
+}
+
+@* 
+@if (Model.DadosAluno != null)
+{
+    <div class="card-aluno" style="padding: 20px; background-color: #f9f9f9; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;">
+        <h3 style="margin-bottom: 10px;">📄 Dados do Aluno</h3>
+        <ul style="list-style: none; padding: 0;">
+            @foreach (var item in Model.DadosAluno)
+            {
+                <li style="margin-bottom: 6px;">
+                    <strong>@item.Key:</strong> @item.Value
+                </li>
+            }
+        </ul>
+    </div>
+} *@
+
+<div class="dashboard coluna"
+     style="--gap: 10px; height: 100%; flex-direction: column-reverse; z-index:1">
+    
+    @if (Model.Resposta != null)
+    {
+        <div class="resposta">
+            <h3>Resposta da IA:</h3>
+            <pre>@Model.Resposta</pre>
+        </div>
+    }
+
+    <form method="post">
+
+        <div class="ImputIA linha" onclick="document.getElementById('IaPergunta').focus()">
+            <img src="~/css/icons/estrelaIA.svg"
+                 alt="ÍconeHome"
+                 width="18"
+                 height="18" />
+            <input asp-for="Prompt"
+                   type="text"
+                   id="IaPergunta"
+                   placeholder="Pergunte à Inteligência Artificial!" />
+            <button type="submit">Gerar</button>
+        </div>
+
+    </form>
+</div>
