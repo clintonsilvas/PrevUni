@@ -22,7 +22,7 @@ namespace Front.Models
 
         //new Acoes { nome_acao = "Aval Final?", actionv = "updated", target = "course_module_completion", component = "core" },
          
-        //new Acoes { nome_acao = "Visualizar Disciplina", action = "viewed", target = "course", component = "core" },
+        new Acoes { nome_acao = "Visualizar Disciplina", action = "viewed", target = "course", component = "core" },
         //new Acoes { nome_acao = "Visualizar Tela com todos os Emblemas", action = "viewed", target = "badge_listing", component = "core" },
         //new Acoes { nome_acao = "Visualizar Tela com todos os Alunos do Curso", action = "viewed", target = "user_list", component = "core" },
         //new Acoes { nome_acao = "Visualizar perfil de um Aluno", action = "viewed", target = "user_profile", component = "core" },

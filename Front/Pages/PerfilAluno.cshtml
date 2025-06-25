@@ -6,7 +6,7 @@
     ViewData["Title"] = $"Aluno {@Model.User.name}";
 }
 
-<div id="us_cont">
+<div class="coluna" id="us_cont">
     <div class="spinner">
         <img src="~/css/icons/loadGif.gif" alt="Carregando..." width="40" />
     </div>
@@ -17,10 +17,12 @@
 
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
-        const userId = "@Model.UserId";
+
         const container = document.getElementById("us_cont");
 
-        const res = await fetch(`/PerfilAluno/${userId}?handler=Carregamento`);
+    const userId = "@Model.UserId";
+    const curso = "@Model.curso"; // ou onde estiver o curso selecionado
+    const res = await fetch(`/PerfilAluno/${userId}?handler=Carregamento&curso=${encodeURIComponent(curso)}`);
         const html = await res.text();
         container.innerHTML = html;
 
