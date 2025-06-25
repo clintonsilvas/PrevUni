@@ -14,10 +14,8 @@ namespace Front.Pages
         {
             _httpClientFactory = httpClientFactory;
         }
-
-        [BindProperty(SupportsGet = true)]
+        [BindProperty]
         public string CursoNome { get; set; } = string.Empty;
-
         [BindProperty]
         public string Prompt { get; set; } = string.Empty;
 
@@ -35,13 +33,14 @@ namespace Front.Pages
         }
 
         public async Task OnGetAsync()
-        {
+        {           
+
             if (TempData["Historico"] is string historicoJson)
                 Historico = JsonSerializer.Deserialize<List<MensagemIA>>(historicoJson) ?? new();
         }
 
         public async Task<IActionResult> OnPostAsync()
-        {
+        {            
             if (TempData["Historico"] is string historicoJson)
                 Historico = JsonSerializer.Deserialize<List<MensagemIA>>(historicoJson) ?? new();
             else
@@ -57,11 +56,11 @@ namespace Front.Pages
                 var requestBody = JsonSerializer.Serialize(new
                 {
                     Prompt,
-                    DadosCurso = resumoTexto
+                    Dados = resumoTexto
                 });
 
                 var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
-                var iaResponse = await client.PostAsync("https://localhost:7232/pergunte-ia-nomeCurso", content);
+                var iaResponse = await client.PostAsync("https://localhost:7232/pergunte-ia", content);
                 var iaResult = await iaResponse.Content.ReadAsStringAsync();
 
                 var resposta = "IA não respondeu.";

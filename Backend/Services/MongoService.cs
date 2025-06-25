@@ -426,15 +426,11 @@ namespace Backend.Services
             return logs;
         }
 
-
         public async Task<string> GerarResumoAlunoIAAsync(string userId)
         {
-            // Pegar todos os logs do usuário
-            var match = new BsonDocument("$match", new BsonDocument("user_id", userId));
             var unwind = new BsonDocument("$unwind", "$logs");
             var matchLogs = new BsonDocument("$match", new BsonDocument("logs.user_id", userId));
             var replaceRoot = new BsonDocument("$replaceRoot", new BsonDocument("newRoot", "$logs"));
-
             var pipeline = new List<BsonDocument> { unwind, matchLogs, replaceRoot };
 
             var resultado = await _collection.AggregateAsync<BsonDocument>(pipeline);
@@ -443,7 +439,7 @@ namespace Backend.Services
             if (!logs.Any())
                 return "Usuário não encontrado ou sem interações.";
 
-            var nome = logs.FirstOrDefault()?.GetValue("name", BsonNull.Value)?.AsString ?? "Nome não disponível";
+            var nome = logs.FirstOrDefault()?["name"]?.AsString ?? "Nome não disponível";
 
             var cursoInteracoes = logs
                 .GroupBy(l => l["course_fullname"].AsString)
@@ -462,12 +458,8 @@ namespace Backend.Services
                 .Distinct()
                 .Count();
 
-            var primeiroAcesso = logs
-                .Min(l => DateTime.Parse(l["date"].AsString));
-
-            var ultimoAcesso = logs
-                .Max(l => DateTime.Parse(l["date"].AsString));
-
+            var primeiroAcesso = logs.Min(l => DateTime.Parse(l["date"].AsString));
+            var ultimoAcesso = logs.Max(l => DateTime.Parse(l["date"].AsString));
             var totalInteracoes = logs.Count;
 
             // Interações semanais
@@ -480,52 +472,46 @@ namespace Backend.Services
                     return $"{data.Year}-W{week:D2}";
                 })
                 .OrderBy(g => g.Key)
-                .Select(g =>
-                {
-                    var componentesSemana = g.GroupBy(l => l["component"].AsString)
-                                             .ToDictionary(c => c.Key, c => c.Count());
-                    return new
-                    {
-                        Semana = g.Key,
-                        Total = g.Count(),
-                        Componentes = componentesSemana
-                    };
-                });
+                .ToList();
 
-            // Construir o resumo
             var sb = new StringBuilder();
-            sb.AppendLine($"Nome do Aluno: {nome}");
-            sb.AppendLine($"User ID: {userId}");
-            sb.AppendLine($"Total de Interações: {totalInteracoes}");
-            sb.AppendLine($"Dias Ativos: {diasAtivos}");
-            sb.AppendLine($"Primeiro Acesso: {primeiroAcesso:yyyy-MM-dd}");
-            sb.AppendLine($"Último Acesso: {ultimoAcesso:yyyy-MM-dd}");
-            sb.AppendLine();
 
-            sb.AppendLine("Interações por nomeCurso:");
-            foreach (var curso in cursoInteracoes)
-                sb.AppendLine($"- {curso.Key}: {curso.Value} interações");
+            // Cabeçalho fixo padronizado
+            sb.Append($"nomeAluno: {nome} / userId: {userId} / Total de Interações: {totalInteracoes} / ");
+            sb.Append($"Dias Ativos: {diasAtivos} / Primeiro Acesso: {primeiroAcesso:yyyy-MM-dd} / Último Acesso: {ultimoAcesso:yyyy-MM-dd} / ");
 
-            sb.AppendLine("\nComponentes mais utilizados:");
-            foreach (var comp in componentes.OrderByDescending(c => c.Value).Take(5))
-                sb.AppendLine($"- {comp.Key}: {comp.Value}");
+            // Cursos
+            sb.Append("Interações por Curso: ");
+            sb.Append(string.Join(", ", cursoInteracoes.Select(c => $"{c.Key}:{c.Value}")));
+            sb.Append(" / ");
 
-            sb.AppendLine("\nAções mais realizadas:");
-            foreach (var acao in acoes.OrderByDescending(a => a.Value).Take(5))
-                sb.AppendLine($"- {acao.Key}: {acao.Value}");
+            // Componentes
+            sb.Append("Componentes mais usados: ");
+            sb.Append(string.Join(", ", componentes.OrderByDescending(c => c.Value).Take(5).Select(c => $"{c.Key}:{c.Value}")));
+            sb.Append(" / ");
 
-            sb.AppendLine("\nResumo Semanal:");
+            // Ações
+            sb.Append("Ações mais comuns: ");
+            sb.Append(string.Join(", ", acoes.OrderByDescending(a => a.Value).Take(5).Select(a => $"{a.Key}:{a.Value}")));
+            sb.Append(" / ");
+
+            // Resumo Semanal
+            sb.Append("Resumo Semanal: ");
             foreach (var semana in porSemana)
             {
-                sb.AppendLine($"Semana: {semana.Semana}");
-                sb.AppendLine($"  Total de Interações: {semana.Total}");
-                sb.AppendLine($"  Componentes:");
-                foreach (var comp in semana.Componentes)
-                    sb.AppendLine($"    - {comp.Key}: {comp.Value}");
+                var semanaLabel = semana.Key;
+                var total = semana.Count();
+                var comp = semana.GroupBy(l => l["component"].AsString)
+                                 .ToDictionary(c => c.Key, c => c.Count());
+
+                sb.Append($"{semanaLabel}({total}): ");
+                sb.Append(string.Join(", ", comp.Select(kv => $"{kv.Key}:{kv.Value}")));
+                sb.Append(" / ");
             }
 
             return sb.ToString();
         }
+
 
 
         public async Task<BsonDocument> GerarResumoAlunoAsync(string userId)
@@ -707,26 +693,26 @@ namespace Backend.Services
 
             var resumoStr = string.Join(" / ", new[]
             {
-        $"nomeCurso: {nomeCurso}",
-        $"Total de quantAlunos: {alunosUnicos}",
-        $"Total de Acessos: {totalAcessos}",
-        $"Média de Acessos por Aluno: {mediaAcessosPorAluno:F2}",
-        $"Dias Ativos: {diasAtivos}",
-        $"Duração Estimada do Uso: {duracaoDias} dias",
-        $"quantAlunos Ativos nos Últimos 30 dias: {alunosAtivos30Dias}",
-        $"quantAlunos Inativos >30 dias: {alunosInativos}",
-        $"% quantAlunos com >5 Acessos: {percentualAlunosEngajados:F2}%",
-        $"quantAlunos com apenas 1 acesso: {alunos1Acesso}",
-        $"quantAlunos sem Engajamento: {alunosSemEngajamento}",
-        $"Interações por Componente: {string.Join(", ", percentualPorComponente)}",
-        $"Ações Mais Comuns: {string.Join(", ", acoesMaisComuns)}",
-        $"Top Ações de Engajamento: {string.Join(", ", acoesEngajamentoTop)}",
-        $"Ações Passivas: {totalPassivas}, Ativas: {totalAtivas}",
-        $"quantAlunos com acesso em >1 dia: {alunosMultiplosDias}",
-        $"Top 3 Usuários com Mais Acessos: {string.Join(", ", topUsuarios)}",
-        $"Top 10 Piores Usuários (menos acessos): {string.Join(", ", pioresUsuarios)}",
-        $"Média de dias entre 1º e último acesso por aluno: {mediaDiasPermanencia:F2} dias "
-    });
+                $"nomeCurso: {nomeCurso}",
+                $"Total de quantAlunos: {alunosUnicos}",
+                $"Total de Acessos: {totalAcessos}",
+                $"Média de Acessos por Aluno: {mediaAcessosPorAluno:F2}",
+                $"Dias Ativos: {diasAtivos}",
+                $"Duração Estimada do Uso: {duracaoDias} dias",
+                $"quantAlunos Ativos nos Últimos 30 dias: {alunosAtivos30Dias}",
+                $"quantAlunos Inativos >30 dias: {alunosInativos}",
+                $"% quantAlunos com >5 Acessos: {percentualAlunosEngajados:F2}%",
+                $"quantAlunos com apenas 1 acesso: {alunos1Acesso}",
+                $"quantAlunos sem Engajamento: {alunosSemEngajamento}",
+                $"Interações por Componente: {string.Join(", ", percentualPorComponente)}",
+                $"Ações Mais Comuns: {string.Join(", ", acoesMaisComuns)}",
+                $"Top Ações de Engajamento: {string.Join(", ", acoesEngajamentoTop)}",
+                $"Ações Passivas: {totalPassivas}, Ativas: {totalAtivas}",
+                $"quantAlunos com acesso em >1 dia: {alunosMultiplosDias}",
+                $"Top 3 Usuários com Mais Acessos: {string.Join(", ", topUsuarios)}",
+                $"Top 10 Piores Usuários (menos acessos): {string.Join(", ", pioresUsuarios)}",
+                $"Média de dias entre 1º e último acesso por aluno: {mediaDiasPermanencia:F2} dias "
+            });
 
             return resumoStr;
         }

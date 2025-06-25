@@ -34,10 +34,7 @@ namespace Backend.Controllers
         public async Task<IActionResult> GetResumoAlunoIA(string userId)
         {
             var resumo = await _mongoService.GerarResumoAlunoIAAsync(userId);
-            if (resumo == null)
-                return NotFound("Usuário não encontrado.");
-
-            return Ok(resumo.ToJson());
+            return Ok(new{ resumo });
         }
 
         [HttpGet("resumo-curso/{nomeCurso}")]

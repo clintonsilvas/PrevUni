@@ -1,93 +1,153 @@
 ﻿@page "{userId}"
 @model Front.Pages.IaChatAlunoModel
 @{
-    ViewData["Title"] = "Conversa com IA";
+    ViewData["Title"] = "Conversa sobre aluno";
     ViewData["OcultarSombra"] = true;
 }
 
 <header class="linha welcome" style="justify-content: space-between; width: 100%;">
     <div class="coluna" style="gap: 10px;">
-        <span class="SubH1 corAzul">Aluno: @Model.User.name</span>
+        <span class="SubH1 corAzul">Aluno: @Model.UserId</span>
         <h1 class="corPreta40B">Inteligência Artificial</h1>
     </div>
 </header>
 
+<style>
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 70vh;
+        max-height: 70vh;
+        overflow-y: auto;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #fff;
+    }
 
+    .chat-bar {
+        margin-top: 10px;
+    }
 
-@*     <div class="card-aluno" style="padding: 20px; background-color: #f9f9f9; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;">
-        <h3 style="margin-bottom: 10px;">📄 Dados do Aluno</h3>
-        <ul style="list-style: none; padding: 0;">
-            <span>@Model.DadosAlunoString</span>
-        </ul>
-    </div> 
- *@
+    .msg {
+        margin-bottom: 10px;
+        white-space: pre-wrap; /* para quebrar linha no <pre> */
+    }
 
-<div class="dashboard coluna" style="gap: 10px; height: 100%; flex-direction: column-reverse;">
-    <form method="post" id="formIA">
-        <div class="ImputIA linha" onclick="document.getElementById('IaPergunta').focus()">
-            <img src="~/css/icons/estrelaIA.svg" alt="Ícone IA" width="18" height="18" />
-            <input asp-for="Prompt"
-                   type="text"
-                   id="IaPergunta"
-                   placeholder="Pergunte à Inteligência Artificial!"
-                   required
-                   autocomplete="off" />
-            <button type="submit" id="btnGerar">Gerar</button>
-        </div>
-    </form>
-    <div id="chatContainer" class="coluna chat" style="gap: 10px; width: 100%; height: fit-content; overflow: auto; flex-direction: column-reverse;">
-        @foreach (var msg in Model.Mensagens.AsEnumerable().Reverse())
+        .msg.pergunta {
+            background: #e0f0ff;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .msg.resposta {
+            background: #f2f2f2;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+    button[disabled] {
+        opacity: 0.6;
+        cursor: wait;
+    }
+</style>
+
+<div class="dashboard coluna" style="gap: 10px; height: 100%; flex-direction: column;">
+    <div class="chat-container" id="chatContainer">
+        @if (Model.Historico != null && Model.Historico.Any())
         {
-            <div class="card-resposta">
-                <span><strong>IA:</strong><br />@Html.Raw(msg.Resposta)</span>
-            </div>
-            <div style="width: 100%; display: flex; flex-direction: row-reverse;">
-                <div class="card-pergunta">
-                    <span><strong>Você:</strong><br />@msg.Pergunta</span>
+            foreach (var msg in Model.Historico)
+            {
+                <div class="msg pergunta">
+                    <strong>Você:</strong>
+                    <pre>@msg.Pergunta</pre>
                 </div>
-            </div>
+                <div class="msg resposta" data-resposta="@msg.Resposta">
+                    <strong>IA:</strong>
+                    <pre class="ia-text"></pre>
+                </div>
+            }
         }
     </div>
+
+    <div class="chat-bar">
+        <form id="formChat" method="post">
+            <div class="ImputIA linha" onclick="document.getElementById('IaPergunta').focus()">
+                <img src="~/css/icons/estrelaIA.svg" alt="ÍconeHome" width="18" height="18" />
+                <input asp-for="Prompt"
+                       type="text"
+                       id="IaPergunta"
+                       placeholder="Pergunte à Inteligência Artificial!"
+                       autocomplete="off"
+                       required />
+                <button id="btnEnviar" type="submit">Gerar</button>
+            </div>
+        </form>
+    </div>
 </div>
+
 <script>
-    const chat = document.getElementById('chat');
-    const input = document.getElementById('perguntaInput');
+    // Mapeamento simples para emojis via texto (adicione mais conforme quiser)
+    const emojiMap = {
+        ':smile:': '😄',
+        ':sad:': '😢',
+        ':heart:': '❤️',
+        ':thumbsup:': '👍',
+        ':star:': '⭐',
+        ':warning:': '⚠️'
+    };
 
-    async function enviarPergunta() {
-        const pergunta = input.value.trim();
-        if (!pergunta) return;
-        event.preventDefault();
-        adicionarMensagem('Você', pergunta);
-        input.value = '';
+    function replaceEmojis(text) {
+        return text.replace(/:\w+:/g, match => emojiMap[match] || match);
+    }
 
-        try {
-            const response = await fetch(window.location.pathname, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    userId: '@Model.UserId',
-                    prompt: pergunta
-                })
-            });
+    // Renderização simples de markdown (negrito, itálico, links)
+    function renderMarkdown(text) {
+        let t = text
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')  // **negrito**
+            .replace(/\*(.+?)\*/g, '<em>$1</em>')              // *itálico*
+            .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>'); // [texto](url)
+        return t;
+    }
 
-            const result = await response.json();
-
-            if (result.sucesso) {
-                adicionarMensagem('IA', result.resposta);
-            } else {
-                adicionarMensagem('Erro', result.erro, true);
-            }
-        } catch (error) {
-            adicionarMensagem('Erro', 'Falha na conexão.', true);
+    // Animação de digitação letra a letra na resposta da IA
+    async function typeWriter(element, text, delay = 20) {
+        element.innerHTML = '';
+        text = replaceEmojis(text);
+        text = renderMarkdown(text);
+        // Remove tags para digitar apenas texto puro
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = text;
+        const plainText = tempDiv.textContent || tempDiv.innerText || '';
+        for (let i = 0; i <= plainText.length; i++) {
+            element.textContent = plainText.substring(0, i);
+            await new Promise(r => setTimeout(r, delay));
         }
+        // Agora renderiza markdown e emojis de verdade
+        element.innerHTML = text;
     }
 
-    function adicionarMensagem(remetente, mensagem, isErro = false) {
-        const div = document.createElement('div');
-        div.innerHTML = `<strong>${remetente}:</strong> ${mensagem}`;
-        if (isErro) div.style.color = 'red';
+    window.onload = () => {
+        const container = document.getElementById("chatContainer");
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
 
-        chat.appendChild(div);
-        chat.scrollTop = chat.scrollHeight;
-    }
+        // Faz a animação para todas respostas carregadas
+        document.querySelectorAll('.msg.resposta').forEach(div => {
+            const pre = div.querySelector('.ia-text');
+            const texto = div.getAttribute('data-resposta') || '';
+            typeWriter(pre, texto, 10);
+        });
+    };
+
+    const form = document.getElementById('formChat');
+    const btnEnviar = document.getElementById('btnEnviar');
+    const input = document.getElementById('IaPergunta');
+    const chatContainer = document.getElementById('chatContainer');
+
+    form.addEventListener('submit', e => {
+        btnEnviar.disabled = true;
+        btnEnviar.textContent = 'Carregando...';
+    });
 </script>
