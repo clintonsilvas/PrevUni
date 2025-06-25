@@ -75,14 +75,55 @@
 
     <hr class="hr_trac" />
 
-    <div class="linha" style="align-items: baseline">
-        <img src="~/css/icons/chave.svg" />
-        <div class="coluna" style="gap: 10px">
-            <h4 class="corPreta50B">Chave de API da Inteligência Artificial.</h4>
-            <span class="SubH5 corCinza60B">Chave Atual: AIzaSyC9ai_WOCBHL2bOK3XlWRsjws2_qMxAFVQ</span>
-            <button class="btn_config_branco">Editar</button>
-        </div>
+    <div class="coluna" style="gap: 10px">
+        <h4 class="corPreta50B">Chave de API da Inteligência Artificial.</h4>
+        <span class="SubH5 corCinza60B" id="chaveAtual">Chave Atual: ****</span>
+
+        <input type="text" id="novaChave" placeholder="Nova chave API" style="display:none;" />
+        <button class="btn_config_branco" onclick="editarChave()">Editar</button>
+        <button class="btn_config_branco" onclick="salvarChave()" style="display:none;" id="btnSalvar">Salvar</button>
     </div>
+
+    <script>
+            window.onload = async function () {
+            try {
+                const res = await fetch('https://localhost:7232/obter-api-key');
+                const data = await res.json();
+
+                // Opcional: mostrar só os 5 primeiros e 5 últimos caracteres
+                const chave = data.chave;
+                const chaveMask = chave.substring(0, 5) + '...' + chave.slice(-5);
+
+                document.getElementById('chaveAtual').innerText = 'Chave Atual: ' + chaveMask;
+            } catch (e) {
+                document.getElementById('chaveAtual').innerText = 'Erro ao carregar chave.';
+                console.error(e);
+            }
+        };
+        function editarChave() {
+            document.getElementById('novaChave').style.display = 'inline';
+            document.getElementById('btnSalvar').style.display = 'inline';
+        }
+
+        async function salvarChave() {
+            const chave = document.getElementById('novaChave').value;
+
+            const res = await fetch('https://localhost:7232/atualizar-api-key', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ novaChave: chave })
+            });
+
+            if (res.ok) {
+                document.getElementById('chaveAtual').innerText = 'Chave Atual: ' + chave;
+                alert('Chave atualizada com sucesso!');
+            } else {
+                alert('Erro ao atualizar chave.');
+            }
+        }
+
+    </script>
+
 
 
     <hr class="hr_trac" />

@@ -725,7 +725,7 @@ namespace Backend.Services
         $"quantAlunos com acesso em >1 dia: {alunosMultiplosDias}",
         $"Top 3 Usuários com Mais Acessos: {string.Join(", ", topUsuarios)}",
         $"Top 10 Piores Usuários (menos acessos): {string.Join(", ", pioresUsuarios)}",
-        $"Média de dias entre 1º e último acesso por aluno: {mediaDiasPermanencia:F2} dias"
+        $"Média de dias entre 1º e último acesso por aluno: {mediaDiasPermanencia:F2} dias "
     });
 
             return resumoStr;

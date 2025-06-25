@@ -1,5 +1,6 @@
 ﻿using Backend.Services;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 
 namespace Backend.Controllers
 {
@@ -54,6 +55,40 @@ namespace Backend.Controllers
             }
 
             return Ok(new { respostaIA = resposta });
+        }
+        public class ApiKeyRequest
+        {
+            public string NovaChave { get; set; }
+        }
+        [HttpPost("atualizar-api-key")]
+        public IActionResult AtualizarApiKey([FromBody] ApiKeyRequest req)
+        {
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
+
+            var json = System.IO.File.ReadAllText(path);
+            dynamic config = JObject.Parse(json);
+
+            config.Gemini.ApiKey = req.NovaChave;
+
+            string atualizado = config.ToString();
+            System.IO.File.WriteAllText(path, atualizado);
+
+            return Ok();
+        }
+        [HttpGet("obter-api-key")]
+        public IActionResult ObterApiKey()
+        {
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
+
+            if (!System.IO.File.Exists(path))
+                return NotFound("Arquivo de configuração não encontrado.");
+
+            var json = System.IO.File.ReadAllText(path);
+            dynamic config = JObject.Parse(json);
+            string chave = config.Gemini.ApiKey;
+
+            // Por segurança, envie mascarada (ou toda se quiser)
+            return Ok(new { chave = chave });
         }
 
 

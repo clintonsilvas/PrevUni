@@ -12,7 +12,16 @@ builder.Services.AddSession();
 builder.Services
        .AddRazorPages()
        .AddSessionStateTempDataProvider();   // mantém TempData em sessão se quiser
-
+builder.Services.AddCors(options =>
+{
+    options.AddDefaultPolicy(policy =>
+    {
+        policy
+            .AllowAnyOrigin() 
+            .AllowAnyMethod()
+            .AllowAnyHeader();
+    });
+});
 
 var app = builder.Build();
 app.UseSession();
@@ -25,7 +34,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 
-
+app.UseCors();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
