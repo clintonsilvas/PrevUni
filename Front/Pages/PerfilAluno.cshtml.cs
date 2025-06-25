@@ -59,6 +59,18 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
 
         return Partial("Alunos/GraficoPerfilAluno", this);
     }
+    public async Task<IActionResult> OnGetCalendarioParcialAsync(int mes, int ano)
+    {
+        if (string.IsNullOrWhiteSpace(UserId))
+            return NotFound("ID do aluno não fornecido.");
+
+        await ObterDadosAlunoAsync(UserId);
+
+        ViewData["mes"] = mes;
+        ViewData["ano"] = ano;
+
+        return Partial("Alunos/Calendario", this);
+    }
 
     private async Task<bool> ObterDadosAlunoAsync(string userId)
     {
