@@ -57,7 +57,7 @@ namespace Front.Pages
             await Cursos.AtualizaSemanas();
             CalcularSemanas();
 
-            await CarregarEngajamentoAsync(http);
+            await CarregarEngajamentoAsync(http, curso); // <-- passe o curso aqui
             CalcularEngajamento();
             CalcularDesistentes();
 
@@ -78,9 +78,9 @@ namespace Front.Pages
             Cursos.usuarios = JsonSerializer.Deserialize<List<Usuario>>(json) ?? new();
         }
 
-        private async Task CarregarEngajamentoAsync(HttpClient httpClient)
+        private async Task CarregarEngajamentoAsync(HttpClient httpClient, string curso)
         {
-            var resp = await httpClient.GetAsync("https://localhost:7232/api/Mongo/engajamento-alunos");
+            var resp = await httpClient.GetAsync($"https://localhost:7232/api/Engajamento/curso/{curso}");
             if (!resp.IsSuccessStatusCode)
             {
                 AlunosEngajamento = new();
@@ -93,6 +93,7 @@ namespace Front.Pages
             var idsAlunos = Cursos.usuarios.Select(u => u.user_id).ToHashSet();
             AlunosEngajamento = todos.Where(a => idsAlunos.Contains(a.UserId)).ToList();
         }
+
 
         private void CalcularEngajamento()
         {

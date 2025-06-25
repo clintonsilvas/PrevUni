@@ -41,27 +41,31 @@ namespace Front.Pages
             var cursos = await GetFromApiAsync<List<Curso>>(
                 "https://localhost:7232/api/Moodle/cursos/com-alunos") ?? new();
 
-            var engajamentos = await GetFromApiAsync<List<AlunoEngajamento>>(
-                "https://localhost:7232/api/Mongo/engajamento-alunos") ?? new();
-
-            foreach (var c in cursos)
+            var tarefas = cursos.Select(async c =>
             {
                 var alunos = cursosComAlunos.FirstOrDefault(l => l.nomeCurso == c.nomeCurso);
-                if (alunos is null) continue;
+                if (alunos is null) return c;
+
+                var engajamentos = await GetFromApiAsync<List<AlunoEngajamento>>(
+                    $"https://localhost:7232/api/Engajamento/curso/{Uri.EscapeDataString(c.nomeCurso)}") ?? new();
 
                 var alunosEng = engajamentos
                     .Where(a => alunos.usuarios.Any(u => u.user_id == a.UserId))
                     .ToList();
 
                 var total = alunosEng.Count;
-                if (total == 0) continue;
+                if (total == 0) return c;
 
                 c.engagAlto = (int)(alunosEng.Count(e => e.Engajamento > 66) * 100.0 / total);
                 c.engagMedio = (int)(alunosEng.Count(e => e.Engajamento is >= 33 and <= 66) * 100.0 / total);
                 c.engagBaixo = 100 - c.engagAlto - c.engagMedio;
-            }
 
-            return cursos;
+                return c;
+            });
+
+            var cursosAtualizados = await Task.WhenAll(tarefas);
+
+            return cursosAtualizados.ToList();
         }
 
 
