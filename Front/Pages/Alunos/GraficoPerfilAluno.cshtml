@@ -105,7 +105,7 @@
     <div class="ImputIA linha">
         <img src="~/css/icons/estrelaIA.svg" alt="ÍconeHome" width="18" height="18" />
         <input type="text" id="IaPergunta" name="Prompt" placeholder="Pergunte à IA!" />
-        <a href="#" onclick="enviarPergunta()">Gerar</a>
+        <a href="IaChatAluno" onclick="enviarPergunta()">Gerar</a>
     </div>
 
     @{
@@ -162,93 +162,7 @@
             </div>
 
             <div class="conteudo" id="conteudo2">
-                <div class="calendario-logs QuadroCards" id="calendario">
-                    @{
-                        int mes = Convert.ToInt32(Context.Request.Query["mes"]) == 0 ? DateTime.Now.Month : Convert.ToInt32(Context.Request.Query["mes"]);
-                        int ano = Convert.ToInt32(Context.Request.Query["ano"]) == 0 ? DateTime.Now.Year : Convert.ToInt32(Context.Request.Query["ano"]);
-
-                        var primeiroDiaMes = new DateTime(ano, mes, 1);
-                        int diasNoMes = DateTime.DaysInMonth(ano, mes);
-                        int diasAtePrimeiroDia = (int)primeiroDiaMes.DayOfWeek;
-
-                        var logsPorDia = Model.AlunoLogs?
-                        .GroupBy(l => DateTime.Parse(l.date).Date)
-                        .ToDictionary(g => g.Key, g => g.ToList())
-                        ?? new();
-                    }
-
-                    <div class="navegacao-mes linha" style="flex: 1; margin-bottom: 20px; align-items: center">
-                        @{
-                            var mesAno = primeiroDiaMes.ToString("MMMM yyyy");
-                            var mesAnoCapitalizado = char.ToUpper(mesAno[0]) + mesAno[1..];
-                        }
-                        <div class="linha" style="--gap: 10px; align-items: center; margin-right: auto">
-                            <img src="~/css/icons/calendario.svg" height="20" />
-                            <h3 class="corPreta50B" style="flex: 1;">@mesAnoCapitalizado</h3>
-                        </div>
-
-                        <div class="linha" style="gap: 8px">
-                            <button class="btn_seta" onclick="mudarMes(-1)">⟵</button>
-                            <button class="btn_seta" onclick="mudarMes(1)">⟶</button>
-                        </div>
-                    </div>
-
-                    <div class="grid-calendario2">
-                        @foreach (var dia in new[] { "Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sabado" })
-                        {
-                            <span class="NomeDiaSemana">@dia</span>
-                        }
-
-                        @for (int j = 0; j < diasAtePrimeiroDia; j++)
-                        {
-                            <div class="diaMesInativo"></div>
-                        }
-
-                        @for (int i = 1; i <= diasNoMes; i++)
-                        {
-                            var dataAtual = new DateTime(ano, mes, i);
-                            var id = $"{dataAtual.Day}_{dataAtual.Month}";
-                            var possuiLog = logsPorDia.ContainsKey(dataAtual);
-                            var logsDoDia = possuiLog ? logsPorDia[dataAtual] : null;
-
-                            <div id="@id" onclick="AbreDia('@id')" class="diaMes @(possuiLog ? "temLog" : "")">
-                                <div class="linha">
-                                    <span class="diaspan" style="flex: 1">@i</span>
-
-                                    @if (possuiLog)
-                                    {
-
-                                        var totalLogs = logsDoDia.Count(l =>
-                                        @Model.AcaoDe(l.action, l.target, l.component) != "Outros");
-
-                                        if (totalLogs > 1)
-                                        {
-                                            <span class="mais_dia">+<span>@(totalLogs - 1)</span></span>
-                                        }
-                                    }
-                                </div>
-
-                                @if (possuiLog)
-                                {
-                                    foreach (var log in logsDoDia)
-                                    {
-                                        string? acao = @Model.AcaoDe(log.action, log.target, log.component);
-
-                                        if (acao != null && acao != "Outros")
-                                        {
-                                            <div class="item-log">
-                                                <span class="acao">@acao</span>
-                                                <span class="acao">@DateTime.Parse(log.date).ToString("HH:mm")</span>
-                                                <span class="curso">@log.course_fullname</span>
-                                            </div>
-                                        }
-                                    }
-                                }
-                            </div>
-                        }
-                    </div>
-
-                </div>
+                @await Html.PartialAsync("Alunos/Calendario", Model)
             </div>
         </div>
     </div>
@@ -727,51 +641,4 @@
     });
 </script>
 
-
-
-
-
-<!--SCRIPT DO CALENDARIO-->
-<script>
-    function AbreDia(id) {
-        const elemento = document.getElementById(id);
-        if (!elemento) return console.warn('Elemento não encontrado:', id);
-
-        const jaAberto = elemento.classList.contains('diaMesAberto');
-        document.querySelectorAll('.diaMes, .diaMesAberto, .temLog').forEach(dia => {
-            dia.className = dia.className.replace('diaMesAberto', 'diaMes').trim();
-        });
-
-        if (!jaAberto) elemento.className = 'diaMesAberto';
-    }
-
-    function mudarMes(direcao) {
-        const urlParams = new URLSearchParams(window.location.search);
-        let mes = parseInt(urlParams.get('mes')) || new Date().getMonth() + 1;
-        let ano = parseInt(urlParams.get('ano')) || new Date().getFullYear();
-
-        mes += direcao;
-        if (mes < 1) { mes = 12; ano--; }
-        if (mes > 12) { mes = 1; ano++; }
-
-        urlParams.set('mes', mes);
-        urlParams.set('ano', ano);
-        window.location.href = window.location.pathname + '?' + urlParams + window.location.hash;
-    }
-
-    window.addEventListener('DOMContentLoaded', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const aba = urlParams.get('aba') || '1';
-        const input = document.getElementById('aba' + aba);
-        if (input) input.checked = true;
-
-        document.querySelectorAll('.botoes label').forEach((label, i) => {
-            label.addEventListener('click', () => {
-                const params = new URLSearchParams(window.location.search);
-                params.set('aba', (i + 1).toString());
-                history.replaceState(null, '', window.location.pathname + '?' + params + window.location.hash);
-            });
-        });
-    });
-</script>
 

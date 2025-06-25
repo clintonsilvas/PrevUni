@@ -12,12 +12,10 @@ namespace Backend.Controllers
     public class MongoController : ControllerBase
     {
         private readonly MongoService _mongoService;
-        private readonly EngajamentoService _engajamentoService;
 
-        public MongoController(MongoService mongoService, EngajamentoService engajamentoService)
+        public MongoController(MongoService mongoService)
         {
             _mongoService = mongoService;
-            _engajamentoService = engajamentoService;
         }
 
         [HttpGet("resumo-aluno/{userId}")]
@@ -34,10 +32,7 @@ namespace Backend.Controllers
         public async Task<IActionResult> GetResumoAlunoIA(string userId)
         {
             var resumo = await _mongoService.GerarResumoAlunoIAAsync(userId);
-            if (resumo == null)
-                return NotFound("Usuário não encontrado.");
-
-            return Ok(resumo.ToJson());
+            return Ok(new{ resumo });
         }
 
         [HttpGet("resumo-curso/{nomeCurso}")]
@@ -47,21 +42,31 @@ namespace Backend.Controllers
             return Ok(new { resumo });
         }
 
-        // Engajamento de todos os alunos
-        [HttpGet("engajamento-alunos")]
-        public async Task<IActionResult> GetEngajamentoAlunos()
-        {
-            var lista = await _engajamentoService.CalcularEngajamentoAlunosAsync();
-            return Ok(lista);
-        }
-
         [HttpGet("usuarios-com-ultimo-acesso")]
         public async Task<IActionResult> GetUsuariosComUltimoAcesso()
         {
             var usuarios = await _mongoService.GetUsuariosComUltimoAcessoAsync();
             return Ok(usuarios);
         }
+    }
 
+    [ApiController]
+    [Route("api/[controller]")]
+    public class EngajamentoController : ControllerBase
+    {
+        private readonly EngajamentoService _engajamentoService;
 
+        public EngajamentoController(EngajamentoService engajamentoService)
+        {
+            _engajamentoService = engajamentoService;
+        }
+
+        // GET api/engajamento/curso/{nomeCurso}
+        [HttpGet("curso/{nomeCurso}")]
+        public async Task<IActionResult> GetEngajamentoAlunosPorCurso(string nomeCurso)
+        {
+            var lista = await _engajamentoService.CalcularEngajamentoAlunosPorCursoAsync(nomeCurso);
+            return Ok(lista);
+        }
     }
 }

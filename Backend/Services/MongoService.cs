@@ -17,41 +17,49 @@ namespace Backend.Services
         {
             public string UserId { get; set; }
             public string Nome { get; set; }
+            public string CursoNome { get; set; }
             public double Engajamento { get; set; } // 0 a 100
         }
 
         public class AcaoQuantidade
         {
-            public string Acao { get; set; }
+            public string Component { get; set; }
+            public string Target { get; set; }
+            public string Action { get; set; }
             public int Quantidade { get; set; }
         }
+
+
 
         public class EngajamentoService
         {
             private readonly IMongoCollection<BsonDocument> _logs;
-
-
+            private readonly IMongoCollection<ConfiguracaoEngajamento> _configCollection;
 
             public EngajamentoService(IMongoDatabase database)
             {
                 _logs = database.GetCollection<BsonDocument>("logs");
+                _configCollection = database.GetCollection<ConfiguracaoEngajamento>("configuracoesEngajamento");
             }
 
-            public async Task<List<AlunoEngajamento>> CalcularEngajamentoAlunosAsync()
+            public async Task<List<AlunoEngajamento>> CalcularEngajamentoAlunosPorCursoAsync(string nomeCurso)
             {
+                var config = await ObterConfiguracaoAsync();
+
                 var pipeline = new[]
                 {
         new BsonDocument("$unwind", "$logs"),
+        new BsonDocument("$match", new BsonDocument("logs.course_fullname", nomeCurso)),
         new BsonDocument("$group", new BsonDocument
         {
             { "_id", new BsonDocument
                 {
                     { "user_id", "$logs.user_id" },
                     { "nome", "$logs.name" },
-                    { "acao", "$logs.action" },
-                    { "target", "$logs.target"},
-                    {"component", $"logs.component" }
-
+                    { "cursoNome", "$logs.course_fullname" },
+                    { "component", "$logs.component" },
+                    { "target", "$logs.target" },
+                    { "action", "$logs.action" }
                 }
             },
             { "qtd", new BsonDocument("$sum", 1) }
@@ -59,24 +67,27 @@ namespace Backend.Services
     };
 
                 using var cursor = await _logs.AggregateAsync<BsonDocument>(pipeline);
-
                 var resultados = await cursor.ToListAsync();
 
                 var agrupados = resultados
                     .GroupBy(d => new
                     {
-                        UserId = d["_id"].AsBsonDocument.TryGetValue("user_id", out var userId) ? userId.AsString : "undefined",
-                        Nome = d["_id"].AsBsonDocument.TryGetValue("nome", out var nome) ? nome.AsString : "undefined"
+                        UserId = d["_id"]["user_id"].AsString,
+                        Nome = d["_id"]["nome"].AsString,
+                        CursoNome = d["_id"]["cursoNome"].AsString
                     })
                     .Select(g => new AlunoEngajamento
                     {
                         UserId = g.Key.UserId,
                         Nome = g.Key.Nome,
+                        CursoNome = g.Key.CursoNome,
                         Engajamento = CalcularLES(g.Select(x => new AcaoQuantidade
                         {
-                            Acao = x["_id"].AsBsonDocument.TryGetValue("acao", out var acao) ? acao.AsString : "undefined",
+                            Component = x["_id"]["component"].AsString,
+                            Target = x["_id"]["target"].AsString,
+                            Action = x["_id"]["action"].AsString,
                             Quantidade = x["qtd"].ToInt32()
-                        }).ToList())
+                        }).ToList(), config)
                     })
                     .ToList();
 
@@ -84,38 +95,46 @@ namespace Backend.Services
             }
 
 
-
-            private double CalcularLES(List<AcaoQuantidade> acoes)
+            private async Task<ConfiguracaoEngajamento> ObterConfiguracaoAsync()
             {
-                int totalVisualizacao = Soma(acoes, new List<string> { "viewed" });
-                int totalEntrega = Soma(acoes, new List<string> { "submitted", "uploaded" });
-                int totalForum = Soma(acoes, new List<string> { "created", "uploaded", "viewed" });
-                int totalAcesso = Soma(acoes, new List<string> { "viewed" });
-                int totalAvaliacao = Soma(acoes, new List<string> { "graded", "reviewed" });
-                int totalTempo = totalVisualizacao;
+                var config = await _configCollection.Find(_ => true).FirstOrDefaultAsync();
+                return config ?? new ConfiguracaoEngajamento(); // fallback para padrão se não encontrar
+            }
 
-                double notaVisualizacao = NotaPorFaixa(totalVisualizacao, 500);
-                double notaEntrega = NotaPorFaixa(totalEntrega, 20);
+            private double CalcularLES(List<AcaoQuantidade> acoes, ConfiguracaoEngajamento config)
+            {
+                int totalVisualizacoes = Soma(acoes, "core", "course", "viewed");
+                int totalForum = Soma(acoes, "mod_forum", "discussion", "created") +
+                                 Soma(acoes, "mod_forum", "discussion", "viewed");
+                int totalEntrega = Soma(acoes, "mod_assign", "submission", "submitted");
+                int totalQuestionario = Soma(acoes, "mod_quiz", "attempt", "submitted");
+                int totalAvaliacao = Soma(acoes, "mod_assign", "submission", "graded") +
+                                     Soma(acoes, "mod_quiz", "attempt", "graded");
+
+                double notaVisualizacao = NotaPorFaixa(totalVisualizacoes, 100);
                 double notaForum = NotaPorFaixa(totalForum, 30);
-                double notaAcesso = NotaPorFaixa(totalAcesso, 100);
-                double notaAvaliacao = NotaPorFaixa(totalAvaliacao, 20);
-                double notaTempo = NotaPorFaixa(totalTempo, 500);
+                double notaEntrega = NotaPorFaixa(totalEntrega, 20);
+                double notaQuiz = NotaPorFaixa(totalQuestionario, 10);
+                double notaAvaliacao = NotaPorFaixa(totalAvaliacao, 10);
 
                 double les =
-                    notaEntrega * 0.30 +
-                    notaVisualizacao * 0.20 +
-                    notaForum * 0.15 +
-                    notaTempo * 0.15 +
-                    notaAcesso * 0.10 +
-                    notaAvaliacao * 0.10;
+                    notaEntrega * config.PesoEntrega +
+                    notaForum * config.PesoForum +
+                    notaVisualizacao * config.PesoVisualizacao +
+                    notaQuiz * config.PesoQuiz +
+                    notaAvaliacao * config.PesoAvaliacao;
 
                 return Math.Round(les * 10, 2);
             }
 
-
-            private int Soma(List<AcaoQuantidade> acoes, List<string> nomes)
+            private int Soma(List<AcaoQuantidade> acoes, string component, string target, string action)
             {
-                return acoes.Where(a => nomes.Contains(a.Acao)).Sum(a => a.Quantidade);
+                return acoes
+                    .Where(a =>
+                        a.Component == component &&
+                        a.Target == target &&
+                        a.Action == action)
+                    .Sum(a => a.Quantidade);
             }
 
             private double NotaPorFaixa(int valor, int maxEsperado)
@@ -126,9 +145,7 @@ namespace Backend.Services
         }
 
 
-
-
-        public class UsuarioComAcoes
+            public class UsuarioComAcoes
         {
             public string UserId { get; set; }
             public string Nome { get; set; }
@@ -426,15 +443,11 @@ namespace Backend.Services
             return logs;
         }
 
-
         public async Task<string> GerarResumoAlunoIAAsync(string userId)
         {
-            // Pegar todos os logs do usuário
-            var match = new BsonDocument("$match", new BsonDocument("user_id", userId));
             var unwind = new BsonDocument("$unwind", "$logs");
             var matchLogs = new BsonDocument("$match", new BsonDocument("logs.user_id", userId));
             var replaceRoot = new BsonDocument("$replaceRoot", new BsonDocument("newRoot", "$logs"));
-
             var pipeline = new List<BsonDocument> { unwind, matchLogs, replaceRoot };
 
             var resultado = await _collection.AggregateAsync<BsonDocument>(pipeline);
@@ -443,7 +456,7 @@ namespace Backend.Services
             if (!logs.Any())
                 return "Usuário não encontrado ou sem interações.";
 
-            var nome = logs.FirstOrDefault()?.GetValue("name", BsonNull.Value)?.AsString ?? "Nome não disponível";
+            var nome = logs.FirstOrDefault()?["name"]?.AsString ?? "Nome não disponível";
 
             var cursoInteracoes = logs
                 .GroupBy(l => l["course_fullname"].AsString)
@@ -462,12 +475,8 @@ namespace Backend.Services
                 .Distinct()
                 .Count();
 
-            var primeiroAcesso = logs
-                .Min(l => DateTime.Parse(l["date"].AsString));
-
-            var ultimoAcesso = logs
-                .Max(l => DateTime.Parse(l["date"].AsString));
-
+            var primeiroAcesso = logs.Min(l => DateTime.Parse(l["date"].AsString));
+            var ultimoAcesso = logs.Max(l => DateTime.Parse(l["date"].AsString));
             var totalInteracoes = logs.Count;
 
             // Interações semanais
@@ -480,52 +489,46 @@ namespace Backend.Services
                     return $"{data.Year}-W{week:D2}";
                 })
                 .OrderBy(g => g.Key)
-                .Select(g =>
-                {
-                    var componentesSemana = g.GroupBy(l => l["component"].AsString)
-                                             .ToDictionary(c => c.Key, c => c.Count());
-                    return new
-                    {
-                        Semana = g.Key,
-                        Total = g.Count(),
-                        Componentes = componentesSemana
-                    };
-                });
+                .ToList();
 
-            // Construir o resumo
             var sb = new StringBuilder();
-            sb.AppendLine($"Nome do Aluno: {nome}");
-            sb.AppendLine($"User ID: {userId}");
-            sb.AppendLine($"Total de Interações: {totalInteracoes}");
-            sb.AppendLine($"Dias Ativos: {diasAtivos}");
-            sb.AppendLine($"Primeiro Acesso: {primeiroAcesso:yyyy-MM-dd}");
-            sb.AppendLine($"Último Acesso: {ultimoAcesso:yyyy-MM-dd}");
-            sb.AppendLine();
 
-            sb.AppendLine("Interações por nomeCurso:");
-            foreach (var curso in cursoInteracoes)
-                sb.AppendLine($"- {curso.Key}: {curso.Value} interações");
+            // Cabeçalho fixo padronizado
+            sb.Append($"nomeAluno: {nome} / userId: {userId} / Total de Interações: {totalInteracoes} / ");
+            sb.Append($"Dias Ativos: {diasAtivos} / Primeiro Acesso: {primeiroAcesso:yyyy-MM-dd} / Último Acesso: {ultimoAcesso:yyyy-MM-dd} / ");
 
-            sb.AppendLine("\nComponentes mais utilizados:");
-            foreach (var comp in componentes.OrderByDescending(c => c.Value).Take(5))
-                sb.AppendLine($"- {comp.Key}: {comp.Value}");
+            // Cursos
+            sb.Append("Interações por Curso: ");
+            sb.Append(string.Join(", ", cursoInteracoes.Select(c => $"{c.Key}:{c.Value}")));
+            sb.Append(" / ");
 
-            sb.AppendLine("\nAções mais realizadas:");
-            foreach (var acao in acoes.OrderByDescending(a => a.Value).Take(5))
-                sb.AppendLine($"- {acao.Key}: {acao.Value}");
+            // Componentes
+            sb.Append("Componentes mais usados: ");
+            sb.Append(string.Join(", ", componentes.OrderByDescending(c => c.Value).Take(5).Select(c => $"{c.Key}:{c.Value}")));
+            sb.Append(" / ");
 
-            sb.AppendLine("\nResumo Semanal:");
+            // Ações
+            sb.Append("Ações mais comuns: ");
+            sb.Append(string.Join(", ", acoes.OrderByDescending(a => a.Value).Take(5).Select(a => $"{a.Key}:{a.Value}")));
+            sb.Append(" / ");
+
+            // Resumo Semanal
+            sb.Append("Resumo Semanal: ");
             foreach (var semana in porSemana)
             {
-                sb.AppendLine($"Semana: {semana.Semana}");
-                sb.AppendLine($"  Total de Interações: {semana.Total}");
-                sb.AppendLine($"  Componentes:");
-                foreach (var comp in semana.Componentes)
-                    sb.AppendLine($"    - {comp.Key}: {comp.Value}");
+                var semanaLabel = semana.Key;
+                var total = semana.Count();
+                var comp = semana.GroupBy(l => l["component"].AsString)
+                                 .ToDictionary(c => c.Key, c => c.Count());
+
+                sb.Append($"{semanaLabel}({total}): ");
+                sb.Append(string.Join(", ", comp.Select(kv => $"{kv.Key}:{kv.Value}")));
+                sb.Append(" / ");
             }
 
             return sb.ToString();
         }
+
 
 
         public async Task<BsonDocument> GerarResumoAlunoAsync(string userId)
@@ -707,26 +710,26 @@ namespace Backend.Services
 
             var resumoStr = string.Join(" / ", new[]
             {
-        $"nomeCurso: {nomeCurso}",
-        $"Total de quantAlunos: {alunosUnicos}",
-        $"Total de Acessos: {totalAcessos}",
-        $"Média de Acessos por Aluno: {mediaAcessosPorAluno:F2}",
-        $"Dias Ativos: {diasAtivos}",
-        $"Duração Estimada do Uso: {duracaoDias} dias",
-        $"quantAlunos Ativos nos Últimos 30 dias: {alunosAtivos30Dias}",
-        $"quantAlunos Inativos >30 dias: {alunosInativos}",
-        $"% quantAlunos com >5 Acessos: {percentualAlunosEngajados:F2}%",
-        $"quantAlunos com apenas 1 acesso: {alunos1Acesso}",
-        $"quantAlunos sem Engajamento: {alunosSemEngajamento}",
-        $"Interações por Componente: {string.Join(", ", percentualPorComponente)}",
-        $"Ações Mais Comuns: {string.Join(", ", acoesMaisComuns)}",
-        $"Top Ações de Engajamento: {string.Join(", ", acoesEngajamentoTop)}",
-        $"Ações Passivas: {totalPassivas}, Ativas: {totalAtivas}",
-        $"quantAlunos com acesso em >1 dia: {alunosMultiplosDias}",
-        $"Top 3 Usuários com Mais Acessos: {string.Join(", ", topUsuarios)}",
-        $"Top 10 Piores Usuários (menos acessos): {string.Join(", ", pioresUsuarios)}",
-        $"Média de dias entre 1º e último acesso por aluno: {mediaDiasPermanencia:F2} dias"
-    });
+                $"nomeCurso: {nomeCurso}",
+                $"Total de quantAlunos: {alunosUnicos}",
+                $"Total de Acessos: {totalAcessos}",
+                $"Média de Acessos por Aluno: {mediaAcessosPorAluno:F2}",
+                $"Dias Ativos: {diasAtivos}",
+                $"Duração Estimada do Uso: {duracaoDias} dias",
+                $"quantAlunos Ativos nos Últimos 30 dias: {alunosAtivos30Dias}",
+                $"quantAlunos Inativos >30 dias: {alunosInativos}",
+                $"% quantAlunos com >5 Acessos: {percentualAlunosEngajados:F2}%",
+                $"quantAlunos com apenas 1 acesso: {alunos1Acesso}",
+                $"quantAlunos sem Engajamento: {alunosSemEngajamento}",
+                $"Interações por Componente: {string.Join(", ", percentualPorComponente)}",
+                $"Ações Mais Comuns: {string.Join(", ", acoesMaisComuns)}",
+                $"Top Ações de Engajamento: {string.Join(", ", acoesEngajamentoTop)}",
+                $"Ações Passivas: {totalPassivas}, Ativas: {totalAtivas}",
+                $"quantAlunos com acesso em >1 dia: {alunosMultiplosDias}",
+                $"Top 3 Usuários com Mais Acessos: {string.Join(", ", topUsuarios)}",
+                $"Top 10 Piores Usuários (menos acessos): {string.Join(", ", pioresUsuarios)}",
+                $"Média de dias entre 1º e último acesso por aluno: {mediaDiasPermanencia:F2} dias "
+            });
 
             return resumoStr;
         }

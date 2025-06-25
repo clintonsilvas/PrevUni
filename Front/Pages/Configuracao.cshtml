@@ -75,14 +75,84 @@
 
     <hr class="hr_trac" />
 
-    <div class="linha" style="align-items: baseline">
-        <img src="~/css/icons/chave.svg" />
-        <div class="coluna" style="gap: 10px">
-            <h4 class="corPreta50B">Chave de API da Inteligência Artificial.</h4>
-            <span class="SubH5 corCinza60B">Chave Atual: AIzaSyC9ai_WOCBHL2bOK3XlWRsjws2_qMxAFVQ</span>
-            <button class="btn_config_branco">Editar</button>
-        </div>
+    <div class="coluna" style="gap: 10px">
+        <h4 class="corPreta50B">Chave de API da Inteligência Artificial.</h4>
+        <span class="SubH5 corCinza60B" id="chaveAtual">Chave Atual: ****</span>
+
+        <input type="text" id="novaChave" placeholder="Nova chave API" style="display:none;" />
+        <button class="btn_config_branco" onclick="editarChave()">Editar</button>
+        <button class="btn_config_branco" onclick="salvarChave()" style="display:none;" id="btnSalvar">Salvar</button>
     </div>
+
+
+    <hr class="hr_trac" />
+
+    <div class="coluna" style="gap: 10px">
+        <h4 class="corPreta50B">Texto de Configuração da IA</h4>
+        <textarea id="textoIa" style="width: 100%; height: 200px" placeholder="Texto que será enviado junto com os dados do aluno..."></textarea>
+        <button class="btn_config_branco" onclick="salvarTextoIA()">Salvar Texto</button>
+    </div>
+    <script>
+            window.onload = async function () {
+            try {
+                const res = await fetch('https://localhost:7232/api/Configuracao/obter-api-key');
+                const data = await res.json();
+
+                // Opcional: mostrar só os 5 primeiros e 5 últimos caracteres
+                const chave = data.chave;
+                const chaveMask = chave.substring(0, 5) + '...' + chave.slice(-5);
+
+                document.getElementById('chaveAtual').innerText = 'Chave Atual: ' + chaveMask;
+            } catch (e) {
+                document.getElementById('chaveAtual').innerText = 'Erro ao carregar chave.';
+                console.error(e);
+            }
+            try {
+                const resTexto = await fetch('https://localhost:7232/api/Configuracao/obter-texto-ia');
+                const dataTexto = await resTexto.json();
+                document.getElementById('textoIa').value = dataTexto.texto;
+            } catch (e) {
+                console.error('Erro ao carregar texto IA', e);
+            }
+        };
+        function editarChave() {
+            document.getElementById('novaChave').style.display = 'inline';
+            document.getElementById('btnSalvar').style.display = 'inline';
+        }
+
+        async function salvarChave() {
+            const chave = document.getElementById('novaChave').value;
+
+            const res = await fetch('https://localhost:7232/api/Configuracao/atualizar-api-key', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ novaChave: chave })
+            });
+
+            if (res.ok) {
+                document.getElementById('chaveAtual').innerText = 'Chave Atual: ' + chave;
+                alert('Chave atualizada com sucesso!');
+            } else {
+                alert('Erro ao atualizar chave.');
+            }
+        }
+            async function salvarTextoIA() {
+            const texto = document.getElementById('textoIa').value;
+
+            const res = await fetch('https://localhost:7232/api/Configuracao/atualizar-texto-ia', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ texto })
+            });
+
+            if (res.ok) {
+                alert('Texto atualizado com sucesso!');
+            } else {
+                alert('Erro ao atualizar texto.');
+            }
+        }
+    </script>
+
 
 
     <hr class="hr_trac" />
@@ -99,6 +169,9 @@
             <button class="btn_config_branco">Editar</button>
         </div>
     </div>
+
+
+
 
 
 </div>

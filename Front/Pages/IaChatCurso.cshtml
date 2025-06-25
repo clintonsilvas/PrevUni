@@ -1,80 +1,153 @@
 ﻿@page "{cursoNome}"
 @model Front.Pages.IaChatCursoModel
 @{
-    ViewData["Title"] = "Chat com IA";
-}
-@{
+    ViewData["Title"] = "Conversa sobre curso";
     ViewData["OcultarSombra"] = true;
 }
 
-
-<header class="linha welcome"
-        style="
-            justify-content: space-between;
-            width: 100%;
-            height: fit-content;
-">
+<header class="linha welcome" style="justify-content: space-between; width: 100%; height: fit-content;">
     <div class="coluna" style="--gap: 10px">
         <span class="SubH1 corAzul">@Model.CursoNome</span>
         <h1 class="corPreta40B">Inteligência Artificial</h1>
     </div>
 </header>
 
-@if (Model.DadosCurso != null)
-{
-    <div class="card-curso" style="padding: 20px; background-color: #f9f9f9; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;">
-        <h3 style="margin-bottom: 10px;">📄 Dados do Curso</h3>
-        <ul style="list-style: none; padding: 0;">
-            @foreach (var item in Model.DadosCurso)
-            {
-                <li style="margin-bottom: 6px;">
-                    <strong>@item.Key:</strong> @item.Value
-                </li>
-            }
-        </ul>
-    </div>
-}
-
-@* 
-@if (Model.DadosAluno != null)
-{
-    <div class="card-aluno" style="padding: 20px; background-color: #f9f9f9; border-radius: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); margin-bottom: 20px;">
-        <h3 style="margin-bottom: 10px;">📄 Dados do Aluno</h3>
-        <ul style="list-style: none; padding: 0;">
-            @foreach (var item in Model.DadosAluno)
-            {
-                <li style="margin-bottom: 6px;">
-                    <strong>@item.Key:</strong> @item.Value
-                </li>
-            }
-        </ul>
-    </div>
-} *@
-
-<div class="dashboard coluna"
-     style="--gap: 10px; height: 100%; flex-direction: column-reverse; z-index:1">
-    
-    @if (Model.Resposta != null)
-    {
-        <div class="resposta">
-            <h3>Resposta da IA:</h3>
-            <pre>@Model.Resposta</pre>
-        </div>
+<style>
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: 70vh;
+        max-height: 70vh;
+        overflow-y: auto;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background-color: #fff;
     }
 
-    <form method="post">
+    .chat-bar {
+        margin-top: 10px;
+    }
 
-        <div class="ImputIA linha" onclick="document.getElementById('IaPergunta').focus()">
-            <img src="~/css/icons/estrelaIA.svg"
-                 alt="ÍconeHome"
-                 width="18"
-                 height="18" />
-            <input asp-for="Prompt"
-                   type="text"
-                   id="IaPergunta"
-                   placeholder="Pergunte à Inteligência Artificial!" />
-            <button type="submit">Gerar</button>
-        </div>
+    .msg {
+        margin-bottom: 10px;
+        white-space: pre-wrap; /* para quebrar linha no <pre> */
+    }
 
-    </form>
+    .msg.pergunta {
+        background: #e0f0ff;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    .msg.resposta {
+        background: #f2f2f2;
+        padding: 10px;
+        border-radius: 8px;
+    }
+
+    button[disabled] {
+        opacity: 0.6;
+        cursor: wait;
+    }
+</style>
+
+<div class="dashboard coluna" style="gap: 10px; height: 100%; flex-direction: column;">
+    <div class="chat-container" id="chatContainer">
+        @if (Model.Historico != null && Model.Historico.Any())
+        {
+            foreach (var msg in Model.Historico)
+            {
+                <div class="msg pergunta">
+                    <strong>Você:</strong>
+                    <pre>@msg.Pergunta</pre>
+                </div>
+                <div class="msg resposta" data-resposta="@msg.Resposta">
+                    <strong>IA:</strong>
+                    <pre class="ia-text"></pre>
+                </div>
+            }
+        }
+    </div>
+
+    <div class="chat-bar">
+        <form id="formChat" method="post">
+            <div class="ImputIA linha" onclick="document.getElementById('IaPergunta').focus()">
+                <img src="~/css/icons/estrelaIA.svg" alt="ÍconeHome" width="18" height="18" />
+                <input asp-for="Prompt"
+                       type="text"
+                       id="IaPergunta"
+                       placeholder="Pergunte à Inteligência Artificial!"
+                       autocomplete="off"
+                       required />
+                <button id="btnEnviar" type="submit">Gerar</button>
+            </div>
+        </form>
+    </div>
 </div>
+
+<script>
+    // Mapeamento simples para emojis via texto (adicione mais conforme quiser)
+    const emojiMap = {
+        ':smile:': '😄',
+        ':sad:': '😢',
+        ':heart:': '❤️',
+        ':thumbsup:': '👍',
+        ':star:': '⭐',
+        ':warning:': '⚠️'
+    };
+
+    function replaceEmojis(text) {
+        return text.replace(/:\w+:/g, match => emojiMap[match] || match);
+    }
+
+    // Renderização simples de markdown (negrito, itálico, links)
+    function renderMarkdown(text) {
+        let t = text
+            .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')  // **negrito**
+            .replace(/\*(.+?)\*/g, '<em>$1</em>')              // *itálico*
+            .replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" target="_blank">$1</a>'); // [texto](url)
+        return t;
+    }
+
+    // Animação de digitação letra a letra na resposta da IA
+    async function typeWriter(element, text, delay = 20) {
+        element.innerHTML = '';
+        text = replaceEmojis(text);
+        text = renderMarkdown(text);
+        // Remove tags para digitar apenas texto puro
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = text;
+        const plainText = tempDiv.textContent || tempDiv.innerText || '';
+        for (let i = 0; i <= plainText.length; i++) {
+            element.textContent = plainText.substring(0, i);
+            await new Promise(r => setTimeout(r, delay));
+        }
+        // Agora renderiza markdown e emojis de verdade
+        element.innerHTML = text;
+    }
+
+    window.onload = () => {
+        const container = document.getElementById("chatContainer");
+        if (container) {
+            container.scrollTop = container.scrollHeight;
+        }
+
+        // Faz a animação para todas respostas carregadas
+        document.querySelectorAll('.msg.resposta').forEach(div => {
+            const pre = div.querySelector('.ia-text');
+            const texto = div.getAttribute('data-resposta') || '';
+            typeWriter(pre, texto, 10);
+        });
+    };
+
+    const form = document.getElementById('formChat');
+    const btnEnviar = document.getElementById('btnEnviar');
+    const input = document.getElementById('IaPergunta');
+    const chatContainer = document.getElementById('chatContainer');
+
+    form.addEventListener('submit', e => {
+        btnEnviar.disabled = true;
+        btnEnviar.textContent = 'Carregando...';
+    });
+</script>
