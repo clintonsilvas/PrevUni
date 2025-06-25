@@ -24,6 +24,10 @@
                 <label for="favCurso">
                     <img id="imgFavCurso" src="@Url.Content(FavoritoService.EhFavorito(@Model.User.user_id) ? "~/css/icons/estrela.svg" : "~/css/icons/estrela_inativa.svg")" height="20" />
                 </label>
+                <button id="exportToPdfButton"
+                        style="margin-left: 20px; padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Exportar para PDF
+                </button>
             </div>
 
         </div>
