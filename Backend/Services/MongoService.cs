@@ -132,13 +132,12 @@ namespace Backend.Services
             {
                 // Conta quantas vezes o aluno fez cada tipo de ação
                 int totalVisualizacoes = Soma(acoes, "core", "course", "viewed");
-                int totalForum = Soma(acoes, "mod_forum", "discussion", "created") +
-                                 Soma(acoes, "mod_forum", "discussion", "viewed");
-                int totalEntrega = Soma(acoes, "mod_assign", "submission", "submitted");
+                int totalForum = Soma(acoes, "mod_forum", "discussion", "created") + Soma(acoes, "mod_forum", "discussion", "viewed");
+                int totalEntrega = Soma(acoes, "core", "user", "graded");
                 int totalQuestionario = Soma(acoes, "mod_quiz", "attempt", "submitted");
-                int totalAvaliacao = Soma(acoes, "mod_assign", "submission", "graded") +
-                                     Soma(acoes, "mod_quiz", "attempt", "graded");
+                int totalAvaliacao = Soma(acoes, "mod_assign", "submission", "graded") + Soma(acoes, "mod_quiz", "attempt", "graded");
 
+               
                 // Converte essas quantidades em uma nota de 0 a 10 (limitada por um máximo esperado)
                 double notaVisualizacao = NotaPorFaixa(totalVisualizacoes, 100);
                 double notaForum = NotaPorFaixa(totalForum, 30);
