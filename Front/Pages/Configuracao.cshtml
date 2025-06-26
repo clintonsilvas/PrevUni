@@ -3,6 +3,24 @@
 @{
     ViewData["Title"] = "Configuração de Importação";
 }
+
+<style>
+    .input-grande {
+        width: 100%;
+        min-height: 180px;
+        padding: 12px;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        resize: vertical;
+    }
+
+    .input-peso {
+        width: 60px;
+        padding: 5px;
+    }
+</style>
+
 <header class="linha welcome" style="justify-content: space-between; height: fit-content">
     <div class="coluna" style="--gap: 10px">
         <span class="SubH1 corAzul">Bem Vindo(a)</span>
@@ -19,10 +37,9 @@
             <h4 class="corPreta50B">Importar dados dos alunos.</h4>
             <span class="SubH5 corCinza60B">
                 Atualize os dados dos alunos. Este processo pode durar algum tempo, portanto não feche esta página após iniciar.
-            </span>            
+            </span>
 
             <div class="linha" style="align-items: center">
-                
                 <button class="btn_config_azul" onclick="iniciarImportacao()" id="btnIniciarImportacao">Iniciar Importação</button>
 
                 <div id="progressBarContainer" class="progress-container" style="display:none;">
@@ -33,15 +50,10 @@
 
                 <p class="SubH5 corCinza60B statusMensagem"></p>
 
-                
-
                 @if (Model.CurrentStatus != null && Model.CurrentStatus.TotalUsuarios > 0)
                 {
                     var progressPercentage = (Model.CurrentStatus.ProgressoAtual / (double)Model.CurrentStatus.TotalUsuarios) * 100;
-                    if (double.IsNaN(progressPercentage) || double.IsInfinity(progressPercentage) || progressPercentage < 0)
-                        progressPercentage = 0;
-                    else if (progressPercentage > 100)
-                        progressPercentage = 100;
+                    progressPercentage = Math.Clamp(progressPercentage, 0, 100);
 
                     <div id="progressBarContainer" class="progress-container">
                         <div id="progressBar" class="progress-bar" style="width: @(progressPercentage.ToString("F0"))%;">
@@ -73,31 +85,26 @@
     <!-- TEXTO IA -->
     <div class="coluna" style="gap: 10px">
         <h4 class="corPreta50B">Texto de Configuração da IA</h4>
-        <textarea id="textoIa" style="width: 100%; height: 200px" placeholder="Texto que será enviado junto com os dados do aluno..."></textarea>
+        <textarea id="textoIa" class="input-grande" placeholder="Texto que será enviado junto com os dados do aluno..."></textarea>
         <button class="btn_config_branco" onclick="salvarTextoIA()">Salvar Texto</button>
     </div>
 
     <hr class="hr_trac" />
 
     <!-- PESOS DE AVALIAÇÃO -->
-    <!-- PESOS DE AVALIAÇÃO -->
     <div class="linha" style="align-items: baseline">
         <img src="~/css/icons/avaliacao.svg" />
         <div class="coluna" style="gap: 10px; width: 100%;">
-            <h4 class="corPreta50B">Pesos de Avaliação.</h4>
+            <h4 class="corPreta50B">Pesos de Avaliação (1 a 10)</h4>
 
-            <!-- Modo Visualização -->
-            <div id="pesosVisualizacao" class="SubH5 corCinza60B">
-                Carregando...
-            </div>
+            <div id="pesosVisualizacao" class="SubH5 corCinza60B">Carregando...</div>
 
-            <!-- Modo Edição -->
             <div id="pesosEdicao" style="display:none; gap: 5px" class="coluna">
-                <label>Atividades Concluídas: <input type="number" id="pesoEntrega" min="0" max="1" step="0.01" /></label>
-                <label>Fóruns Postados: <input type="number" id="pesoForum" min="0" max="1" step="0.01" /></label>
-                <label>Quizzes Respondidos: <input type="number" id="pesoQuiz" min="0" max="1" step="0.01" /></label>
-                <label>Visualizações: <input type="number" id="pesoVisualizacao" min="0" max="1" step="0.01" /></label>
-                <label>Avaliações Corrigidas: <input type="number" id="pesoAvaliacao" min="0" max="1" step="0.01" /></label>
+                <label>Atividades Concluídas: <input type="number" class="input-peso" id="pesoEntrega" min="1" max="10" step="1" /></label>
+                <label>Fóruns Postados: <input type="number" class="input-peso" id="pesoForum" min="1" max="10" step="1" /></label>
+                <label>Quizzes Respondidos: <input type="number" class="input-peso" id="pesoQuiz" min="1" max="10" step="1" /></label>
+                <label>Visualizações: <input type="number" class="input-peso" id="pesoVisualizacao" min="1" max="10" step="1" /></label>
+                <label>Avaliações Corrigidas: <input type="number" class="input-peso" id="pesoAvaliacao" min="1" max="10" step="1" /></label>
                 <button onclick="salvarPesos()" class="btn_config_branco">Salvar</button>
             </div>
 
@@ -107,119 +114,169 @@
 </div>
 
 @section Scripts {
-<script>
-    let importacaoId = "@Model.ImportacaoId";
+    <script>
+        let importacaoId = "@Model.ImportacaoId";
         let intervaloStatus = null;
+        let pesos = {};
 
-    window.onload = async function () {
-        await carregarChaveIA();
-        await carregarTextoIA();
-        await carregarPesos();
-
-        if (importacaoId) {
-            checkStatus(importacaoId);
-        }
-    };
-
-    async function carregarChaveIA() {
-        try {
-            const res = await fetch('https://localhost:7232/api/Configuracao/obter-api-key');
-            const data = await res.json();
-            const chave = data.chave;
-            const chaveMask = chave.substring(0, 5) + '...' + chave.slice(-5);
-            document.getElementById('chaveAtual').innerText = 'Chave Atual: ' + chaveMask;
-        } catch (e) {
-            document.getElementById('chaveAtual').innerText = 'Erro ao carregar chave.';
-            console.error(e);
-        }
-    }
-
-    async function carregarTextoIA() {
-        try {
-            const res = await fetch('https://localhost:7232/api/Configuracao/obter-texto-ia');
-            const data = await res.json();
-            document.getElementById('textoIa').value = data.texto;
-        } catch (e) {
-            console.error('Erro ao carregar texto IA', e);
-        }
-    }
-
-    function editarChave() {
-        document.getElementById('novaChave').style.display = 'inline';
-        document.getElementById('btnSalvar').style.display = 'inline';
-    }
-
-    async function salvarChave() {
-        const chave = document.getElementById('novaChave').value;
-        const res = await fetch('https://localhost:7232/api/Configuracao/atualizar-api-key', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ novaChave: chave })
-        });
-
-        if (res.ok) {
-            alert('Chave atualizada com sucesso!');
+        window.onload = async function () {
             await carregarChaveIA();
-        } else {
-            alert('Erro ao atualizar chave.');
-        }
-    }
+            await carregarTextoIA();
+            await carregarPesos();
 
-    async function salvarTextoIA() {
-        const texto = document.getElementById('textoIa').value;
-        const res = await fetch('https://localhost:7232/api/Configuracao/atualizar-texto-ia', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ texto })
-        });
+            if (importacaoId) checkStatus(importacaoId);
+        };
 
-        if (res.ok) {
-            alert('Texto atualizado com sucesso!');
-        } else {
-            alert('Erro ao atualizar texto.');
-        }
-    }
-
-            async function iniciarImportacao() {
+        async function carregarChaveIA() {
             try {
-                const botao = document.getElementById('btnIniciarImportacao');
-                botao.disabled = true;
-                botao.innerText = 'Importando...';
+                const res = await fetch('https://localhost:7232/api/Configuracao/obter-api-key');
+                const data = await res.json();
+                const chave = data.chave;
+                const chaveMask = chave.substring(0, 5) + '...' + chave.slice(-5);
+                document.getElementById('chaveAtual').innerText = 'Chave Atual: ' + chaveMask;
+            } catch (e) {
+                document.getElementById('chaveAtual').innerText = 'Erro ao carregar chave.';
+            }
+        }
 
-                const res = await fetch('https://localhost:7232/api/Importacao/iniciar-com-mudanca', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: ''
-                });
+        async function carregarTextoIA() {
+            try {
+                const res = await fetch('https://localhost:7232/api/Configuracao/obter-texto-ia');
+                const data = await res.json();
+                document.getElementById('textoIa').value = data.texto;
+            } catch (e) {
+                console.error('Erro ao carregar texto IA', e);
+            }
+        }
 
-                if (!res.ok) {
-                    alert('Erro ao iniciar importação');
-                    botao.disabled = false;
-                    botao.innerText = 'Iniciar Importação';
+        function editarChave() {
+            document.getElementById('novaChave').style.display = 'inline';
+            document.getElementById('btnSalvar').style.display = 'inline';
+        }
+
+        async function salvarChave() {
+            const chave = document.getElementById('novaChave').value;
+            const res = await fetch('https://localhost:7232/api/Configuracao/atualizar-api-key', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ novaChave: chave })
+            });
+
+            if (res.ok) {
+                alert('Chave atualizada com sucesso!');
+                await carregarChaveIA();
+            } else {
+                alert('Erro ao atualizar chave.');
+            }
+        }
+
+        async function salvarTextoIA() {
+            const texto = document.getElementById('textoIa').value;
+            const res = await fetch('https://localhost:7232/api/Configuracao/atualizar-texto-ia', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ texto })
+            });
+
+            if (res.ok) {
+                alert('Texto atualizado com sucesso!');
+            } else {
+                alert('Erro ao atualizar texto.');
+            }
+        }
+
+        async function carregarPesos() {
+            try {
+                const res = await fetch('https://localhost:7232/api/Configuracao/obter-pesos-avaliacao');
+                if (!res.ok) throw new Error('Erro ao obter pesos');
+                pesos = await res.json();
+
+                document.getElementById('pesosVisualizacao').innerHTML = `
+                    Atividades Concluídas: ${pesos.pesoEntrega}<br />
+                    Fóruns Postados: ${pesos.pesoForum}<br />
+                    Quizzes Respondidos: ${pesos.pesoQuiz}<br />
+                    Visualizações: ${pesos.pesoVisualizacao}<br />
+                    Avaliações Corrigidas: ${pesos.pesoAvaliacao}
+                `;
+
+                document.getElementById('pesoEntrega').value = pesos.pesoEntrega;
+                document.getElementById('pesoForum').value = pesos.pesoForum;
+                document.getElementById('pesoQuiz').value = pesos.pesoQuiz;
+                document.getElementById('pesoVisualizacao').value = pesos.pesoVisualizacao;
+                document.getElementById('pesoAvaliacao').value = pesos.pesoAvaliacao;
+            } catch (e) {
+                document.getElementById('pesosVisualizacao').innerText = 'Erro ao carregar pesos.';
+            }
+        }
+
+        function alternarEdicaoPesos() {
+            document.getElementById('pesosEdicao').style.display = 'flex';
+            document.getElementById('pesosVisualizacao').style.display = 'none';
+            document.getElementById('btnEditarPesos').style.display = 'none';
+        }
+
+        async function salvarPesos() {
+            const payload = {
+                PesoEntrega: parseInt(document.getElementById('pesoEntrega').value),
+                PesoForum: parseInt(document.getElementById('pesoForum').value),
+                PesoQuiz: parseInt(document.getElementById('pesoQuiz').value),
+                PesoVisualizacao: parseInt(document.getElementById('pesoVisualizacao').value),
+                PesoAvaliacao: parseInt(document.getElementById('pesoAvaliacao').value)
+            };
+
+            for (let key in payload) {
+                if (payload[key] < 1 || payload[key] > 10 || isNaN(payload[key])) {
+                    alert(`O valor de "${key}" deve ser entre 1 e 10.`);
                     return;
                 }
+            }
+
+            const res = await fetch('https://localhost:7232/api/Configuracao/atualizar-pesos-avaliacao', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+
+            if (res.ok) {
+                alert('Pesos atualizados com sucesso!');
+                await carregarPesos();
+                document.getElementById('pesosEdicao').style.display = 'none';
+                document.getElementById('pesosVisualizacao').style.display = 'block';
+                document.getElementById('btnEditarPesos').style.display = 'inline-block';
+            } else {
+                alert('Erro ao salvar os pesos.');
+            }
+        }
+
+        async function iniciarImportacao() {
+            const botao = document.getElementById('btnIniciarImportacao');
+            botao.disabled = true;
+            botao.innerText = 'Importando...';
+
+            try {
+                const res = await fetch('https://localhost:7232/api/Importacao/iniciar-com-mudanca', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (!res.ok) throw new Error('Erro ao iniciar importação');
 
                 const data = await res.json();
                 importacaoId = data.importacaoId;
 
-                if (!importacaoId) {
-                    alert('ID da importação não retornado');
-                    botao.disabled = false;
-                    botao.innerText = 'Iniciar Importação';
-                    return;
-                }
-
                 document.getElementById('progressBarContainer').style.display = 'block';
                 document.querySelector('.statusMensagem').innerText = 'Importação iniciada...';
-
                 acompanharStatus();
-
             } catch (e) {
                 alert('Erro: ' + e.message);
-                const botao = document.getElementById('btnIniciarImportacao');
                 botao.disabled = false;
                 botao.innerText = 'Iniciar Importação';
             }
+        }
+
+        function checkStatus(id) {
+            importacaoId = id;
+            acompanharStatus();
         }
 
         function acompanharStatus() {
@@ -231,129 +288,35 @@
                     if (!res.ok) throw new Error('Falha ao obter status');
 
                     const data = await res.json();
-
                     const progresso = document.getElementById('progressBar');
                     const mensagem = document.querySelector('.statusMensagem');
 
                     let percent = 0;
                     if (data.totalUsuarios > 0) {
                         percent = (data.progressoAtual / data.totalUsuarios) * 100;
-                        if (percent > 100) percent = 100;
-                        if (percent < 0) percent = 0;
+                        percent = Math.min(100, Math.max(0, percent));
                     }
 
                     progresso.style.width = percent.toFixed(0) + '%';
                     progresso.innerHTML = `<span>${percent.toFixed(0)}%</span>`;
-
                     mensagem.innerText = `Status: ${data.status}. Progresso: ${data.progressoAtual} de ${data.totalUsuarios}`;
 
                     if (data.status === "Concluída" || data.status === "Erro") {
                         clearInterval(intervaloStatus);
+                        mensagem.innerText = data.status === "Concluída"
+                            ? "Importação finalizada com sucesso!"
+                            : "Erro na importação: " + data.mensagem;
 
-                        if (data.status === "Concluída") {
-                            mensagem.innerText = "Importação finalizada com sucesso!";
-                        } else {
-                            mensagem.innerText = "Erro na importação: " + data.mensagem;
-                        }
-
-                        // Reabilitar botão e resetar texto
                         const botao = document.getElementById('btnIniciarImportacao');
                         botao.disabled = false;
                         botao.innerText = 'Iniciar Importação';
-
-                        // Opcional: esconder barra de progresso se quiser
-                        // document.getElementById('progressBarContainer').style.display = 'none';
                     }
                 } catch (e) {
                     console.error('Erro ao buscar status:', e);
                     clearInterval(intervaloStatus);
                     document.querySelector('.statusMensagem').innerText = 'Erro ao buscar status.';
-
-                    const botao = document.getElementById('btnIniciarImportacao');
-                    botao.disabled = false;
-                    botao.innerText = 'Iniciar Importação';
                 }
             }, 3000);
         }
-        // Função para carregar os pesos de avaliação e mostrar na tela
-        async function carregarPesos() {
-            try {
-                const res = await fetch('https://localhost:7232/api/Configuracao/obter-pesos-avaliacao');
-                if (!res.ok) throw new Error('Erro ao obter pesos de avaliação');
-                const pesos = await res.json();
-
-                document.getElementById('pesosVisualizacao').innerHTML = `
-                    Atividades Concluídas: ${Math.round(pesos.pesoEntrega || 0)}<br />
-                    Fóruns Postados: ${Math.round(pesos.pesoForum || 0)}<br />
-                    Quizzes Respondidos: ${Math.round(pesos.pesoQuiz || 0)}<br />
-                    Visualizações: ${Math.round(pesos.pesoVisualizacao || 0)}<br />
-                    Avaliações Corrigidas: ${Math.round(pesos.pesoAvaliacao || 0)}
-                `;
-
-
-                // Também preenche os inputs de edição se estiverem visíveis
-                if (document.getElementById('pesoEntrega')) document.getElementById('pesoEntrega').value = pesos.pesoEntrega || 0;
-                if (document.getElementById('pesoForum')) document.getElementById('pesoForum').value = pesos.pesoForum || 0;
-                if (document.getElementById('pesoQuiz')) document.getElementById('pesoQuiz').value = pesos.pesoQuiz || 0;
-                if (document.getElementById('pesoVisualizacao')) document.getElementById('pesoVisualizacao').value = pesos.pesoVisualizacao || 0;
-                if (document.getElementById('pesoAvaliacao')) document.getElementById('pesoAvaliacao').value = pesos.pesoAvaliacao || 0;
-
-            } catch (e) {
-                console.error('Erro ao carregar pesos:', e);
-                document.getElementById('pesosVisualizacao').innerText = 'Erro ao carregar pesos.';
-            }
-        }
-
-                function alternarEdicaoPesos() {
-            // Mostra o formulário de edição
-            document.getElementById('pesosEdicao').style.display = 'flex';
-            // Esconde a visualização estática
-            document.getElementById('pesosVisualizacao').style.display = 'none';
-            // Esconde o botão editar enquanto estiver no modo edição
-            document.getElementById('btnEditarPesos').style.display = 'none';
-
-            // Preenche os inputs com os valores atuais (variável pesos deve estar atualizada)
-            document.getElementById('pesoEntrega').value = pesos.pesoEntrega;
-            document.getElementById('pesoForum').value = pesos.pesoForum;
-            document.getElementById('pesoQuiz').value = pesos.pesoQuiz;
-            document.getElementById('pesoVisualizacao').value = pesos.pesoVisualizacao;
-            document.getElementById('pesoAvaliacao').value = pesos.pesoAvaliacao;
-        }
-        
-        async function salvarPesos() {
-            try {
-                const payload = {
-                    PesoEntrega: parseFloat(document.getElementById('pesoEntrega').value),
-                    PesoForum: parseFloat(document.getElementById('pesoForum').value),
-                    PesoQuiz: parseFloat(document.getElementById('pesoQuiz').value),
-                    PesoVisualizacao: parseFloat(document.getElementById('pesoVisualizacao').value),
-                    PesoAvaliacao: parseFloat(document.getElementById('pesoAvaliacao').value)
-                };
-
-                const res = await fetch('https://localhost:7232/api/Configuracao/atualizar-pesos-avaliacao', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-
-                if (!res.ok) throw new Error('Falha ao salvar pesos');
-
-                alert('Pesos atualizados com sucesso!');
-
-                // Após salvar, recarrega os pesos para atualizar a visualização
-                await carregarPesos();
-
-                // Oculta o modo edição e mostra o modo visualização
-                document.getElementById('pesosEdicao').style.display = 'none';
-                document.getElementById('pesosVisualizacao').style.display = 'block';
-                document.getElementById('btnEditarPesos').style.display = 'inline-block';
-
-            } catch (e) {
-                alert('Erro ao salvar os pesos: ' + e.message);
-                console.error(e);
-            }
-        }
-
-
-</script>
+    </script>
 }

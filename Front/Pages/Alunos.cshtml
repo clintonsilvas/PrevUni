@@ -20,38 +20,20 @@
     </div>
 
     <div class="tabela-card QuadroCards" style="padding: 0; overflow: hidden">
-        <table id="tabelaAlunos">
-            @{var acoesFixas = new Acoes().ListarAcoes();}
-             <thead>
+        <table id="tabelaAlunos" style="width: 100%; border-collapse: collapse">
+            <thead>
                 <tr>
-                    <th>
+                    <th style="width: 5%; text-align: left;">
                         <span class="bot_tab">#</span>
                     </th>
-                    <th>
+                    <th style="width: 45%; text-align: left;">
                         <button onclick="ordenarTabela(1)" class="bot_tab">
                             Nome <img src="~/css/icons/Ordenar.svg" />
                         </button>
                     </th>
-                    <th>
+                    <th style="width: 50%; text-align: left;">
                         <button onclick="ordenarTabela(2)" class="bot_tab">
                             Último Acesso <img src="~/css/icons/Ordenar.svg" />
-                        </button>
-                    </th>
-                    @{
-                        int ind = 3;
-                    }
-                    @foreach (var ac in acoesFixas)
-                    {
-                        <th>
-                            <button onclick="ordenarTabela(@ind)" class="bot_tab">
-                                @ac.nome_acao <img src="~/css/icons/Ordenar.svg" />
-                            </button>
-                        </th>
-                        ind++;
-                    }
-                    <th>
-                        <button onclick="ordenarTabela(@ind)" class="bot_tab">
-                            Engajamento <img src="~/css/icons/Ordenar.svg" />
                         </button>
                     </th>
                 </tr>
@@ -60,15 +42,14 @@
                 @{
                     System.Globalization.CultureInfo.CurrentCulture = new System.Globalization.CultureInfo("pt-BR");
                     int i = 0;
-                    
+
                     foreach (Usuario al in Model.users.OrderBy(c => c.name))
                     {
                         i++;
                         <tr>
                             <td>@i</td>
                             <td>
-                                <a asp-page="/PerfilAluno"
-                                   asp-route-userId="@al.user_id">
+                                <a asp-page="/PerfilAluno" asp-route-userId="@al.user_id">
                                     @al.name
                                 </a>
                             </td>
@@ -79,16 +60,26 @@
                                 }
                                 @dataFormatada
                             </td>
-
-
-
-
-
-
                         </tr>
                     }
                 }
             </tbody>
         </table>
     </div>
+
 </div>
+<script>
+    function filtrarCursos() {
+        const filtro = document.getElementById("filtroCursos").value.toLowerCase();
+        const linhas = document.querySelectorAll("#tabelaAlunos tbody tr");
+
+        linhas.forEach(linha => {
+            const nome = linha.querySelector("td:nth-child(2)")?.innerText.toLowerCase();
+            if (nome.includes(filtro)) {
+                linha.style.display = "";
+            } else {
+                linha.style.display = "none";
+            }
+        });
+    }
+</script>
