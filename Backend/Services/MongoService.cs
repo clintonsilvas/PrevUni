@@ -2,6 +2,7 @@
 using Backend.Services;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Globalization;
 using System.Text;
 using System.Text.Json;
 
@@ -493,79 +494,83 @@ namespace Backend.Services
             var pipeline = new List<BsonDocument> { unwind, matchLogs, replaceRoot };
 
             var resultado = await _collection.AggregateAsync<BsonDocument>(pipeline);
-            var logs = await resultado.ToListAsync();
+            var raw = await resultado.ToListAsync();
 
-            if (!logs.Any())
+            if (raw == null || raw.Count == 0)
                 return "Usuário não encontrado ou sem interações.";
 
-            var nome = logs.FirstOrDefault()?["name"]?.AsString ?? "Nome não disponível";
+            var cal = CultureInfo.CurrentCulture.Calendar;
 
-            var cursoInteracoes = logs
-                .GroupBy(l => l["course_fullname"].AsString)
-                .ToDictionary(g => g.Key, g => g.Count());
-
-            var componentes = logs
-                .GroupBy(l => l["component"].AsString)
-                .ToDictionary(g => g.Key, g => g.Count());
-
-            var acoes = logs
-                .GroupBy(l => l["action"].AsString)
-                .ToDictionary(g => g.Key, g => g.Count());
-
-            var diasAtivos = logs
-                .Select(l => DateTime.Parse(l["date"].AsString).Date)
-                .Distinct()
-                .Count();
-
-            var primeiroAcesso = logs.Min(l => DateTime.Parse(l["date"].AsString));
-            var ultimoAcesso = logs.Max(l => DateTime.Parse(l["date"].AsString));
-            var totalInteracoes = logs.Count;
-
-            // Interações semanais
-            var porSemana = logs
-                .GroupBy(l =>
+            var logs = raw
+                .Select(l =>
                 {
-                    var data = DateTime.Parse(l["date"].AsString);
-                    var calendar = System.Globalization.CultureInfo.InvariantCulture.Calendar;
-                    var week = calendar.GetWeekOfYear(data, System.Globalization.CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
-                    return $"{data.Year}-W{week:D2}";
+                    var dt = DateTime.Parse(l["date"].AsString);
+                    var semana = cal.GetWeekOfYear(dt, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+                    var ano = dt.Year;
+
+                    // Define o primeiro dia da semana (segunda-feira)
+                    var inicioSemana = dt.Date.AddDays(-(int)dt.DayOfWeek + (dt.DayOfWeek == DayOfWeek.Sunday ? -6 : 1));
+                    var fimSemana = inicioSemana.AddDays(6);
+
+                    return new
+                    {
+                        Nome = l.GetValue("name", BsonNull.Value).ToString(),
+                        Curso = l.GetValue("course_fullname", BsonNull.Value).ToString(),
+                        Componente = l.GetValue("component", BsonNull.Value).ToString(),
+                        Acao = l.GetValue("action", BsonNull.Value).ToString(),
+                        dt,
+                        semana,
+                        ano,
+                        inicioSemana,
+                        fimSemana
+                    };
                 })
-                .OrderBy(g => g.Key)
+                .Where(x => x.Curso != null && x.Componente != null && x.Acao != null)
                 .ToList();
 
+            var nomeAluno = logs.FirstOrDefault()?.Nome ?? "Nome não disponível";
+            var primeiro = logs.Min(x => x.dt);
+            var ultimo = logs.Max(x => x.dt);
+            var diasAtivos = logs.Select(x => x.dt.Date).Distinct().Count();
+            var totInt = logs.Count;
+
+            var resumoSemanal = logs
+                .GroupBy(x => new { x.ano, x.semana, x.inicioSemana, x.fimSemana, x.Curso, x.Acao })
+                .Select(g => new {
+                    g.Key.ano,
+                    g.Key.semana,
+                    g.Key.inicioSemana,
+                    g.Key.fimSemana,
+                    Curso = g.Key.Curso,
+                    Acao = g.Key.Acao,
+                    Count = g.Count()
+                })
+                .GroupBy(x => new { x.ano, x.semana, x.inicioSemana, x.fimSemana })
+                .OrderBy(x => x.Key.ano).ThenBy(x => x.Key.semana);
+
             var sb = new StringBuilder();
+            sb.Append($"Nome: {nomeAluno}/ ");
+            sb.Append($"1º: {primeiro:dd/MM/yyyy}/ ");
+            sb.Append($"Úl.: {ultimo:dd/MM/yyyy}/ ");
+            sb.Append($"DiasAtv: {diasAtivos}/ ");
+            sb.Append($"TotInt: {totInt}/ ");
 
-            // Cabeçalho fixo padronizado
-            sb.Append($"nomeAluno: {nome} / userId: {userId} / Total de Interações: {totalInteracoes} / ");
-            sb.Append($"Dias Ativos: {diasAtivos} / Primeiro Acesso: {primeiroAcesso:yyyy-MM-dd} / Último Acesso: {ultimoAcesso:yyyy-MM-dd} / ");
-
-            // Cursos
-            sb.Append("Interações por Curso: ");
-            sb.Append(string.Join(", ", cursoInteracoes.Select(c => $"{c.Key}:{c.Value}")));
-            sb.Append(" / ");
-
-            // Componentes
-            sb.Append("Componentes mais usados: ");
-            sb.Append(string.Join(", ", componentes.OrderByDescending(c => c.Value).Take(5).Select(c => $"{c.Key}:{c.Value}")));
-            sb.Append(" / ");
-
-            // Ações
-            sb.Append("Ações mais comuns: ");
-            sb.Append(string.Join(", ", acoes.OrderByDescending(a => a.Value).Take(5).Select(a => $"{a.Key}:{a.Value}")));
-            sb.Append(" / ");
-
-            // Resumo Semanal
-            sb.Append("Resumo Semanal: ");
-            foreach (var semana in porSemana)
+            foreach (var semana in resumoSemanal)
             {
-                var semanaLabel = semana.Key;
-                var total = semana.Count();
-                var comp = semana.GroupBy(l => l["component"].AsString)
-                                 .ToDictionary(c => c.Key, c => c.Count());
+                var periodo = $"{semana.Key.inicioSemana:dd/MM} à {semana.Key.fimSemana:dd/MM}";
+                sb.Append($"({periodo}){{");
 
-                sb.Append($"{semanaLabel}({total}): ");
-                sb.Append(string.Join(", ", comp.Select(kv => $"{kv.Key}:{kv.Value}")));
-                sb.Append(" / ");
+                foreach (var curso in semana.GroupBy(x => x.Curso).OrderBy(g => g.Key))
+                {
+                    var stats = curso
+                        .GroupBy(x => x.Acao)
+                        .OrderByDescending(g => g.Count())
+                        .Select(g => $"{g.Key}:{g.Count()}");
+
+                    sb.Append($"[{curso.Key} {string.Join(", ", stats)}]/");
+                }
+
+                sb.Append("}");
             }
 
             return sb.ToString();
