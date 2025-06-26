@@ -105,7 +105,7 @@
     <div class="ImputIA linha">
         <img src="~/css/icons/estrelaIA.svg" alt="ÍconeHome" width="18" height="18" />
         <input type="text" id="IaPergunta" name="Prompt" placeholder="Pergunte à IA!" />
-        <a href="IaChatAluno" onclick="enviarPergunta()">Gerar</a>
+        <button onclick="enviarPergunta()">Gerar</button>
     </div>
 
     @{
@@ -160,9 +160,11 @@
 
                 </div>
             </div>
-
+            <div id="spinner" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;">
+                <img src="~/css/icons/loadGif.gif" alt="Carregando..." width="40" />
+            </div>
             <div class="conteudo" id="conteudo2">
-                @await Html.PartialAsync("Alunos/Calendario", Model)
+                @await Html.PartialAsync("Alunos/Calendario", Model.Calendario)
             </div>
         </div>
     </div>

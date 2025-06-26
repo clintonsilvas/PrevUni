@@ -1,0 +1,27 @@
+﻿@model Front.Models.Curso
+
+<a asp-page="/Dashboard" asp-route-curso="@Model.nomeCurso" class="card-curso" style="text-decoration: none">
+    <div class="flex QuadroCards_List coluna" style="gap: 24px">
+        <div class="linha" style="align-items: center">
+            <img src="~/css/icons/caderno.svg" height="16px" />
+            <h4 class="corPreta40B">@Model.nomeCurso</h4>
+        </div>
+        <div class="coluna" style="gap: 4px">
+            <span class="subH4 corCinza60B">Quant: @Model.quantAlunos Alunos</span>
+        </div>
+        <div class="linha">
+            <div class="linha cur_porcVerd" style="gap: 8px">
+                <img src="~/css/icons/rostofeliz.svg" height="16px" />
+                <span class="cur_porcFont">@Model.engagAlto%</span>
+            </div>
+            <div class="linha cur_porcAzul" style="gap: 8px">
+                <img src="~/css/icons/rostosememocao.svg" height="16px" />
+                <span class="cur_porcFont">@Model.engagMedio%</span>
+            </div>
+            <div class="linha cur_porcVerm" style="gap: 8px">
+                <img src="~/css/icons/rostotriste.svg" height="16px" />
+                <span class="cur_porcFont">@Model.engagBaixo%</span>
+            </div>
+        </div>
+    </div>
+</a>

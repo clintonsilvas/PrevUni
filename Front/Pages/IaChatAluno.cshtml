@@ -31,19 +31,26 @@
 
     .msg {
         margin-bottom: 10px;
-        white-space: pre-wrap; /* para quebrar linha no <pre> */
+        
+
     }
 
         .msg.pergunta {
             background: #e0f0ff;
-            padding: 10px;
+            padding: 40px;
             border-radius: 8px;
+
         }
 
         .msg.resposta {
             background: #f2f2f2;
-            padding: 10px;
+            padding: 40px;
             border-radius: 8px;
+        }
+
+        .msg pre{
+            flex: 1;
+            white-space: pre-wrap;
         }
 
     button[disabled] {

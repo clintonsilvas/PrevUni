@@ -2,7 +2,9 @@
 using Backend.Services;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using System.Globalization;
 using System.Text;
+using System.Text.Json;
 
 
 namespace Backend.Services
@@ -41,34 +43,72 @@ namespace Backend.Services
                 _logs = database.GetCollection<BsonDocument>("logs");
                 _configCollection = database.GetCollection<ConfiguracaoEngajamento>("configuracoesEngajamento");
             }
+            // Lê o arquivo config.json para obter os pesos de engajamento
+            public ConfiguracaoEngajamento CarregarConfiguracao()
+            {
+                // Define o caminho do arquivo config.json baseado no diretório da aplicação
+                var caminho = Path.Combine(AppContext.BaseDirectory, "config.json");
 
+                // Lê todo o conteúdo do arquivo JSON
+                var json = File.ReadAllText(caminho);
+
+                // Faz o parsing do conteúdo em formato JSON
+                var doc = JsonDocument.Parse(json);
+
+                // Acessa o bloco específico "ConfiguracaoEngajamento"
+                var configEngajamentoJson = doc.RootElement.GetProperty("ConfiguracaoEngajamento");
+
+                // Extrai os valores e retorna uma instância da classe com os pesos preenchidos
+                return new ConfiguracaoEngajamento
+                {
+                    PesoVisualizacao = configEngajamentoJson.GetProperty("PesoVisualizacao").GetDouble(),
+                    PesoForum = configEngajamentoJson.GetProperty("PesoForum").GetDouble(),
+                    PesoEntrega = configEngajamentoJson.GetProperty("PesoEntrega").GetDouble(),
+                    PesoQuiz = configEngajamentoJson.GetProperty("PesoQuiz").GetDouble(),
+                    PesoAvaliacao = configEngajamentoJson.GetProperty("PesoAvaliacao").GetDouble(),
+                };
+            }
+
+            // Calcula o engajamento dos alunos de um curso específico
             public async Task<List<AlunoEngajamento>> CalcularEngajamentoAlunosPorCursoAsync(string nomeCurso)
             {
-                var config = await ObterConfiguracaoAsync();
+                // Carrega a configuração dos pesos do arquivo
+                var config = CarregarConfiguracao(); // <- corrigido: estava usando ConfiguracaoEngajamento.LoadFromFile, mas você já tem esse método
 
+                // Define o pipeline de agregação do MongoDB para analisar logs
                 var pipeline = new[]
                 {
-        new BsonDocument("$unwind", "$logs"),
-        new BsonDocument("$match", new BsonDocument("logs.course_fullname", nomeCurso)),
-        new BsonDocument("$group", new BsonDocument
-        {
-            { "_id", new BsonDocument
-                {
-                    { "user_id", "$logs.user_id" },
-                    { "nome", "$logs.name" },
-                    { "cursoNome", "$logs.course_fullname" },
-                    { "component", "$logs.component" },
-                    { "target", "$logs.target" },
-                    { "action", "$logs.action" }
-                }
-            },
-            { "qtd", new BsonDocument("$sum", 1) }
-        })
-    };
+            // Quebra cada item do array "logs" em documentos individuais
+            new BsonDocument("$unwind", "$logs"),
 
+            // Filtra apenas os logs que correspondem ao nome do curso especificado
+            new BsonDocument("$match", new BsonDocument("logs.course_fullname", nomeCurso)),
+
+            // Agrupa os logs por aluno e tipo de ação
+            new BsonDocument("$group", new BsonDocument
+            {
+                { "_id", new BsonDocument
+                    {
+                        { "user_id", "$logs.user_id" },
+                        { "nome", "$logs.name" },
+                        { "cursoNome", "$logs.course_fullname" },
+                        { "component", "$logs.component" },
+                        { "target", "$logs.target" },
+                        { "action", "$logs.action" }
+                    }
+                },
+                // Conta quantas vezes essa combinação ocorreu
+                { "qtd", new BsonDocument("$sum", 1) }
+            })
+        };
+
+                // Executa a agregação no MongoDB
                 using var cursor = await _logs.AggregateAsync<BsonDocument>(pipeline);
+
+                // Transforma os resultados em uma lista
                 var resultados = await cursor.ToListAsync();
 
+                // Agrupa os resultados por aluno
                 var agrupados = resultados
                     .GroupBy(d => new
                     {
@@ -81,6 +121,8 @@ namespace Backend.Services
                         UserId = g.Key.UserId,
                         Nome = g.Key.Nome,
                         CursoNome = g.Key.CursoNome,
+
+                        // Calcula o LES (índice de engajamento) com base nas ações do aluno e nos pesos
                         Engajamento = CalcularLES(g.Select(x => new AcaoQuantidade
                         {
                             Component = x["_id"]["component"].AsString,
@@ -94,15 +136,10 @@ namespace Backend.Services
                 return agrupados;
             }
 
-
-            private async Task<ConfiguracaoEngajamento> ObterConfiguracaoAsync()
-            {
-                var config = await _configCollection.Find(_ => true).FirstOrDefaultAsync();
-                return config ?? new ConfiguracaoEngajamento(); // fallback para padrão se não encontrar
-            }
-
+            // Calcula o índice LES de um aluno com base nas ações e na configuração de pesos
             private double CalcularLES(List<AcaoQuantidade> acoes, ConfiguracaoEngajamento config)
             {
+                // Conta quantas vezes o aluno fez cada tipo de ação
                 int totalVisualizacoes = Soma(acoes, "core", "course", "viewed");
                 int totalForum = Soma(acoes, "mod_forum", "discussion", "created") +
                                  Soma(acoes, "mod_forum", "discussion", "viewed");
@@ -111,12 +148,14 @@ namespace Backend.Services
                 int totalAvaliacao = Soma(acoes, "mod_assign", "submission", "graded") +
                                      Soma(acoes, "mod_quiz", "attempt", "graded");
 
+                // Converte essas quantidades em uma nota de 0 a 10 (limitada por um máximo esperado)
                 double notaVisualizacao = NotaPorFaixa(totalVisualizacoes, 100);
                 double notaForum = NotaPorFaixa(totalForum, 30);
                 double notaEntrega = NotaPorFaixa(totalEntrega, 20);
                 double notaQuiz = NotaPorFaixa(totalQuestionario, 10);
                 double notaAvaliacao = NotaPorFaixa(totalAvaliacao, 10);
 
+                // Aplica os pesos para gerar a nota final ponderada
                 double les =
                     notaEntrega * config.PesoEntrega +
                     notaForum * config.PesoForum +
@@ -124,9 +163,11 @@ namespace Backend.Services
                     notaQuiz * config.PesoQuiz +
                     notaAvaliacao * config.PesoAvaliacao;
 
+                // Escala o resultado e arredonda
                 return Math.Round(les * 10, 2);
             }
 
+            // Soma todas as ocorrências de uma ação específica
             private int Soma(List<AcaoQuantidade> acoes, string component, string target, string action)
             {
                 return acoes
@@ -137,6 +178,7 @@ namespace Backend.Services
                     .Sum(a => a.Quantidade);
             }
 
+            // Converte um valor bruto para uma nota entre 0 e 10, limitado por um valor máximo esperado
             private double NotaPorFaixa(int valor, int maxEsperado)
             {
                 double nota = (double)valor / maxEsperado * 10;
@@ -145,7 +187,8 @@ namespace Backend.Services
         }
 
 
-            public class UsuarioComAcoes
+
+        public class UsuarioComAcoes
         {
             public string UserId { get; set; }
             public string Nome { get; set; }
@@ -451,79 +494,83 @@ namespace Backend.Services
             var pipeline = new List<BsonDocument> { unwind, matchLogs, replaceRoot };
 
             var resultado = await _collection.AggregateAsync<BsonDocument>(pipeline);
-            var logs = await resultado.ToListAsync();
+            var raw = await resultado.ToListAsync();
 
-            if (!logs.Any())
+            if (raw == null || raw.Count == 0)
                 return "Usuário não encontrado ou sem interações.";
 
-            var nome = logs.FirstOrDefault()?["name"]?.AsString ?? "Nome não disponível";
+            var cal = CultureInfo.CurrentCulture.Calendar;
 
-            var cursoInteracoes = logs
-                .GroupBy(l => l["course_fullname"].AsString)
-                .ToDictionary(g => g.Key, g => g.Count());
-
-            var componentes = logs
-                .GroupBy(l => l["component"].AsString)
-                .ToDictionary(g => g.Key, g => g.Count());
-
-            var acoes = logs
-                .GroupBy(l => l["action"].AsString)
-                .ToDictionary(g => g.Key, g => g.Count());
-
-            var diasAtivos = logs
-                .Select(l => DateTime.Parse(l["date"].AsString).Date)
-                .Distinct()
-                .Count();
-
-            var primeiroAcesso = logs.Min(l => DateTime.Parse(l["date"].AsString));
-            var ultimoAcesso = logs.Max(l => DateTime.Parse(l["date"].AsString));
-            var totalInteracoes = logs.Count;
-
-            // Interações semanais
-            var porSemana = logs
-                .GroupBy(l =>
+            var logs = raw
+                .Select(l =>
                 {
-                    var data = DateTime.Parse(l["date"].AsString);
-                    var calendar = System.Globalization.CultureInfo.InvariantCulture.Calendar;
-                    var week = calendar.GetWeekOfYear(data, System.Globalization.CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
-                    return $"{data.Year}-W{week:D2}";
+                    var dt = DateTime.Parse(l["date"].AsString);
+                    var semana = cal.GetWeekOfYear(dt, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday);
+                    var ano = dt.Year;
+
+                    // Define o primeiro dia da semana (segunda-feira)
+                    var inicioSemana = dt.Date.AddDays(-(int)dt.DayOfWeek + (dt.DayOfWeek == DayOfWeek.Sunday ? -6 : 1));
+                    var fimSemana = inicioSemana.AddDays(6);
+
+                    return new
+                    {
+                        Nome = l.GetValue("name", BsonNull.Value).ToString(),
+                        Curso = l.GetValue("course_fullname", BsonNull.Value).ToString(),
+                        Componente = l.GetValue("component", BsonNull.Value).ToString(),
+                        Acao = l.GetValue("action", BsonNull.Value).ToString(),
+                        dt,
+                        semana,
+                        ano,
+                        inicioSemana,
+                        fimSemana
+                    };
                 })
-                .OrderBy(g => g.Key)
+                .Where(x => x.Curso != null && x.Componente != null && x.Acao != null)
                 .ToList();
 
+            var nomeAluno = logs.FirstOrDefault()?.Nome ?? "Nome não disponível";
+            var primeiro = logs.Min(x => x.dt);
+            var ultimo = logs.Max(x => x.dt);
+            var diasAtivos = logs.Select(x => x.dt.Date).Distinct().Count();
+            var totInt = logs.Count;
+
+            var resumoSemanal = logs
+                .GroupBy(x => new { x.ano, x.semana, x.inicioSemana, x.fimSemana, x.Curso, x.Acao })
+                .Select(g => new {
+                    g.Key.ano,
+                    g.Key.semana,
+                    g.Key.inicioSemana,
+                    g.Key.fimSemana,
+                    Curso = g.Key.Curso,
+                    Acao = g.Key.Acao,
+                    Count = g.Count()
+                })
+                .GroupBy(x => new { x.ano, x.semana, x.inicioSemana, x.fimSemana })
+                .OrderBy(x => x.Key.ano).ThenBy(x => x.Key.semana);
+
             var sb = new StringBuilder();
+            sb.Append($"Nome: {nomeAluno}/ ");
+            sb.Append($"1º: {primeiro:dd/MM/yyyy}/ ");
+            sb.Append($"Úl.: {ultimo:dd/MM/yyyy}/ ");
+            sb.Append($"DiasAtv: {diasAtivos}/ ");
+            sb.Append($"TotInt: {totInt}/ ");
 
-            // Cabeçalho fixo padronizado
-            sb.Append($"nomeAluno: {nome} / userId: {userId} / Total de Interações: {totalInteracoes} / ");
-            sb.Append($"Dias Ativos: {diasAtivos} / Primeiro Acesso: {primeiroAcesso:yyyy-MM-dd} / Último Acesso: {ultimoAcesso:yyyy-MM-dd} / ");
-
-            // Cursos
-            sb.Append("Interações por Curso: ");
-            sb.Append(string.Join(", ", cursoInteracoes.Select(c => $"{c.Key}:{c.Value}")));
-            sb.Append(" / ");
-
-            // Componentes
-            sb.Append("Componentes mais usados: ");
-            sb.Append(string.Join(", ", componentes.OrderByDescending(c => c.Value).Take(5).Select(c => $"{c.Key}:{c.Value}")));
-            sb.Append(" / ");
-
-            // Ações
-            sb.Append("Ações mais comuns: ");
-            sb.Append(string.Join(", ", acoes.OrderByDescending(a => a.Value).Take(5).Select(a => $"{a.Key}:{a.Value}")));
-            sb.Append(" / ");
-
-            // Resumo Semanal
-            sb.Append("Resumo Semanal: ");
-            foreach (var semana in porSemana)
+            foreach (var semana in resumoSemanal)
             {
-                var semanaLabel = semana.Key;
-                var total = semana.Count();
-                var comp = semana.GroupBy(l => l["component"].AsString)
-                                 .ToDictionary(c => c.Key, c => c.Count());
+                var periodo = $"{semana.Key.inicioSemana:dd/MM} à {semana.Key.fimSemana:dd/MM}";
+                sb.Append($"({periodo}){{");
 
-                sb.Append($"{semanaLabel}({total}): ");
-                sb.Append(string.Join(", ", comp.Select(kv => $"{kv.Key}:{kv.Value}")));
-                sb.Append(" / ");
+                foreach (var curso in semana.GroupBy(x => x.Curso).OrderBy(g => g.Key))
+                {
+                    var stats = curso
+                        .GroupBy(x => x.Acao)
+                        .OrderByDescending(g => g.Count())
+                        .Select(g => $"{g.Key}:{g.Count()}");
+
+                    sb.Append($"[{curso.Key} {string.Join(", ", stats)}]/");
+                }
+
+                sb.Append("}");
             }
 
             return sb.ToString();
