@@ -6,10 +6,10 @@
     "ConfiguracaoIAAgente": "Você é um assistente especializado em análise de desempenho de alunos EAD que deve fazer etste ff"
   },
   "ConfiguracaoEngajamento": {
-    "PesoVisualizacao": 2.0,
-    "PesoForum": 15.0,
-    "PesoEntrega": 9.0,
-    "PesoQuiz": 100.0,
-    "PesoAvaliacao": 30.0
+    "PesoVisualizacao": 0.1,
+    "PesoForum": 0.7,
+    "PesoEntrega": 0.5,
+    "PesoQuiz": 0.8,
+    "PesoAvaliacao": 0.8
   }
 }

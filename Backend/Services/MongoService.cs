@@ -37,35 +37,26 @@ namespace Backend.Services
         {
             private readonly IMongoCollection<BsonDocument> _logs;
             private readonly IMongoCollection<ConfiguracaoEngajamento> _configCollection;
+            private readonly IConfiguration _configuration;
 
-            public EngajamentoService(IMongoDatabase database)
+            public EngajamentoService(IMongoDatabase database, IConfiguration configuration)
             {
                 _logs = database.GetCollection<BsonDocument>("logs");
                 _configCollection = database.GetCollection<ConfiguracaoEngajamento>("configuracoesEngajamento");
+                _configuration = configuration;
             }
             // Lê o arquivo config.json para obter os pesos de engajamento
             public ConfiguracaoEngajamento CarregarConfiguracao()
             {
-                // Define o caminho do arquivo config.json baseado no diretório da aplicação
-                var caminho = Path.Combine(AppContext.BaseDirectory, "config.json");
+                var section = _configuration.GetSection("ConfiguracaoEngajamento");
 
-                // Lê todo o conteúdo do arquivo JSON
-                var json = File.ReadAllText(caminho);
-
-                // Faz o parsing do conteúdo em formato JSON
-                var doc = JsonDocument.Parse(json);
-
-                // Acessa o bloco específico "ConfiguracaoEngajamento"
-                var configEngajamentoJson = doc.RootElement.GetProperty("ConfiguracaoEngajamento");
-
-                // Extrai os valores e retorna uma instância da classe com os pesos preenchidos
                 return new ConfiguracaoEngajamento
                 {
-                    PesoVisualizacao = configEngajamentoJson.GetProperty("PesoVisualizacao").GetDouble(),
-                    PesoForum = configEngajamentoJson.GetProperty("PesoForum").GetDouble(),
-                    PesoEntrega = configEngajamentoJson.GetProperty("PesoEntrega").GetDouble(),
-                    PesoQuiz = configEngajamentoJson.GetProperty("PesoQuiz").GetDouble(),
-                    PesoAvaliacao = configEngajamentoJson.GetProperty("PesoAvaliacao").GetDouble(),
+                    PesoVisualizacao = section.GetValue<double>("PesoVisualizacao"),
+                    PesoForum = section.GetValue<double>("PesoForum"),
+                    PesoEntrega = section.GetValue<double>("PesoEntrega"),
+                    PesoQuiz = section.GetValue<double>("PesoQuiz"),
+                    PesoAvaliacao = section.GetValue<double>("PesoAvaliacao"),
                 };
             }
 
