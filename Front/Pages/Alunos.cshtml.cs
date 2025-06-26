@@ -13,7 +13,7 @@ namespace Front.Pages
             using var httpClient = new HttpClient();
 
             // Buscar quantAlunos do nomeCurso
-            var responseAlunos = await httpClient.GetAsync($"https://localhost:7232/api/Moodle/usuarios");
+            var responseAlunos = await httpClient.GetAsync($"https://localhost:7232/api/Unifenas/usuarios");
 
             var jsonAlunos = await responseAlunos.Content.ReadAsStringAsync();
             users = JsonSerializer.Deserialize<List<Usuario>>(jsonAlunos) ?? new();
