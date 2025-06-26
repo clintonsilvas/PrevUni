@@ -1,20 +1,18 @@
-﻿
-@model Front.Pages.PerfilAlunoModel
+﻿@model Front.Pages.CalendarioInfos
 @{
 }
 
 
 <div class="calendario-logs QuadroCards" id="calendario">
     @{
-        int mes = ViewData["mes"] as int? ?? DateTime.Now.Month;
-        int ano = ViewData["ano"] as int? ?? DateTime.Now.Year;
 
 
-        var primeiroDiaMes = new DateTime(ano, mes, 1);
-        int diasNoMes = DateTime.DaysInMonth(ano, mes);
+
+        var primeiroDiaMes = new DateTime(Model.ano, Model.mes, 1);
+        int diasNoMes = DateTime.DaysInMonth(Model.ano, Model.mes);
         int diasAtePrimeiroDia = (int)primeiroDiaMes.DayOfWeek;
 
-        var logsPorDia = Model.AlunoLogs?
+        var logsPorDia = Model.logs?
         .GroupBy(l => DateTime.Parse(l.date).Date)
         .ToDictionary(g => g.Key, g => g.ToList())
         ?? new();
@@ -49,7 +47,7 @@
 
         @for (int i = 1; i <= diasNoMes; i++)
         {
-            var dataAtual = new DateTime(ano, mes, i);
+            var dataAtual = new DateTime(Model.ano, Model.mes, i);
             var id = $"{dataAtual.Day}_{dataAtual.Month}";
             var possuiLog = logsPorDia.ContainsKey(dataAtual);
             var logsDoDia = possuiLog ? logsPorDia[dataAtual] : null;
@@ -106,25 +104,36 @@
 
         if (!jaAberto) elemento.className = 'diaMesAberto';
     }
+ let mes = @Model.mes;
+    let ano = @Model.ano;
 
     function mudarMes(direcao) {
         const urlParams = new URLSearchParams(window.location.search);
-        const path = window.location.pathname; // Ex: /PerfilAluno/USER_0544A8A95209
-        const userId = path.split('/').pop(); // Pega USER_0544A8A95209
-        let mes = parseInt(urlParams.get('mes')) || new Date().getMonth() + 1;
-        let ano = parseInt(urlParams.get('ano')) || new Date().getFullYear();
+        const path = window.location.pathname;
+        const curso = urlParams.get('curso') ?? '';
+        const userId = path.split('/').pop();
 
         mes += direcao;
         if (mes < 1) { mes = 12; ano--; }
         if (mes > 12) { mes = 1; ano++; }
 
-        fetch(`${path}?handler=CalendarioParcial&userId=${userId}&mes=${mes}&ano=${ano}`)
+        const novaUrl = `${window.location.pathname}?handler=CalendarioParcial&userId=${userId}&curso=${curso}&mes=${mes}&ano=${ano}`;
+
+        document.getElementById('conteudo2').innerHTML = '';
+        if (spinner) spinner.style.display = "flex"; // ou "block"
+
+        fetch(novaUrl)
             .then(res => res.text())
             .then(html => {
-                document.getElementById("conteudo2").innerHTML = html;
+                const conteudo = document.getElementById("conteudo2");
+                if (conteudo) conteudo.innerHTML = html;
             })
-            .catch(err => console.error("Erro ao carregar calendário:", err));
+            .catch(err => console.error("Erro ao carregar calendário:", err))
+            .finally(() => {
+                if (spinner) spinner.style.display = "none";
+            });
     }
+
 
     window.addEventListener('DOMContentLoaded', () => {
         const urlParams = new URLSearchParams(window.location.search);

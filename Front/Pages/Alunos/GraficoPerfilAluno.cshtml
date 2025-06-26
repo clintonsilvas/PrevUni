@@ -156,9 +156,11 @@
 
                 </div>
             </div>
-
+            <div id="spinner" style="display:none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000;">
+                <img src="~/css/icons/loadGif.gif" alt="Carregando..." width="40" />
+            </div>
             <div class="conteudo" id="conteudo2">
-                @await Html.PartialAsync("Alunos/Calendario", Model)
+                @await Html.PartialAsync("Alunos/Calendario", Model.Calendario)
             </div>
         </div>
     </div>
