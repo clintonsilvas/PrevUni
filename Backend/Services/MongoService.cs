@@ -3,6 +3,7 @@ using Backend.Services;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using System.Text;
+using System.Text.Json;
 
 
 namespace Backend.Services
@@ -41,34 +42,72 @@ namespace Backend.Services
                 _logs = database.GetCollection<BsonDocument>("logs");
                 _configCollection = database.GetCollection<ConfiguracaoEngajamento>("configuracoesEngajamento");
             }
+            // Lê o arquivo config.json para obter os pesos de engajamento
+            public ConfiguracaoEngajamento CarregarConfiguracao()
+            {
+                // Define o caminho do arquivo config.json baseado no diretório da aplicação
+                var caminho = Path.Combine(AppContext.BaseDirectory, "config.json");
 
+                // Lê todo o conteúdo do arquivo JSON
+                var json = File.ReadAllText(caminho);
+
+                // Faz o parsing do conteúdo em formato JSON
+                var doc = JsonDocument.Parse(json);
+
+                // Acessa o bloco específico "ConfiguracaoEngajamento"
+                var configEngajamentoJson = doc.RootElement.GetProperty("ConfiguracaoEngajamento");
+
+                // Extrai os valores e retorna uma instância da classe com os pesos preenchidos
+                return new ConfiguracaoEngajamento
+                {
+                    PesoVisualizacao = configEngajamentoJson.GetProperty("PesoVisualizacao").GetDouble(),
+                    PesoForum = configEngajamentoJson.GetProperty("PesoForum").GetDouble(),
+                    PesoEntrega = configEngajamentoJson.GetProperty("PesoEntrega").GetDouble(),
+                    PesoQuiz = configEngajamentoJson.GetProperty("PesoQuiz").GetDouble(),
+                    PesoAvaliacao = configEngajamentoJson.GetProperty("PesoAvaliacao").GetDouble(),
+                };
+            }
+
+            // Calcula o engajamento dos alunos de um curso específico
             public async Task<List<AlunoEngajamento>> CalcularEngajamentoAlunosPorCursoAsync(string nomeCurso)
             {
-                var config = await ObterConfiguracaoAsync();
+                // Carrega a configuração dos pesos do arquivo
+                var config = CarregarConfiguracao(); // <- corrigido: estava usando ConfiguracaoEngajamento.LoadFromFile, mas você já tem esse método
 
+                // Define o pipeline de agregação do MongoDB para analisar logs
                 var pipeline = new[]
                 {
-        new BsonDocument("$unwind", "$logs"),
-        new BsonDocument("$match", new BsonDocument("logs.course_fullname", nomeCurso)),
-        new BsonDocument("$group", new BsonDocument
-        {
-            { "_id", new BsonDocument
-                {
-                    { "user_id", "$logs.user_id" },
-                    { "nome", "$logs.name" },
-                    { "cursoNome", "$logs.course_fullname" },
-                    { "component", "$logs.component" },
-                    { "target", "$logs.target" },
-                    { "action", "$logs.action" }
-                }
-            },
-            { "qtd", new BsonDocument("$sum", 1) }
-        })
-    };
+            // Quebra cada item do array "logs" em documentos individuais
+            new BsonDocument("$unwind", "$logs"),
 
+            // Filtra apenas os logs que correspondem ao nome do curso especificado
+            new BsonDocument("$match", new BsonDocument("logs.course_fullname", nomeCurso)),
+
+            // Agrupa os logs por aluno e tipo de ação
+            new BsonDocument("$group", new BsonDocument
+            {
+                { "_id", new BsonDocument
+                    {
+                        { "user_id", "$logs.user_id" },
+                        { "nome", "$logs.name" },
+                        { "cursoNome", "$logs.course_fullname" },
+                        { "component", "$logs.component" },
+                        { "target", "$logs.target" },
+                        { "action", "$logs.action" }
+                    }
+                },
+                // Conta quantas vezes essa combinação ocorreu
+                { "qtd", new BsonDocument("$sum", 1) }
+            })
+        };
+
+                // Executa a agregação no MongoDB
                 using var cursor = await _logs.AggregateAsync<BsonDocument>(pipeline);
+
+                // Transforma os resultados em uma lista
                 var resultados = await cursor.ToListAsync();
 
+                // Agrupa os resultados por aluno
                 var agrupados = resultados
                     .GroupBy(d => new
                     {
@@ -81,6 +120,8 @@ namespace Backend.Services
                         UserId = g.Key.UserId,
                         Nome = g.Key.Nome,
                         CursoNome = g.Key.CursoNome,
+
+                        // Calcula o LES (índice de engajamento) com base nas ações do aluno e nos pesos
                         Engajamento = CalcularLES(g.Select(x => new AcaoQuantidade
                         {
                             Component = x["_id"]["component"].AsString,
@@ -94,15 +135,10 @@ namespace Backend.Services
                 return agrupados;
             }
 
-
-            private async Task<ConfiguracaoEngajamento> ObterConfiguracaoAsync()
-            {
-                var config = await _configCollection.Find(_ => true).FirstOrDefaultAsync();
-                return config ?? new ConfiguracaoEngajamento(); // fallback para padrão se não encontrar
-            }
-
+            // Calcula o índice LES de um aluno com base nas ações e na configuração de pesos
             private double CalcularLES(List<AcaoQuantidade> acoes, ConfiguracaoEngajamento config)
             {
+                // Conta quantas vezes o aluno fez cada tipo de ação
                 int totalVisualizacoes = Soma(acoes, "core", "course", "viewed");
                 int totalForum = Soma(acoes, "mod_forum", "discussion", "created") +
                                  Soma(acoes, "mod_forum", "discussion", "viewed");
@@ -111,12 +147,14 @@ namespace Backend.Services
                 int totalAvaliacao = Soma(acoes, "mod_assign", "submission", "graded") +
                                      Soma(acoes, "mod_quiz", "attempt", "graded");
 
+                // Converte essas quantidades em uma nota de 0 a 10 (limitada por um máximo esperado)
                 double notaVisualizacao = NotaPorFaixa(totalVisualizacoes, 100);
                 double notaForum = NotaPorFaixa(totalForum, 30);
                 double notaEntrega = NotaPorFaixa(totalEntrega, 20);
                 double notaQuiz = NotaPorFaixa(totalQuestionario, 10);
                 double notaAvaliacao = NotaPorFaixa(totalAvaliacao, 10);
 
+                // Aplica os pesos para gerar a nota final ponderada
                 double les =
                     notaEntrega * config.PesoEntrega +
                     notaForum * config.PesoForum +
@@ -124,9 +162,11 @@ namespace Backend.Services
                     notaQuiz * config.PesoQuiz +
                     notaAvaliacao * config.PesoAvaliacao;
 
+                // Escala o resultado e arredonda
                 return Math.Round(les * 10, 2);
             }
 
+            // Soma todas as ocorrências de uma ação específica
             private int Soma(List<AcaoQuantidade> acoes, string component, string target, string action)
             {
                 return acoes
@@ -137,6 +177,7 @@ namespace Backend.Services
                     .Sum(a => a.Quantidade);
             }
 
+            // Converte um valor bruto para uma nota entre 0 e 10, limitado por um valor máximo esperado
             private double NotaPorFaixa(int valor, int maxEsperado)
             {
                 double nota = (double)valor / maxEsperado * 10;
@@ -145,7 +186,8 @@ namespace Backend.Services
         }
 
 
-            public class UsuarioComAcoes
+
+        public class UsuarioComAcoes
         {
             public string UserId { get; set; }
             public string Nome { get; set; }

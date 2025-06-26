@@ -80,5 +80,50 @@ namespace Front.Pages
                 PropertyNameCaseInsensitive = true
             });
         }
+        public async Task<JsonResult> OnGetListaCursosAsync()
+        {
+            var cursos = await GetFromApiAsync<List<Curso>>(
+                "https://localhost:7232/api/Moodle/cursos/com-alunos") ?? new();
+
+            return new JsonResult(cursos.Select(c => new
+            {
+                c.nomeCurso,
+                quantAlunos = c.usuarios?.Count ?? c.quantAlunos
+            }));
+        }
+        public async Task<PartialViewResult> OnGetCursoDetalhadoAsync(string nomeCurso)
+        {
+            var cursosComAlunos = await GetFromApiAsync<List<Curso>>(
+                "https://localhost:7232/api/Moodle/curso/alunos") ?? new();
+
+            var cursoAlunos = cursosComAlunos.FirstOrDefault(c => c.nomeCurso == nomeCurso);
+            if (cursoAlunos == null) return Partial("Cursos/_CardCurso", new Curso());
+
+            var curso = new Curso
+            {
+                nomeCurso = cursoAlunos.nomeCurso,
+                usuarios = cursoAlunos.usuarios,
+                quantAlunos = cursoAlunos.usuarios?.Count ?? 0 // <-- ESSA LINHA GARANTE QUE VAI FUNCIONAR
+            };
+
+
+            var engajamentos = await GetFromApiAsync<List<AlunoEngajamento>>(
+                $"https://localhost:7232/api/Engajamento/curso/{Uri.EscapeDataString(nomeCurso)}") ?? new();
+
+            var alunosEng = engajamentos
+                .Where(e => curso.usuarios.Any(u => u.user_id == e.UserId))
+                .ToList();
+
+            int total = alunosEng.Count;
+            if (total > 0)
+            {
+                curso.engagAlto = (int)(alunosEng.Count(e => e.Engajamento > 66) * 100.0 / total);
+                curso.engagMedio = (int)(alunosEng.Count(e => e.Engajamento is >= 33 and <= 66) * 100.0 / total);
+                curso.engagBaixo = 100 - curso.engagAlto - curso.engagMedio;
+            }
+
+            return Partial("Cursos/_CardCurso", curso);
+        }
+
     }
 }

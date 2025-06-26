@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Backend.Models;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json.Linq;
 
 namespace Backend.Controllers
@@ -41,8 +42,7 @@ namespace Backend.Controllers
             var json = System.IO.File.ReadAllText(path);
             dynamic config = JObject.Parse(json);
             string chave = config.Gemini.ApiKey;
-
-            // Por segurança, envie mascarada (ou toda se quiser)
+            
             return Ok(new { chave = chave });
         }
 
@@ -82,6 +82,48 @@ namespace Backend.Controllers
 
             return Ok();
         }
-        
+        [HttpPost("atualizar-pesos-avaliacao")]
+        public IActionResult AtualizarPesosAvaliacao([FromBody] ConfiguracaoEngajamento req)
+        {
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
+
+            var json = System.IO.File.ReadAllText(path);
+            dynamic config = JObject.Parse(json);
+
+            config.ConfiguracaoEngajamento.PesoVisualizacao = req.PesoVisualizacao;
+            config.ConfiguracaoEngajamento.PesoForum = req.PesoForum;
+            config.ConfiguracaoEngajamento.PesoEntrega = req.PesoEntrega;
+            config.ConfiguracaoEngajamento.PesoQuiz = req.PesoQuiz;
+            config.ConfiguracaoEngajamento.PesoAvaliacao = req.PesoAvaliacao;
+
+            string atualizado = config.ToString();
+            System.IO.File.WriteAllText(path, atualizado);
+
+            return Ok();
+        }
+        [HttpGet("obter-pesos-avaliacao")]
+        public IActionResult ObterPesosAvaliacao()
+        {
+            string path = Path.Combine(Directory.GetCurrentDirectory(), "config.json");
+
+            if (!System.IO.File.Exists(path))
+                return NotFound("Arquivo de configuração não encontrado.");
+
+            var json = System.IO.File.ReadAllText(path);
+            dynamic config = JObject.Parse(json);
+
+            var pesos = new
+            {
+                PesoVisualizacao = (double)config.ConfiguracaoEngajamento.PesoVisualizacao,
+                PesoForum = (double)config.ConfiguracaoEngajamento.PesoForum,
+                PesoEntrega = (double)config.ConfiguracaoEngajamento.PesoEntrega,
+                PesoQuiz = (double)config.ConfiguracaoEngajamento.PesoQuiz,
+                PesoAvaliacao = (double)config.ConfiguracaoEngajamento.PesoAvaliacao
+            };
+
+            return Ok(pesos);
+        }
+
+
     }
 }

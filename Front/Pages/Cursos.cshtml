@@ -52,12 +52,24 @@
 </div>
 
 <script>
-    document.addEventListener("DOMContentLoaded", async () => {
+        document.addEventListener("DOMContentLoaded", async () => {
         const container = document.getElementById("us_cont");
-        const res = await fetch("/Cursos?handler=Carregamento");
-        const html = await res.text();
-        container.innerHTML = html;
+
+        // Mostra um gif de carregamento enquanto os cards chegam
+        container.innerHTML = `<div class="spinner"><img src="/css/icons/loadGif.gif" width="40" /></div>`;
+
+        const listaRes = await fetch("/Cursos?handler=ListaCursos");
+        const cursos = await listaRes.json();
+
+        container.innerHTML = ""; // remove o loading
+
+        for (const curso of cursos) {
+            const cardRes = await fetch(`/Cursos?handler=CursoDetalhado&nomeCurso=${encodeURIComponent(curso.nomeCurso)}`);
+            const html = await cardRes.text();
+            container.insertAdjacentHTML("beforeend", html);
+        }
     });
+
 
     function aplicarFiltroAvancado() {
         const tipoFiltro = document.querySelector('input[name="filtroAvancado"]:checked')?.value;

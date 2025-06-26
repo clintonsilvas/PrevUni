@@ -4,22 +4,40 @@ using static Backend.Services.MongoService;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Lê configurações MongoDB do appsettings.json
+// -------------------- CONFIGURAÇÃO --------------------
+
+// Configuração de arquivos (config.json + appsettings.json)
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+    .AddJsonFile("config.json", optional: false, reloadOnChange: true);
+
+// -------------------- MONGO CONFIG --------------------
+
 var mongoSettings = builder.Configuration.GetSection("MongoSettings");
 var connectionString = mongoSettings.GetValue<string>("ConnectionString");
 var databaseName = mongoSettings.GetValue<string>("Database");
 
-// Configura MongoClient e IMongoDatabase no DI container
-builder.Services.AddSingleton<IMongoClient>(sp =>
-{
-    return new MongoClient(connectionString);
-});
-
+// MongoDB: Singleton para cliente e banco
+builder.Services.AddSingleton<IMongoClient>(_ => new MongoClient(connectionString));
 builder.Services.AddSingleton<IMongoDatabase>(sp =>
 {
     var client = sp.GetRequiredService<IMongoClient>();
     return client.GetDatabase(databaseName);
 });
+
+// -------------------- DEPENDÊNCIAS PERSONALIZADAS --------------------
+
+// Serviços da aplicação
+builder.Services.AddSingleton<MongoService>();
+builder.Services.AddSingleton<UnifenasService>();    
+builder.Services.AddSingleton<ImportacaoService>();
+builder.Services.AddScoped<EngajamentoService>();
+builder.Services.AddHttpClient("MoodleApiClient");     
+builder.Services.AddHttpClient<GeminiService>();        
+
+// -------------------- API / CORS / SWAGGER --------------------
+
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policy =>
@@ -29,22 +47,12 @@ builder.Services.AddCors(options =>
               .AllowAnyMethod();
     });
 });
-builder.Configuration
-    .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("config.json", optional: false, reloadOnChange: true);
 
-// Registra seus serviços
-builder.Services.AddSingleton<MongoService>();
-builder.Services.AddScoped<EngajamentoService>();
-
-// Serviços padrão
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Exemplo: adicionando GeminiService e ApiService, se quiser
-builder.Services.AddSingleton<ApiService>();
-builder.Services.AddHttpClient<GeminiService>();
+// -------------------- APP CONFIG --------------------
 
 var app = builder.Build();
 
