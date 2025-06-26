@@ -5,67 +5,160 @@
     ViewData["Title"] = "Dashboard do Curso";
 }
 
+<div id="contentToExport">
+    <header class="linha welcome"
+            style="
+                justify-content: space-between;
+                width: 100%;
+                height: fit-content;
+            ">
+        <div class="coluna" style="--gap: 10px">
+            <span class="SubH1 corAzul">Dashboard do Curso</span>
+            <div class="linha" style="align-items: center">
+                <h1 class="corPreta40B">@Model.Cursos.nomeCurso</h1>
+                <input type="checkbox" style="display: none" id="favCurso" @(FavoritoService.EhFavorito(Model.Cursos.nomeCurso) ? "checked" : "")
+                       onchange="toggleFavorito(this)" />
+                <label for="favCurso">
+                    <img id="imgFavCurso" src="@Url.Content(FavoritoService.EhFavorito(Model.Cursos.nomeCurso) ? "~/css/icons/estrela.svg" : "~/css/icons/estrela_inativa.svg")" height="20" />
+                </label>
+                <button id="exportDashboardToPdf"
+                        style="margin-left: 20px; padding: 8px 15px; background-color: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+                    Exportar possíveis desistentes para PDF
+                </button>
+            </div>
+        </div>
+    </header>
 
-<header class="linha welcome"
-        style="
-            justify-content: space-between;
-            width: 100%;
-            height: fit-content;
-">
-    <div class="coluna" style="--gap: 10px">
-        <span class="SubH1 corAzul">Dashboard do Curso</span>
-        <div class="linha" style="align-items: center">
-            <h1 class="corPreta40B">@Model.Cursos.nomeCurso</h1>
-            <input type="checkbox" style="display: none" id="favCurso" @(FavoritoService.EhFavorito(Model.Cursos.nomeCurso) ? "checked" : "")
-                   onchange="toggleFavorito(this)" />
-            <label for="favCurso">
-                <img id="imgFavCurso" src="@Url.Content(FavoritoService.EhFavorito(Model.Cursos.nomeCurso) ? "~/css/icons/estrela.svg" : "~/css/icons/estrela_inativa.svg")" height="20" />
-            </label>
+    <div class="dashboard coluna" style="--gap: 10px">
+        <div class="ImputIA linha">
+            <img src="~/css/icons/estrelaIA.svg"
+                 alt="ÍconeHome"
+                 width="18"
+                 height="18" />
+            <input type="text"
+                   id="IaPergunta"
+                   name="nome"
+                   placeholder="Pergunte a inteligência Artifical!" />
+            <a asp-page="/IaChatCurso" asp-route-cursoNome="@Model.Cursos.nomeCurso">Gerar</a>
+        </div>
+
+        <div class="abas" id="us_cont">
+            <div class="spinner"><img src="~/css/icons/loadGif.gif" alt="Carregando..." width="40" /></div>
         </div>
     </div>
-</header>
-
-
-<div class="dashboard coluna" style="--gap: 10px">
-    <div class="ImputIA linha">
-        <img src="~/css/icons/estrelaIA.svg"
-             alt="ÍconeHome"
-             width="18"
-             height="18" />
-        <input type="text"
-               id="IaPergunta"
-               name="nome"
-               placeholder="Pergunte a inteligência Artifical!" />
-        <a asp-page="/IaChatCurso" asp-route-cursoNome="@Model.Cursos.nomeCurso">Gerar</a>
-    </div>
-
-    <div class="abas" id="us_cont">
-        <div class="spinner"><img src="~/css/icons/loadGif.gif" alt="Carregando..." width="40" /></div>
-    </div>
-
-    <script>
-        document.addEventListener("DOMContentLoaded", async () => {
-            const curso = "@Model.Cursos.nomeCurso";
-            const container = document.getElementById("us_cont");
-
-            const res = await fetch(`/Dashboard/${curso}?handler=Carregamento`);
-            const html = await res.text();
-            container.innerHTML = html;
-
-            const scripts = container.querySelectorAll("script");
-            scripts.forEach(oldScript => {
-                const newScript = document.createElement("script");
-                if (oldScript.src) {
-                    newScript.src = oldScript.src;
-                    newScript.async = false;
-                } else {
-                    newScript.text = oldScript.textContent;
-                }
-                document.body.appendChild(newScript);
-            });
-        });
-    </script>
 </div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const curso = "@Model.Cursos.nomeCurso";
+        const container = document.getElementById("us_cont");
+
+        const res = await fetch(`/Dashboard/${curso}?handler=Carregamento`);
+        const html = await res.text();
+        container.innerHTML = html;
+
+        const scripts = container.querySelectorAll("script");
+        scripts.forEach(oldScript => {
+            const newScript = document.createElement("script");
+            if (oldScript.src) {
+                newScript.src = oldScript.src;
+                newScript.async = false;
+            } else {
+                newScript.text = oldScript.textContent;
+            }
+            document.body.appendChild(newScript);
+        });
+
+        const exportButton = document.getElementById("exportDashboardToPdf");
+        if (exportButton) {
+            exportButton.addEventListener("click", () => {
+                const elementToExport = document.getElementById('alunosDesistentes');
+                generatePdfFromLoadedContent(elementToExport);
+            });
+        }
+    });
+
+    async function generatePdfFromLoadedContent(elementToExport) {
+        const { jsPDF } = window.jspdf;
+        if (!elementToExport) {
+            console.error("Erro: Elemento para exportar não encontrado.");
+            alert("Não foi possível gerar o PDF. O conteúdo pode não estar carregado.");
+            return;
+        }
+
+        let hiddenRows = [];
+        let loadMoreButton = null;
+
+        try {
+            const tabelaAlunos = elementToExport.querySelector('#tabela-alunos');
+            if (tabelaAlunos) {
+                hiddenRows = Array.from(tabelaAlunos.querySelectorAll('tr.escondido'));
+                hiddenRows.forEach(row => row.classList.remove('escondido'));
+
+                loadMoreButton = elementToExport.querySelector('#btn-carregar');
+                if (loadMoreButton) {
+                    loadMoreButton.style.display = 'none';
+                }
+            }
+
+            const canvas = await html2canvas(elementToExport, {
+                scale: 2,
+                useCORS: true
+            });
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'tabloid');
+
+            const imgWidth = canvas.width;
+            const imgHeight = canvas.height;
+            const ratio = imgHeight / imgWidth; 
+
+            const pageWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+
+            const horizontalMargin = 10; // margens laterais
+            const verticalMargin = 10; // margens superior/inferior
+
+            let newImgWidth = pageWidth - horizontalMargin;
+            let newImgHeight = newImgWidth * ratio;
+
+            if (newImgHeight > pageHeight - verticalMargin) {
+                newImgHeight = pageHeight - verticalMargin;
+                newImgWidth = newImgHeight / ratio;
+            }
+
+            const xOffset = (pageWidth - newImgWidth) / 2;
+            const yOffset = (pageHeight - newImgHeight) / 2;
+
+
+            let heightLeft = newImgHeight;
+            let position = 0; 
+
+            pdf.addImage(imgData, 'PNG', xOffset, yOffset, newImgWidth, newImgHeight);
+            heightLeft -= (pageHeight - yOffset);
+
+            while (heightLeft > 0) {
+                pdf.addPage();
+                position = -((newImgHeight - heightLeft) + yOffset);
+                pdf.addImage(imgData, 'PNG', xOffset, position, newImgWidth, newImgHeight);
+                heightLeft -= (pageHeight - yOffset);
+            }
+
+            pdf.save(`Dashboard_"@Model.Cursos.nomeCurso".pdf`);
+
+        } catch (error) {
+            console.error("Erro ao gerar PDF:", error);
+            alert("Ocorreu um erro ao gerar o PDF. Verifique o console para mais detalhes.");
+        } finally {
+            hiddenRows.forEach(row => row.classList.add('escondido'));
+            if (loadMoreButton) {
+                loadMoreButton.style.display = 'block';
+            }
+        }
+    }
+</script>
 
 <script>
     // --------- CONSTANTES ---------
@@ -98,6 +191,3 @@
     }
 
 </script>
-
-
-

@@ -12,6 +12,9 @@
     </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
 <script>
     document.addEventListener("DOMContentLoaded", async () => {
 
@@ -35,7 +38,39 @@
             }
             document.body.appendChild(newScript);
         });
+
+        const exportButton = document.getElementById("exportToPdfButton");
+        if (exportButton) {
+            exportButton.addEventListener("click", () => {
+                generatePdfFromLoadedContent(container);
+            });
+        }
     });
+
+    async function generatePdfFromLoadedContent(elementToExport) {
+        const { jsPDF } = window.jspdf;
+        html2canvas(elementToExport, { scale: 2 }).then(canvas => {
+            const imgData = canvas.toDataURL('image/png');
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgWidth = pdf.internal.pageSize.getWidth();
+            const pageHeight = pdf.internal.pageSize.getHeight();
+            const imgHeight = canvas.height * imgWidth / canvas.width;
+            let heightLeft = imgHeight;
+            let position = 0;
+            pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+            heightLeft -= pageHeight;
+            while (heightLeft >= 0) {
+                position = heightLeft - imgHeight;
+                pdf.addPage();
+                pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                heightLeft -= pageHeight;
+            }
+            pdf.save(`{Perfil_"@Model.User.name"}.pdf`);
+        }).catch(error => {
+            console.error("Erro ao gerar PDF:", error);
+            alert("Ocorreu um erro ao gerar o PDF. Verifique o console para mais detalhes.");
+        });
+    }
 </script>
 
 

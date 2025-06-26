@@ -12,14 +12,11 @@ namespace Backend.Controllers
         {
             _geminiService = geminiService;
         }
-        
         public class PerguntaIaRequest
         {
             public string Prompt { get; set; }
             public string Dados { get; set; }
         }
-        
-
         [HttpPost("pergunte-ia")]
         public async Task<IActionResult> PergunteIA([FromBody] PerguntaIaRequest request)
         {
