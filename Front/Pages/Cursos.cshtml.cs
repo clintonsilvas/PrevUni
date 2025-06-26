@@ -3,15 +3,16 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using System;
 
 namespace Front.Pages
 {
     public class CursosModel : PageModel
     {
-
         public List<Curso> Cursos { get; private set; } = new();
-
 
         private readonly HttpClient _httpClient;
         public CursosModel(HttpClient httpClient) => _httpClient = httpClient;
@@ -25,105 +26,81 @@ namespace Front.Pages
 
         public Task OnGetAsync() => Task.CompletedTask;
 
-
-        public async Task<PartialViewResult> OnGetCarregamentoAsync()
-        {
-            Cursos = await CarregarCursosComEngajamentoAsync();
-            return Partial("Cursos/_Listagem_de_Cursos", Cursos.OrderBy(c => c.nomeCurso).ToList());
-        }
-
-
-        private async Task<List<Curso>> CarregarCursosComEngajamentoAsync()
-        {
-            var cursosComAlunos = await GetFromApiAsync<List<Curso>>(
-                "https://localhost:7232/api/Moodle/curso/alunos") ?? new();
-
-            var cursos = await GetFromApiAsync<List<Curso>>(
-                "https://localhost:7232/api/Moodle/cursos/com-alunos") ?? new();
-
-            var tarefas = cursos.Select(async c =>
-            {
-                var alunos = cursosComAlunos.FirstOrDefault(l => l.nomeCurso == c.nomeCurso);
-                if (alunos is null) return c;
-
-                var engajamentos = await GetFromApiAsync<List<AlunoEngajamento>>(
-                    $"https://localhost:7232/api/Engajamento/curso/{Uri.EscapeDataString(c.nomeCurso)}") ?? new();
-
-                var alunosEng = engajamentos
-                    .Where(a => alunos.usuarios.Any(u => u.user_id == a.UserId))
-                    .ToList();
-
-                var total = alunosEng.Count;
-                if (total == 0) return c;
-
-                c.engagAlto = (int)(alunosEng.Count(e => e.Engajamento > 66) * 100.0 / total);
-                c.engagMedio = (int)(alunosEng.Count(e => e.Engajamento is >= 33 and <= 66) * 100.0 / total);
-                c.engagBaixo = 100 - c.engagAlto - c.engagMedio;
-
-                return c;
-            });
-
-            var cursosAtualizados = await Task.WhenAll(tarefas);
-
-            return cursosAtualizados.ToList();
-        }
-
-
-        private async Task<T?> GetFromApiAsync<T>(string url)
-        {
-            var res = await _httpClient.GetAsync(url);
-            if (!res.IsSuccessStatusCode) return default;
-
-            var json = await res.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-        }
-        public async Task<JsonResult> OnGetListaCursosAsync()
+        public async Task<JsonResult> OnGetCursosComQuantAlunosAsync()
         {
             var cursos = await GetFromApiAsync<List<Curso>>(
                 "https://localhost:7232/api/Moodle/cursos/com-alunos") ?? new();
 
-            return new JsonResult(cursos.Select(c => new
-            {
-                c.nomeCurso,
-                quantAlunos = c.usuarios?.Count ?? c.quantAlunos
-            }));
+            return new JsonResult(cursos
+                .Select(c => new
+                {
+                    c.nomeCurso,
+                    quantAlunos = c.quantAlunos
+                })
+                .OrderBy(c => c.nomeCurso)
+                .ToList());
         }
-        public async Task<PartialViewResult> OnGetCursoDetalhadoAsync(string nomeCurso)
+
+        public async Task<JsonResult> OnGetEngajamentoCursoAsync(string nomeCurso)
         {
             var cursosComAlunos = await GetFromApiAsync<List<Curso>>(
                 "https://localhost:7232/api/Moodle/curso/alunos") ?? new();
 
             var cursoAlunos = cursosComAlunos.FirstOrDefault(c => c.nomeCurso == nomeCurso);
-            if (cursoAlunos == null) return Partial("Cursos/_CardCurso", new Curso());
-
-            var curso = new Curso
+            if (cursoAlunos == null || cursoAlunos.usuarios == null || !cursoAlunos.usuarios.Any())
             {
-                nomeCurso = cursoAlunos.nomeCurso,
-                usuarios = cursoAlunos.usuarios,
-                quantAlunos = cursoAlunos.usuarios?.Count ?? 0 // <-- ESSA LINHA GARANTE QUE VAI FUNCIONAR
-            };
-
+                return new JsonResult(new { engagAlto = 0, engagMedio = 0, engagBaixo = 0 });
+            }
 
             var engajamentos = await GetFromApiAsync<List<AlunoEngajamento>>(
                 $"https://localhost:7232/api/Engajamento/curso/{Uri.EscapeDataString(nomeCurso)}") ?? new();
 
             var alunosEng = engajamentos
-                .Where(e => curso.usuarios.Any(u => u.user_id == e.UserId))
+                .Where(e => cursoAlunos.usuarios.Any(u => u.user_id == e.UserId))
                 .ToList();
 
             int total = alunosEng.Count;
+            int engagAlto = 0;
+            int engagMedio = 0;
+            int engagBaixo = 0; // DECLARAÇÃO CORRETA
+
             if (total > 0)
             {
-                curso.engagAlto = (int)(alunosEng.Count(e => e.Engajamento > 66) * 100.0 / total);
-                curso.engagMedio = (int)(alunosEng.Count(e => e.Engajamento is >= 33 and <= 66) * 100.0 / total);
-                curso.engagBaixo = 100 - curso.engagAlto - curso.engagMedio;
+                engagAlto = (int)(alunosEng.Count(e => e.Engajamento > 66) * 100.0 / total);
+                engagMedio = (int)(alunosEng.Count(e => e.Engajamento is >= 33 and <= 66) * 100.0 / total);
+                engagBaixo = 100 - engagAlto - engagMedio; // USO CORRETO
             }
 
-            return Partial("Cursos/_CardCurso", curso);
+            return new JsonResult(new
+            {
+                engagAlto,
+                engagMedio,
+                engagBaixo
+            });
         }
 
+        private async Task<T?> GetFromApiAsync<T>(string url)
+        {
+            try
+            {
+                var res = await _httpClient.GetAsync(url);
+                if (!res.IsSuccessStatusCode)
+                {
+                    Console.WriteLine($"Erro ao buscar da API: {res.StatusCode} - {await res.Content.ReadAsStringAsync()}");
+                    return default;
+                }
+
+                var json = await res.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<T>(json, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exceção durante a chamada da API: {ex.Message}");
+                return default;
+            }
+        }
     }
 }

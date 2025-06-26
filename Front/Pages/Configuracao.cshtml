@@ -283,12 +283,13 @@
                 const pesos = await res.json();
 
                 document.getElementById('pesosVisualizacao').innerHTML = `
-                    Atividades Concluídas: ${Math.round((pesos.pesoEntrega || 0) * 100)}%<br />
-                    Fóruns Postados: ${Math.round((pesos.pesoForum || 0) * 100)}%<br />
-                    Quizzes Respondidos: ${Math.round((pesos.pesoQuiz || 0) * 100)}%<br />
-                    Visualizações: ${Math.round((pesos.pesoVisualizacao || 0) * 100)}%<br />
-                    Avaliações Corrigidas: ${Math.round((pesos.pesoAvaliacao || 0) * 100)}%
+                    Atividades Concluídas: ${Math.round(pesos.pesoEntrega || 0)}<br />
+                    Fóruns Postados: ${Math.round(pesos.pesoForum || 0)}<br />
+                    Quizzes Respondidos: ${Math.round(pesos.pesoQuiz || 0)}<br />
+                    Visualizações: ${Math.round(pesos.pesoVisualizacao || 0)}<br />
+                    Avaliações Corrigidas: ${Math.round(pesos.pesoAvaliacao || 0)}
                 `;
+
 
                 // Também preenche os inputs de edição se estiverem visíveis
                 if (document.getElementById('pesoEntrega')) document.getElementById('pesoEntrega').value = pesos.pesoEntrega || 0;

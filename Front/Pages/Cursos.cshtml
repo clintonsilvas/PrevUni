@@ -44,42 +44,142 @@
         </div>
     </div>
 
-    <!-- Container dos cards -->
     <div class="flex grid" id="us_cont">
         <div class="spinner"><img src="~/css/icons/loadGif.gif" alt="Carregando..." width="40" /></div>
-        
+    </div>
+
+    <div id="pagination-controls" style="text-align: center; margin-top: 20px;">
+        <button id="loadMoreBtn" style="padding: 10px 20px; font-size: 16px; cursor: pointer; background-color: #007bff; color: white; border: none; border-radius: 5px;">Carregar Mais Cursos</button>
     </div>
 </div>
 
 <script>
-        document.addEventListener("DOMContentLoaded", async () => {
+    let allCourses = []; // Armazena todos os cursos buscados
+    let coursesPerPage = 10; // Quantidade de cursos por página
+    let currentPage = 0; // Página atual
+
+    document.addEventListener("DOMContentLoaded", async () => {
         const container = document.getElementById("us_cont");
+        const loadMoreBtn = document.getElementById("loadMoreBtn");
 
         // Mostra um gif de carregamento enquanto os cards chegam
         container.innerHTML = `<div class="spinner"><img src="/css/icons/loadGif.gif" width="40" /></div>`;
+        loadMoreBtn.style.display = 'none'; // Esconde o botão até os cursos serem carregados
 
-        const listaRes = await fetch("/Cursos?handler=ListaCursos");
-        const cursos = await listaRes.json();
+        try {
+            // Busca TODOS os cursos com quantidade de alunos
+            const allCoursesRes = await fetch("/Cursos?handler=CursosComQuantAlunos");
+            if (!allCoursesRes.ok) {
+                throw new Error(`HTTP error! status: ${allCoursesRes.status}`);
+            }
+            allCourses = await allCoursesRes.json();
+            container.innerHTML = ""; // Remove o loading
 
-        container.innerHTML = ""; // remove o loading
+            // Exibe a primeira página de cursos
+            displayCourses();
 
-        for (const curso of cursos) {
-            const cardRes = await fetch(`/Cursos?handler=CursoDetalhado&nomeCurso=${encodeURIComponent(curso.nomeCurso)}`);
-            const html = await cardRes.text();
-            container.insertAdjacentHTML("beforeend", html);
+            // Mostra o botão "Carregar Mais" se houver mais cursos
+            if (allCourses.length > coursesPerPage) {
+                loadMoreBtn.style.display = 'block';
+                loadMoreBtn.addEventListener('click', displayCourses);
+            } else {
+                loadMoreBtn.style.display = 'none';
+            }
+
+        } catch (error) {
+            console.error("Erro ao carregar cursos iniciais:", error);
+            container.innerHTML = `<p style="color: red;">Erro ao carregar os cursos. Por favor, tente novamente.</p>`;
+            loadMoreBtn.style.display = 'none';
         }
     });
 
+    // Função para exibir os cursos (paginação)
+    function displayCourses() {
+        const container = document.getElementById("us_cont");
+        const loadMoreBtn = document.getElementById("loadMoreBtn");
+
+        const startIndex = currentPage * coursesPerPage;
+        const endIndex = startIndex + coursesPerPage;
+        const coursesToDisplay = allCourses.slice(startIndex, endIndex);
+
+        if (coursesToDisplay.length === 0) {
+            loadMoreBtn.style.display = 'none'; // Esconde se não houver mais cursos
+            return;
+        }
+
+        coursesToDisplay.forEach(curso => {
+            const cardHtml = `
+               <a href="/Dashboard/${encodeURIComponent(curso.nomeCurso)}"
+                   class="card-curso"
+                   style="text-decoration: none"
+                   data-nome-curso="${encodeURIComponent(curso.nomeCurso)}"
+                   data-quant-alunos="${curso.quantAlunos}">
+                    <div class="flex QuadroCards_List coluna" style="gap: 24px">
+                        <div class="linha" style="align-items: center">
+                            <img src="/css/icons/caderno.svg" height="16px" />
+                            <h4 class="corPreta40B">${curso.nomeCurso}</h4>
+                        </div>
+                        <div class="coluna" style="gap: 4px">
+                            <span class="subH4 corCinza60B">Quant: ${curso.quantAlunos} Alunos</span>
+                        </div>
+                        <div class="linha engagement-container" data-course-name="${encodeURIComponent(curso.nomeCurso)}">
+                            <div class="engagement-spinner">
+                                <img src="/css/icons/loadGif.gif" alt="Carregando Engajamento..." width="20" />
+                            </div>
+                        </div>
+                    </div>
+                </a>
+            `;
+            container.insertAdjacentHTML("beforeend", cardHtml);
+
+            // Chamada assíncrona para o engajamento de CADA curso
+            fetch(`/Cursos?handler=EngajamentoCurso&nomeCurso=${encodeURIComponent(curso.nomeCurso)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        console.error(`Erro HTTP ao buscar engajamento para ${curso.nomeCurso}: ${response.status}`);
+                        return { engagAlto: 0, engagMedio: 0, engagBaixo: 0 }; // Retorna valores padrão em caso de erro
+                    }
+                    return response.json();
+                })
+                .then(engagementData => {
+                    const engagementContainer = document.querySelector(`.engagement-container[data-course-name="${encodeURIComponent(curso.nomeCurso)}"]`);
+                    if (engagementContainer) {
+                        engagementContainer.innerHTML = `
+                            <div class="linha cur_porcVerd" style="gap: 8px">
+                                <img src="/css/icons/rostofeliz.svg" height="16px" />
+                                <span class="cur_porcFont">${engagementData.engagAlto}%</span>
+                            </div>
+                            <div class="linha cur_porcAzul" style="gap: 8px">
+                                <img src="/css/icons/rostosememocao.svg" height="16px" />
+                                <span class="cur_porcFont">${engagementData.engagMedio}%</span>
+                            </div>
+                            <div class="linha cur_porcVerm" style="gap: 8px">
+                                <img src="/css/icons/rostotriste.svg" height="16px" />
+                                <span class="cur_porcFont">${engagementData.engagBaixo}%</span>
+                            </div>
+                        `;
+                    }
+                })
+                .catch(error => console.error(`Erro ao carregar engajamento para ${curso.nomeCurso}:`, error));
+        });
+
+        currentPage++; // Avança para a próxima página
+        // Esconde o botão se todos os cursos já foram carregados
+        if (endIndex >= allCourses.length) {
+            loadMoreBtn.style.display = 'none';
+        }
+    }
 
     function aplicarFiltroAvancado() {
         const tipoFiltro = document.querySelector('input[name="filtroAvancado"]:checked')?.value;
         if (!tipoFiltro) return;
 
         const container = document.getElementById("us_cont");
+        // Seleciona todos os cards visíveis atualmente para ordenação
         const cards = Array.from(container.querySelectorAll(".card-curso"));
 
         let getValue = (card, selector) =>
-            parseFloat(card.querySelector(selector).innerText.replace('%', '').trim());
+            parseFloat(card.querySelector(selector)?.innerText.replace('%', '').trim() || '0');
 
         switch (tipoFiltro) {
             case "alfabetico":
@@ -88,10 +188,11 @@
                 );
                 break;
             case "maisAlunos":
-                cards.sort((a, b) =>
-                    parseInt(b.innerText.match(/Quant: (\d+)/)[1]) -
-                    parseInt(a.innerText.match(/Quant: (\d+)/)[1])
-                );
+                cards.sort((a, b) => {
+                    const quantA = parseInt(a.dataset.quantAlunos || '0');
+                    const quantB = parseInt(b.dataset.quantAlunos || '0');
+                    return quantB - quantA;
+                });
                 break;
             case "engajamentoAlto":
                 cards.sort((a, b) =>
@@ -109,7 +210,8 @@
                 );
                 break;
         }
-
+        // Limpa o container e adiciona os cards ordenados
+        container.innerHTML = '';
         cards.forEach(card => container.appendChild(card));
     }
 
@@ -123,4 +225,3 @@
         });
     }
 </script>
-
