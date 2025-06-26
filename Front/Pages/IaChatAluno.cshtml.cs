@@ -26,10 +26,6 @@ namespace Front.Pages
             public string Pergunta { get; set; }
             public string Resposta { get; set; }
         }
-        public override void OnPageHandlerExecuted(Microsoft.AspNetCore.Mvc.Filters.PageHandlerExecutedContext context)
-        {
-            TempData.Keep("Historico");
-        }
 
         public async Task OnGetAsync()
         {
