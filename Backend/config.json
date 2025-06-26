@@ -7,9 +7,9 @@
   },
   "ConfiguracaoEngajamento": {
     "PesoVisualizacao": 1.0,
-    "PesoForum": 8.0,
-    "PesoEntrega": 1.0,
-    "PesoQuiz": 7.0,
-    "PesoAvaliacao": 8.0
+    "PesoForum": 3.0,
+    "PesoEntrega": 5.0,
+    "PesoQuiz": 2.0,
+    "PesoAvaliacao": 1.0
   }
 }

@@ -154,7 +154,7 @@ namespace Backend.Services
                     notaAvaliacao * config.PesoAvaliacao;
 
                 // Escala o resultado e arredonda
-                return Math.Min(100.0, Math.Round(les * 10, 2)); //<- para n ultrapassar 100%
+                return Math.Min(100.0, Math.Round(les, 2)); //<- para n ultrapassar 100%
             }
 
             // Soma todas as ocorrências de uma ação específica
@@ -174,6 +174,7 @@ namespace Backend.Services
                 double nota = (double)valor / maxEsperado * 10;
                 return Math.Min(nota, 10);
             }
+
         }
 
 
