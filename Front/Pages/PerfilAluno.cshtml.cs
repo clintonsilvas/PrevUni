@@ -51,7 +51,7 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
 
     public async Task<IActionResult> OnGetCalendarioParcialAsync()
     {
-        var logs = await GetFromApiAsync<List<LogUsuario>>($"https://localhost:7232/api/Moodle/logs/{UserId}");
+        var logs = await GetFromApiAsync<List<LogUsuario>>($"https://localhost:7232/api/Unifenas/logs/{UserId}");
 
         if (logs == null || logs.Count == 0)
             return Partial("Alunos/Calendario", new CalendarioInfos()); // retorna vazio se nada encontrado
@@ -77,7 +77,7 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
 
     private async Task<bool> CarregarDadosAlunoAsync()
     {
-        var logsUrl = $"https://localhost:7232/api/Moodle/logs/{UserId}";
+        var logsUrl = $"https://localhost:7232/api/Unifenas/logs/{UserId}";
         var logsTask = GetFromApiAsync<List<LogUsuario>>(logsUrl);
 
         await Task.WhenAll(logsTask);
