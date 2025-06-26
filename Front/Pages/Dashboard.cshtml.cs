@@ -64,6 +64,22 @@ namespace Front.Pages
             return Partial("Cursos/_Graficos_Curso", this);
         }
 
+        public async Task<PartialViewResult> OnGetRelatorioAsync(string curso)
+        {
+            Cursos = new Curso { nomeCurso = curso };
+            using var http = new HttpClient();
+
+            await CarregarAlunosAsync(http, curso);
+            await Cursos.AtualizaSemanas();
+            CalcularSemanas();
+
+            await CarregarEngajamentoAsync(http, curso); // <-- passe o curso aqui
+            CalcularEngajamento();
+            CalcularDesistentes();
+
+            return Partial("Cursos/RelatorioCurso", this);
+        }
+
         private async Task CarregarAlunosAsync(HttpClient httpClient, string curso)
         {
             var resp = await httpClient.GetAsync($"https://localhost:7232/api/Moodle/alunos-por-curso/{curso}");
