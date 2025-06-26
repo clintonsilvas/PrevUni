@@ -143,7 +143,7 @@ namespace Backend.Services
                 double notaVisualizacao = NotaPorFaixa(totalVisualizacoes, 100);
                 double notaForum = NotaPorFaixa(totalForum, 30);
                 double notaEntrega = NotaPorFaixa(totalEntrega, 20);
-                double notaQuiz = NotaPorFaixa(totalQuestionario, 10);
+                double notaQuiz = NotaPorFaixa(totalQuestionario, 2);
                 double notaAvaliacao = NotaPorFaixa(totalAvaliacao, 10);
 
                 // Aplica os pesos para gerar a nota final ponderada
@@ -155,7 +155,7 @@ namespace Backend.Services
                     notaAvaliacao * config.PesoAvaliacao;
 
                 // Escala o resultado e arredonda
-                return Math.Round(les * 10, 2);
+                return Math.Min(100.0, Math.Round(les * 10, 2)); //<- para n ultrapassar 100%
             }
 
             // Soma todas as ocorrências de uma ação específica
