@@ -3,12 +3,12 @@
     "ApiKey": "AIzaSyDxUymNFaBoHJT33UrjP8T8dOcNsRCo5l4"
   },
   "TextGemini": {
-    "ConfiguracaoIAAgente": "Você é um assistente especializado em análise de desempenho de alunos EAD que deve fazer etste ff"
+    "ConfiguracaoIAAgente": "Respoda tudo com  \"Não\""
   },
   "ConfiguracaoEngajamento": {
     "PesoVisualizacao": 1.0,
-    "PesoForum": 3.0,
-    "PesoEntrega": 5.0,
+    "PesoForum": 8.0,
+    "PesoEntrega": 4.0,
     "PesoQuiz": 2.0,
     "PesoAvaliacao": 1.0
   }
