@@ -1,0 +1,198 @@
+﻿.dark {
+    /*Variações de Azul*/
+    --Azul-principal: #668eff;
+    --Azul40B: #001b66;
+    --Azul50B: #002280;
+    --Azul60B: #002899;
+    --Azul70B: #002fb2;
+    --Azul80B: #0036cc;
+    --Azul60S: #668eff;
+    --Azul40S: #99b4ff;
+    --Azul30S: #b2c7ff;
+    --Azul20S: #ccd9ff;
+    --Azul10S: #232938;
+    /*Variações de Tons Neutros*/
+    --Preto40B: #eff2fa;
+    --Preto50B: #cfd5e5;
+    --Cinza60B: #bec6ea;
+    --Cinza70B: #abb4cc;
+    --Cinza80B: #6B7799;
+    --Cinza90B: #0f1933;
+    --Cinza100B: #040e27;
+    --Branco: #020817;
+    --branco: #020817;
+    /*Cores Secundárias*/
+    --Verde: #00bd55;
+    --Vermelho: #ff6a6a;
+    --verde_trasparente: #112d2e;
+    --vermelho_transparenre: #312035;
+}
+
+    .dark .QuadroCards {
+        background-color: var(--Cinza90B);
+        border: solid 1px #1e293b;
+    }
+
+    .dark .botaoatualiza {
+        background-color: var(--Cinza90B);
+    }
+
+    .dark .links_nav a {
+        text-decoration: none;
+        font-size: 10pt;
+        font-weight: 500;
+        color: var(--Cinza70B);
+    }
+
+    /*ENDERENÇO*/
+    .dark .Endereco span,
+    .Endereco a {
+        color: var(--Cinza70B);
+    }
+
+    /*IMPUT DA IA OU DE PESQUISA*/
+    .dark .ImputIA {
+        background-color: var(--Cinza90B);
+        border: solid 1px #1e293b;
+    }
+
+    .dark .ImputIA:hover {
+        background-color: var(--Cinza90B);
+        border: solid 1px var(--Azul-principal);
+    }
+
+        .dark .ImputIA:has(input:focus) {
+            background-color: #17264d;
+            border: solid 1px var(--Azul-principal);
+        }
+
+    .dark input[type="text"] {
+        color: var(--Preto50B);
+    }
+
+        .dark input[type="text"]::placeholder {
+            color: #8f98b2;
+        }
+
+    .dark .QuantAlunos {
+        background-color: var(--Azul-principal);
+    }
+
+        .dark .QuantAlunos h4,
+        .dark .QuantAlunos h2 {
+            color: var(--Preto40B);
+        }
+
+    .dark .iconEscuro {
+        background-color: #597cde;
+    }
+
+    .dark .sobreposicao_inferior {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        height: 100px;
+        background: linear-gradient( to top, rgba(04, 14, 39, 0.8), rgba(04, 14, 39, 0) );
+        z-index: 2;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 30px;
+}
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--Cinza100B);
+    transition: 0.4s;
+    border-radius: 30px;
+}
+
+    .slider:before {
+        content: "";
+        position: absolute;
+        height: 26px;
+        width: 26px;
+        left: 2px;
+        bottom: 2px;
+        background-color: var(--Azul-principal);
+        transition: 0.4s;
+        border-radius: 50%;
+    }
+
+    /* Ícones dentro do slider */
+    .slider img {
+        position: absolute;
+        height: 14px;
+        width: 14px;
+        transition: 0.4s;
+    }
+
+/* Posição inicial - modo claro */
+#modClaro {
+    left: 8px;
+    bottom: 8px;
+    display: block;
+}
+
+#modEscuro {
+    left: 8px;
+    bottom: 8px;
+    display: none;
+}
+
+/* Quando ativar (modo escuro) */
+input:checked + .slider:before {
+    transform: translateX(28px);
+}
+
+input:checked + .slider #modClaro {
+    display: none;
+}
+
+input:checked + .slider #modEscuro {
+    display: block;
+    transform: translateX(28px);
+}
+
+#logoClara{
+    display:block;
+}
+#logoEscura{
+    display: none;
+}
+
+
+.dark #logoClara {
+    display: none;
+}
+
+.dark #logoEscura {
+    display: block;
+}

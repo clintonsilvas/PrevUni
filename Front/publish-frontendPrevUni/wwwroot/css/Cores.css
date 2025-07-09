@@ -1,0 +1,174 @@
+:root {
+    /*Variações de Azul*/
+    --Azul-principal: #2e5ee5;
+    --Azul40B: #001b66;
+    --Azul50B: #002280;
+    --Azul60B: #002899;
+    --Azul70B: #002fb2;
+    --Azul80B: #0036cc;
+    --Azul60S: #668eff;
+    --Azul40S: #99b4ff;
+    --Azul30S: #b2c7ff;
+    --Azul20S: #ccd9ff;
+    --Azul10S: #e5ecff;
+    /*Variações de Tons Neutros*/
+    --Preto40B: #363f5e;
+    --Preto50B: #495580;
+    --Cinza60B: #6b7799;
+    --Cinza70B: #8f98b2;
+    --Cinza80B: #abb4cc;
+    --Cinza90B: #cfd5e5;
+    --Cinza100B: #eff2fa;
+    --Branco: #fff;
+    /*Cores Secundárias*/
+    --Verde: #22C55E;
+    --Vermelho: #ff6a6a;
+    --verde_trasparente: #e7ffe5;
+    --vermelho_transparenre: #fff0f0;
+}
+
+.linha_azul {
+    height: 2px;
+    width: 100%;
+    background-color: var(--Azul-principal);
+}
+
+.abas {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    font-family: sans-serif;
+    position: relative;
+}
+
+
+
+    /* Oculta os inputs de rádio */
+    .abas input[type="radio"] {
+        display: none;
+    }
+
+/* Estilo dos botões das abas */
+.botoes {
+    display: flex;
+    flex-direction: row;
+    gap: 16px;
+    width: fit-content;
+    height: fit-content;
+    position: relative;
+    margin-bottom: 20px;
+}
+
+    .botoes label {
+        flex: 1;
+        width: 150px;
+        text-align: center;
+        padding: 12px 0;
+        cursor: pointer;
+        color: var(--Cinza60B);
+        font-weight: 600;
+        transition: color 0.3s;
+        padding: 8px;
+    }
+
+        .botoes label:hover {
+            color: var(--Azul-principal);
+        }
+
+/* Underline animado */
+.underline {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 50%;
+    height: 2px;
+    background-color: var(--Azul-principal);
+    transition: transform 0.3s ease;
+}
+
+/* Define qual aba está ativa (underline) */
+#abaa1:checked ~ .botoes .underline {
+    transform: translateX(0%);
+}
+
+#aba2:checked ~ .botoes .underline {
+    transform: translateX(100%);
+}
+
+#aba3:checked ~ .botoes .underline {
+    transform: translateX(200%);
+}
+
+/* Conteúdo das abas */
+.conteudos {
+    flex: 1;
+    width: 100%;
+}
+
+.conteudo {
+    display: none;
+    animation: fadeIn 0.3s ease;
+}
+
+#aba1:checked ~ .conteudos #conteudo1,
+#aba2:checked ~ .conteudos #conteudo2,
+#aba3:checked ~ .conteudos #conteudo3 {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+/* Animação suave de entrada */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+
+
+.card-resposta {
+    max-width: 80%;
+    width: fit-content;
+    padding: 24px;
+    background-color: var(--Azul-principal);
+    border-radius: 10px;
+}
+
+    .card-resposta span {
+        font-size: 10pt;
+        font-weight: 400;
+        color: var(--Branco);
+        line-height: 1.4;
+    }
+
+.card-pergunta strong {
+    color: var(--Azul-principal);
+}
+
+.card-pergunta {
+    max-width: 80%;
+    width: fit-content;
+    padding: 24px;
+    background-color: var(--Branco);
+    border-radius: 10px;
+    border: 1px solid var(--Azul10S);  
+}
+
+
+    .card-pergunta span {
+        font-size: 10pt;
+        font-weight: 400;
+        color: var(--Cinza60B);
+        line-height: 1.4;
+    }
+
+.dark .card-resposta span {
+    color: #fff;
+}
