@@ -7,10 +7,16 @@ using Front.Models;
 
 namespace Front.Pages;
 
-public class PerfilAlunoModel(HttpClient httpClient) : PageModel
+public class PerfilAlunoModel : PageModel
 {
-    private readonly HttpClient _httpClient = httpClient;
+    private readonly IConfiguration _configuration;
+    private readonly HttpClient _httpClient;
 
+    public PerfilAlunoModel(IConfiguration configuration, HttpClient httpClient)
+    {
+        _configuration = configuration;
+        _httpClient = httpClient;
+    }
     [BindProperty(SupportsGet = true)] public string UserId { get; set; } = string.Empty;
     [BindProperty(SupportsGet = true)] public string curso { get; set; } = string.Empty;
     [BindProperty(SupportsGet = true)] public string nome { get; set; } = string.Empty;
@@ -38,6 +44,7 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
         [property: JsonPropertyName("engajamento")] double Engajamento);
 
     public class AcaoResumo { public string Acao { get; set; } = string.Empty; public int Quantidade { get; set; } }
+    
 
     public async Task<IActionResult> OnGetCarregamentoAsync(string? curso = null)
     {
@@ -51,7 +58,7 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
 
     public async Task<IActionResult> OnGetCalendarioParcialAsync()
     {
-        var logs = await GetFromApiAsync<List<LogUsuario>>($"https://localhost:7232/api/Unifenas/logs/{UserId}");
+        var logs = await GetFromApiAsync<List<LogUsuario>>($"{_configuration["ApiUrl"]}/api/Unifenas/logs/{UserId}");
 
         if (logs == null || logs.Count == 0)
             return Partial("Alunos/Calendario", new CalendarioInfos()); // retorna vazio se nada encontrado
@@ -77,7 +84,7 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
 
     private async Task<bool> CarregarDadosAlunoAsync()
     {
-        var logsUrl = $"https://localhost:7232/api/Unifenas/logs/{UserId}";
+        var logsUrl = $"{_configuration["ApiUrl"]}/api/Unifenas/logs/{UserId}";
         var logsTask = GetFromApiAsync<List<LogUsuario>>(logsUrl);
 
         await Task.WhenAll(logsTask);
@@ -99,7 +106,7 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
         if (string.IsNullOrWhiteSpace(cursoSelecionado))
         {
             var engajamentoTasks = ListaDeCursos
-                .Select(c => GetFromApiAsync<List<AlunoEngajamento>>($"https://localhost:7232/api/engajamento/curso/{Uri.EscapeDataString(c)}"))
+                .Select(c => GetFromApiAsync<List<AlunoEngajamento>>($"{_configuration["ApiUrl"]}/api/engajamento/curso/{Uri.EscapeDataString(c)}"))
                 .ToList();
 
             var engajamentoResults = await Task.WhenAll(engajamentoTasks);
@@ -116,7 +123,7 @@ public class PerfilAlunoModel(HttpClient httpClient) : PageModel
         }
         else
         {
-            var engUrl = $"https://localhost:7232/api/engajamento/curso/{Uri.EscapeDataString(cursoSelecionado)}";
+            var engUrl = $"{_configuration["ApiUrl"]}/api/engajamento/curso/{Uri.EscapeDataString(cursoSelecionado)}";
             var engajamentosResult = await GetFromApiAsync<List<AlunoEngajamento>>(engUrl);
             Engajamento = (float)(engajamentosResult?.FirstOrDefault(e => e.UserId == UserId)?.Engajamento ?? 0);
         }

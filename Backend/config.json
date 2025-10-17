@@ -1,12 +1,12 @@
 {
   "Gemini": {
-    "ApiKey": "AIzaSyDxUymNFaBoHJT33UrjP8T8dOcNsRCo5l4"
+    "ApiKey": "AIzaSyCpaeTmvzJ5RRdXFO0CK-FJzV0dKUJVRko"
   },
   "TextGemini": {
-    "ConfiguracaoIAAgente": "Respoda tudo com  \"Não\""
+    "ConfiguracaoIAAgente": "Você é um agente que analisará alunos, logs de alunos de cursos ead e dará sempre objetivamente os alunos que tem chance de evasão escolar com base nos dados, alem disso alternativas para evitar isso"
   },
   "ConfiguracaoEngajamento": {
-    "PesoVisualizacao": 1.0,
+    "PesoVisualizacao": 9.0,
     "PesoForum": 8.0,
     "PesoEntrega": 4.0,
     "PesoQuiz": 2.0,

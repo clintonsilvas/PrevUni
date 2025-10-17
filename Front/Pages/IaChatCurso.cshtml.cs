@@ -9,10 +9,12 @@ namespace Front.Pages
     public class IaChatCursoModel : PageModel
     {
         private readonly IHttpClientFactory _httpClientFactory;
+        private readonly IConfiguration _configuration;
 
-        public IaChatCursoModel(IHttpClientFactory httpClientFactory)
+        public IaChatCursoModel(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _httpClientFactory = httpClientFactory;
+            _configuration = configuration;
         }
         [BindProperty]
         public string CursoNome { get; set; } = string.Empty;
@@ -47,7 +49,7 @@ namespace Front.Pages
 
             try
             {
-                var resumoJson = await client.GetStringAsync($"https://localhost:7232/api/Mongo/resumo-curso/{CursoNome}");
+                var resumoJson = await client.GetStringAsync($"{_configuration["ApiUrl"]}/api/Mongo/resumo-curso/{CursoNome}");
                 var resumoTexto = JsonDocument.Parse(resumoJson).RootElement.GetProperty("resumo").GetString();
 
                 var requestBody = JsonSerializer.Serialize(new
@@ -57,7 +59,7 @@ namespace Front.Pages
                 });
 
                 var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
-                var iaResponse = await client.PostAsync("https://localhost:7232/pergunte-ia", content);
+                var iaResponse = await client.PostAsync($"{_configuration["ApiUrl"]}/pergunte-ia", content);
                 var iaResult = await iaResponse.Content.ReadAsStringAsync();
 
                 var resposta = "IA não respondeu.";

@@ -9,11 +9,23 @@ namespace Front.Pages
 {
     public class DashboardModel : PageModel
     {
+        private readonly IConfiguration _configuration;
+        private readonly Curso _curso;
+        private readonly HttpClient _httpClient;
+
+        public DashboardModel(IConfiguration configuration, Curso curso, HttpClient httpClient)
+        {
+            _configuration = configuration;
+            _curso = curso;
+            _httpClient = httpClient;
+            Cursos = _curso;
+        }
+
         public int EngajamentoBaixo { get; set; }
         public int EngajamentoMedio { get; set; }
         public int EngajamentoAlto { get; set; }
 
-        public Curso Cursos { get; set; } = new();
+        public Curso Cursos { get; set; }
         public List<AlunoEngajamento> PossiveisDesistentes { get; set; } = new();
         public List<AlunoEngajamento> AlunosEngajamento { get; set; } = new();
 
@@ -21,10 +33,8 @@ namespace Front.Pages
         {
             [JsonPropertyName("userId")]
             public string UserId { get; set; } = "";
-
             [JsonPropertyName("nome")]
             public string Name { get; set; } = "";
-
             [JsonPropertyName("engajamento")]
             public double Engajamento { get; set; }
         }
@@ -35,29 +45,30 @@ namespace Front.Pages
             public int Quantidade { get; set; }
         }
 
-        public string LblJson { get; set; } = string.Empty;
-        public string DsJson { get; set; } = string.Empty;
-        public string AnosJson { get; set; } = string.Empty;
-        public string SemanasJson { get; set; } = string.Empty;
-        public string Labels { get; set; } = string.Empty;
-        public string Dados { get; set; } = string.Empty;
+        public string LblJson { get; set; } = "";
+        public string DsJson { get; set; } = "";
+        public string AnosJson { get; set; } = "";
+        public string SemanasJson { get; set; } = "";
+        public string Labels { get; set; } = "";
+        public string Dados { get; set; } = "";
         public List<AcaoResumo> AcoesResumo { get; set; } = new();
 
         public async Task OnGetAsync(string curso)
         {
-            Cursos = new Curso { nomeCurso = curso };
+            Cursos.nomeCurso = curso;
+            await Cursos.AtualizaSemanas();
+            await Cursos.AtualizaAlunos();
         }
 
         public async Task<PartialViewResult> OnGetCarregamentoAsync(string curso)
         {
-            Cursos = new Curso { nomeCurso = curso };
-            using var http = new HttpClient();
+            Cursos.nomeCurso = curso;
 
-            await CarregarAlunosAsync(http, curso);
+            await CarregarAlunosAsync();
             await Cursos.AtualizaSemanas();
             CalcularSemanas();
 
-            await CarregarEngajamentoAsync(http, curso); // <-- passe o curso aqui
+            await CarregarEngajamentoAsync();
             CalcularEngajamento();
             CalcularDesistentes();
 
@@ -66,23 +77,24 @@ namespace Front.Pages
 
         public async Task<PartialViewResult> OnGetRelatorioAsync(string curso)
         {
-            Cursos = new Curso { nomeCurso = curso };
-            using var http = new HttpClient();
+            Cursos.nomeCurso = curso;
 
-            await CarregarAlunosAsync(http, curso);
+            await CarregarAlunosAsync();
             await Cursos.AtualizaSemanas();
             CalcularSemanas();
 
-            await CarregarEngajamentoAsync(http, curso); // <-- passe o curso aqui
+            await CarregarEngajamentoAsync();
             CalcularEngajamento();
             CalcularDesistentes();
 
             return Partial("Cursos/RelatorioCurso", this);
         }
 
-        private async Task CarregarAlunosAsync(HttpClient httpClient, string curso)
+        private async Task CarregarAlunosAsync()
         {
-            var resp = await httpClient.GetAsync($"https://localhost:7232/api/Moodle/alunos-por-curso/{curso}");
+            var url = $"{_configuration["ApiUrl"]}/api/Moodle/alunos-por-curso/{Cursos.nomeCurso}";
+            var resp = await _httpClient.GetAsync(url);
+
             if (!resp.IsSuccessStatusCode)
             {
                 Cursos.usuarios = new List<Usuario>();
@@ -94,9 +106,11 @@ namespace Front.Pages
             Cursos.usuarios = JsonSerializer.Deserialize<List<Usuario>>(json) ?? new();
         }
 
-        private async Task CarregarEngajamentoAsync(HttpClient httpClient, string curso)
+        private async Task CarregarEngajamentoAsync()
         {
-            var resp = await httpClient.GetAsync($"https://localhost:7232/api/Engajamento/curso/{curso}");
+            var url = $"{_configuration["ApiUrl"]}/api/Engajamento/curso/{Cursos.nomeCurso}";
+            var resp = await _httpClient.GetAsync(url);
+
             if (!resp.IsSuccessStatusCode)
             {
                 AlunosEngajamento = new();
@@ -109,7 +123,6 @@ namespace Front.Pages
             var idsAlunos = Cursos.usuarios.Select(u => u.user_id).ToHashSet();
             AlunosEngajamento = todos.Where(a => idsAlunos.Contains(a.UserId)).ToList();
         }
-
 
         private void CalcularEngajamento()
         {
@@ -135,7 +148,8 @@ namespace Front.Pages
         private void CalcularSemanas()
         {
             var acoesFixas = new Acoes().ListarAcoes();
-            string AcaoDe(string a, string t, string c) => acoesFixas.FirstOrDefault(x => x.action == a && x.target == t && x.component == c)?.nome_acao ?? "Outros";
+            string AcaoDe(string a, string t, string c) =>
+                acoesFixas.FirstOrDefault(x => x.action == a && x.target == t && x.component == c)?.nome_acao ?? "Outros";
 
             var cal = CultureInfo.CurrentCulture.Calendar;
 

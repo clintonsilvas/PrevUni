@@ -1,12 +1,12 @@
-using Backend.Services;
+ï»¿using Backend.Services;
 using MongoDB.Driver;
 using static Backend.Services.MongoService;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// -------------------- CONFIGURAÇÃO --------------------
+// -------------------- CONFIGURAÃ‡ÃƒO --------------------
 
-// Configuração de arquivos (config.json + appsettings.json)
+// ConfiguraÃ§Ã£o de arquivos (config.json + appsettings.json)
 builder.Configuration
     .SetBasePath(Directory.GetCurrentDirectory())
     .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
@@ -26,9 +26,9 @@ builder.Services.AddSingleton<IMongoDatabase>(sp =>
     return client.GetDatabase(databaseName);
 });
 
-// -------------------- DEPENDÊNCIAS PERSONALIZADAS --------------------
+// -------------------- DEPENDÃŠNCIAS PERSONALIZADAS --------------------
 
-// Serviços da aplicação
+// ServiÃ§os da aplicaÃ§Ã£o
 builder.Services.AddSingleton<MongoService>();
 builder.Services.AddSingleton<UnifenasService>();    
 builder.Services.AddSingleton<ImportacaoService>();
@@ -62,8 +62,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
 app.UseCors();
 app.UseAuthorization();
+app.UseHttpsRedirection();
 app.MapControllers();
+app.MapGet("/", () => "Backend do Prev Uni rodando");
 app.Run();

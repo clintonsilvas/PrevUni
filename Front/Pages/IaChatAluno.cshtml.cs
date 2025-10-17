@@ -10,10 +10,11 @@ namespace Front.Pages
     public class IaChatAlunoModel : PageModel
     {
         private readonly IHttpClientFactory _httpClientFactory;
-
-        public IaChatAlunoModel(IHttpClientFactory httpClientFactory)
+        private readonly IConfiguration _configuration;
+        public IaChatAlunoModel(IHttpClientFactory httpClientFactory, IConfiguration configuration)
         {
             _httpClientFactory = httpClientFactory;
+            _configuration = configuration;
         }
         [BindProperty]
         public string UserId { get; set; }
@@ -44,7 +45,7 @@ namespace Front.Pages
 
             try
             {
-                var resumoJson = await client.GetStringAsync($"https://localhost:7232/api/Mongo/resumo-aluno-ia/{UserId}");
+                var resumoJson = await client.GetStringAsync($"{_configuration["ApiUrl"]}/api/Mongo/resumo-aluno-ia/{UserId}");
                 var resumoTexto = JsonDocument.Parse(resumoJson).RootElement.GetProperty("resumo").GetString();
 
                 var requestBody = JsonSerializer.Serialize(new
@@ -54,7 +55,7 @@ namespace Front.Pages
                 });
 
                 var content = new StringContent(requestBody, Encoding.UTF8, "application/json");
-                var iaResponse = await client.PostAsync("https://localhost:7232/pergunte-ia", content);
+                var iaResponse = await client.PostAsync($"{_configuration["ApiUrl"]}/pergunte-ia", content);
                 var iaResult = await iaResponse.Content.ReadAsStringAsync();
 
                 var resposta = "IA não respondeu.";

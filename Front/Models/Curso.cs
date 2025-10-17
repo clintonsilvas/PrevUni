@@ -1,13 +1,22 @@
 ﻿using System.Net.Http;
 using System.Text.Json;
-using Front.Models;
+
 namespace Front.Models
 {
-
     public class Curso
     {
         private readonly FavoritoService _favoritoService;
-        public string nomeCurso { get; set; }
+        private readonly IConfiguration _configuration;
+        private readonly HttpClient _httpClient;
+
+        public Curso(IConfiguration configuration, FavoritoService favoritoService, HttpClient httpClient)
+        {
+            _favoritoService = favoritoService;
+            _configuration = configuration;
+            _httpClient = httpClient;
+        }
+
+        public string nomeCurso { get; set; } = "";
         public int quantAlunos { get; set; }
         public List<LogUsuario> Logs { get; set; } = new();
         public List<int> Semanas { get; set; } = new(new int[10]);
@@ -15,25 +24,22 @@ namespace Front.Models
 
         public bool IsFavorito { get; set; }
 
-
         public int engagAlto = 0;
         public int engagMedio = 0;
         public int engagBaixo = 0;
 
         public async Task AtualizaSemanas()
         {
-            using var httpClient = new HttpClient();
-            var response = await httpClient.GetAsync($"https://localhost:7232/api/Moodle/logs-por-nomeCurso/{nomeCurso}");
-
+            var response = await _httpClient.GetAsync($"{_configuration["ApiUrl"]}/api/Moodle/logs-por-nomeCurso/{nomeCurso}");
             if (!response.IsSuccessStatusCode) return;
 
             var json = await response.Content.ReadAsStringAsync();
-            Logs = JsonSerializer.Deserialize<List<LogUsuario>>(json) ?? [];
+            Logs = JsonSerializer.Deserialize<List<LogUsuario>>(json) ?? new();
 
             if (Logs.Count == 0) return;
 
             var primeiroAcesso = Logs.Min(l => DateTime.Parse(l.date));
-            Semanas = new List<int>(new int[10]); // Resetar
+            Semanas = new List<int>(new int[10]);
 
             foreach (var log in Logs)
             {
@@ -50,20 +56,11 @@ namespace Front.Models
 
         public async Task AtualizaAlunos()
         {
-            using var httpClient = new HttpClient();
-            var response = await httpClient.GetAsync($"https://localhost:7232/api/Moodle/quantAlunos-por-nomeCurso/{nomeCurso}");
-
+            var response = await _httpClient.GetAsync($"{_configuration["ApiUrl"]}/api/Moodle/quantAlunos-por-nomeCurso/{nomeCurso}");
             if (!response.IsSuccessStatusCode) return;
 
             var json = await response.Content.ReadAsStringAsync();
-            usuarios = JsonSerializer.Deserialize<List<Usuario>>(json) ?? [];
+            usuarios = JsonSerializer.Deserialize<List<Usuario>>(json) ?? new();
         }
-    }
-
-
-    public class CursoComAlunos
-    {
-        public string nomeCurso { get; set; }
-        public List<Usuario> usuarios { get; set; }
     }
 }

@@ -3,7 +3,10 @@
 @{
     ViewData["Title"] = "Configuração de Importação";
 }
-
+@inject IConfiguration Configuration
+@{
+    var apiUrl = Configuration["ApiUrl"];
+}
 <style>
     .input-grande {
         width: 100%;
@@ -129,7 +132,7 @@
 
         async function carregarChaveIA() {
             try {
-                const res = await fetch('https://localhost:7232/api/Configuracao/obter-api-key');
+                const res = await fetch('@apiUrl/api/Configuracao/obter-api-key');
                 const data = await res.json();
                 const chave = data.chave;
                 const chaveMask = chave.substring(0, 5) + '...' + chave.slice(-5);
@@ -141,7 +144,7 @@
 
         async function carregarTextoIA() {
             try {
-                const res = await fetch('https://localhost:7232/api/Configuracao/obter-texto-ia');
+                const res = await fetch('@apiUrl/api/Configuracao/obter-texto-ia');
                 const data = await res.json();
                 document.getElementById('textoIa').value = data.texto;
             } catch (e) {
@@ -156,7 +159,7 @@
 
         async function salvarChave() {
             const chave = document.getElementById('novaChave').value;
-            const res = await fetch('https://localhost:7232/api/Configuracao/atualizar-api-key', {
+            const res = await fetch('@apiUrl/api/Configuracao/atualizar-api-key', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ novaChave: chave })
@@ -172,7 +175,7 @@
 
         async function salvarTextoIA() {
             const texto = document.getElementById('textoIa').value;
-            const res = await fetch('https://localhost:7232/api/Configuracao/atualizar-texto-ia', {
+            const res = await fetch('@apiUrl/api/Configuracao/atualizar-texto-ia', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ texto })
@@ -187,7 +190,7 @@
 
         async function carregarPesos() {
             try {
-                const res = await fetch('https://localhost:7232/api/Configuracao/obter-pesos-avaliacao');
+                const res = await fetch('@apiUrl/api/Configuracao/obter-pesos-avaliacao');
                 if (!res.ok) throw new Error('Erro ao obter pesos');
                 pesos = await res.json();
 
@@ -231,7 +234,7 @@
                 }
             }
 
-            const res = await fetch('https://localhost:7232/api/Configuracao/atualizar-pesos-avaliacao', {
+            const res = await fetch('@apiUrl/api/Configuracao/atualizar-pesos-avaliacao', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
@@ -254,7 +257,7 @@
             botao.innerText = 'Importando...';
 
             try {
-                const res = await fetch('https://localhost:7232/api/Importacao/iniciar-com-mudanca', {
+                const res = await fetch('@apiUrl/api/Importacao/iniciar-com-mudanca', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -284,7 +287,7 @@
 
             intervaloStatus = setInterval(async () => {
                 try {
-                    const res = await fetch(`https://localhost:7232/api/importacao/status/${importacaoId}`);
+                    const res = await fetch(`@apiUrl/api/importacao/status/${importacaoId}`);
                     if (!res.ok) throw new Error('Falha ao obter status');
 
                     const data = await res.json();

@@ -1,0 +1,13 @@
+services:
+  backend:
+    image: ${DOCKER_REGISTRY-}backend
+    build:
+      context: .
+      dockerfile: Backend/Dockerfile
+
+  front:
+    image: ${DOCKER_REGISTRY-}front
+    build:
+      context: .
+      dockerfile: Front/Dockerfile
+
