@@ -1,0 +1,35 @@
+.buttomPrimary {
+  padding: 8px 16px;
+  min-height: 56px;
+  background-color: var(--primary-color);
+  color: var(--white);
+  border: none;
+  border-radius: 900px;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--blue-60S);
+  }
+}
+
+.buttomSecondary {
+  padding: 8px 16px;
+  min-height: 56px;
+  background-color: transparent;
+  color: var(--neutral-50B);
+  border: solid 1px var(--neutral-70B);
+  border-radius: 900px;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    background-color: var(--blue-60S);
+    color: var(--white);
+    border: none;
+  }
+}

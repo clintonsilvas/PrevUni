@@ -1,0 +1,119 @@
+.body-container {
+  min-width: 100vw;
+  min-height: 100vh;
+  background-color: var(--neutral-100B);
+  color: var(--neutral-40B);
+  padding: 24px;
+  display: grid;
+  grid-template-columns: repeat(12, 1fr);
+  grid-template-rows: auto;
+  gap: 16px;
+}
+
+.form-container {
+  display: flex;
+  flex-direction: column;
+  grid-column: 2/6;
+  text-align: center;
+  justify-content: center;
+  gap: 40px;
+  align-items: center;
+  width: 100%;
+}
+
+.header-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+
+  h1 {
+    font-size: 40px;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  p {
+    font-size: 18px;
+    font-weight: 500;
+    line-height: 1.4;
+    color: var(--neutral-50B);
+  }
+}
+
+.inputs-container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 24px;
+}
+
+.submitContainer {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  gap: 16px;
+}
+
+.image-container {
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  grid-column: 7/13;
+
+  background: linear-gradient(219.69deg, #fff5cc 0%, #668eff 100.82%);
+}
+
+.createAccountLabel {
+  font-size: 16px;
+  font-weight: 400;
+  color: var(--neutral-60B);
+  line-height: 1.6;
+
+  a {
+    color: var(--primary-color);
+    text-decoration: underline;
+    font-weight: 500;
+    cursor: pointer;
+  }
+}
+
+@media (max-width: 1200px) {
+  .body-container {
+    grid-template-columns: repeat(6, 1fr);
+    min-height: none;
+  }
+
+  .form-container {
+    grid-column: 2 / 6;
+  }
+
+  .image-container {
+    display: none;
+  }
+}
+
+@media (max-width: 768px) {
+  .body-container {
+    align-items: flex-start;
+    justify-content: flex-start;
+  }
+  .form-container {
+    padding: 40px 0;
+    height: fit-content;
+
+    grid-column: 1 / -1 !important;
+  }
+
+  .header-container {
+    gap: 4px;
+
+    h1 {
+      font-size: 32px;
+    }
+
+    p {
+      font-size: 16px;
+    }
+  }
+}

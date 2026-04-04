@@ -1,0 +1,36 @@
+.input-container-single {
+  align-items: flex-start;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  label {
+    text-align: left;
+    font-size: 18px;
+    font-weight: 600;
+    line-height: 1.2;
+    color: var(--neutral-60B);
+    width: 100%;
+  }
+}
+
+.input-container-single input {
+  border: 1px solid var(--neutral-90B);
+  background-color: var(--white);
+  width: 100%;
+  display: flex;
+  padding: 18px 24px;
+  border-radius: 80px;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+
+  &:hover {
+    border: 1px solid var(--blue-30S);
+  }
+  &:focus {
+    outline: none;
+    border: 1px solid var(--primary-color);
+  }
+}
