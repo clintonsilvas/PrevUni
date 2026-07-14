@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 :root {
   --primary-color: #003de5;
   --blue-40B: #001b66;
@@ -18,21 +20,11 @@
   --neutral-80B: #abb4cc;
   --neutral-90B: #cfd5e5;
   --neutral-100B: #eff2fa;
-  --white: #fff;
-
-  --green: #00bd55;
-  --light-green: #e7ffe5;
-  --red: #ff6a6a;
-  --light-red: #fff0f0;
+  --white: #fff;  
 }
 
-* {
-  padding: 0;
-  margin: 0;
-  font-family: Inter;
+* {  
+  font-family: var(--font-montserrat);  
   box-sizing: border-box;
 }
-body {
-  min-width: 100vw;
-  min-height: 100vh;
-}
+

@@ -1,5 +1,12 @@
 import type { Metadata } from "next";
 import "./globals.css";
+import { Montserrat } from "next/font/google";
+
+const montserrat = Montserrat({
+  subsets: ["latin"],
+  variable: "--font-montserrat",
+});
+
 
 export const metadata: Metadata = {
   title: "PrevUni - Prevenção Evasão Escolar",
@@ -13,7 +20,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-br">
-      <body>{children}</body>
+      <body className={montserrat.variable}>{children}</body>
     </html>
   );
 }
