@@ -48,7 +48,8 @@
 }
 
 .form {  
-  width: 450px;
+  width: 100%;
+  max-width: 450px;
   display: flex;
   flex-direction: column;  
 }
@@ -87,3 +88,8 @@
   background: #1d4ed8;
 }
 
+@media (max-width: 768px) {
+  .right {
+    display: none;
+  }
+}
