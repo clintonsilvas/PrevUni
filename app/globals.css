@@ -1,5 +1,3 @@
-@import "tailwindcss";
-
 :root {
   --primary-color: #003de5;
   --blue-40B: #001b66;
@@ -25,5 +23,8 @@
 
 * {  
   font-family: var(--font-inter);  
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
 }
 
