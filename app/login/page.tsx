@@ -17,10 +17,23 @@ export default function Login() {
         <form className={styles.form}>
           <label >Email</label>
           <input type="email" placeholder="Insira aqui" />
-          <label>Senha</label>
+          <label>Senha</label>          
           <input type="password" placeholder="Insira aqui" />
-          <button>Entrar</button>          
+          <hr className={styles.divider} />
+          <div className={styles.buttons}>
+            <button type="submit" className={styles.loginButton}>
+              Entrar
+            </button>
+
+            <button type="button" className={styles.googleButton}>
+              <img src="/google.svg" alt="" />
+              Entrar com o Google
+            </button>
+          </div>                    
         </form>
+        <p className={styles.register}>
+            Não possui conta? <a href="/cadastro">Crie uma conta</a>
+          </p>
       </div>
       <div className={styles.right}>        
       </div>
