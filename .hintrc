@@ -11,6 +11,7 @@
           "text-wrap: balance"
         ]
       }
-    ]
+    ],
+    "typescript-config/consistent-casing": "off"
   }
 }
