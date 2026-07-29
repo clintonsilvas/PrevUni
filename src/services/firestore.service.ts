@@ -8,6 +8,8 @@ import {
   setDoc,
   where,
   writeBatch,
+  QueryDocumentSnapshot,
+  DocumentData,
 } from "firebase/firestore";
 
 import { db } from "@/firebase/firebase";
@@ -16,14 +18,14 @@ export class FirestoreService {
   /**
    * Cria ou atualiza um documento
    */
-  async salvar(
+  async salvar<T>(
     caminho: string,
     id: string,
-    dados: any
+    dados: T
   ): Promise<void> {
     await setDoc(
       doc(db, caminho, id),
-      dados,
+      dados as DocumentData,
       {
         merge: true,
       }
@@ -33,10 +35,10 @@ export class FirestoreService {
   /**
    * Busca um documento pelo id
    */
-  async buscar(
+  async buscar<T>(
     caminho: string,
     id: string
-  ) {
+  ): Promise<T | null> {
     const snapshot = await getDoc(
       doc(db, caminho, id)
     );
@@ -45,33 +47,39 @@ export class FirestoreService {
       return null;
     }
 
-    return snapshot.data();
+    return {
+      id: snapshot.id,
+      ...snapshot.data(),
+    } as T;
   }
 
   /**
    * Lista todos os documentos
    */
-  async listar(
+  async listar<T>(
     caminho: string
-  ) {
+  ): Promise<T[]> {
     const snapshot = await getDocs(
       collection(db, caminho)
     );
 
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    return snapshot.docs.map(
+      (doc: QueryDocumentSnapshot<DocumentData>) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+        } as T)
+    );
   }
 
   /**
    * Busca por um campo
    */
-  async buscarPorCampo(
+  async buscarPorCampo<T>(
     caminho: string,
     campo: string,
-    valor: any
-  ) {
+    valor: unknown
+  ): Promise<T[]> {
     const q = query(
       collection(db, caminho),
       where(campo, "==", valor)
@@ -79,10 +87,13 @@ export class FirestoreService {
 
     const snapshot = await getDocs(q);
 
-    return snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data(),
-    }));
+    return snapshot.docs.map(
+      (doc: QueryDocumentSnapshot<DocumentData>) =>
+        ({
+          id: doc.id,
+          ...doc.data(),
+        } as T)
+    );
   }
 
   /**
@@ -91,7 +102,7 @@ export class FirestoreService {
   async excluir(
     caminho: string,
     id: string
-  ) {
+  ): Promise<void> {
     await deleteDoc(
       doc(db, caminho, id)
     );
@@ -100,14 +111,14 @@ export class FirestoreService {
   /**
    * Salva vários documentos em lote
    */
-  async salvarLote(
+  async salvarLote<T extends { id: string }>(
     caminho: string,
-    documentos: any[]
-  ) {
+    documentos: T[]
+  ): Promise<void> {
 
     const batch = writeBatch(db);
 
-    documentos.forEach(item => {
+    documentos.forEach((item) => {
 
       const referencia = doc(
         db,
@@ -117,7 +128,7 @@ export class FirestoreService {
 
       batch.set(
         referencia,
-        item,
+        item as DocumentData,
         {
           merge: true,
         }
@@ -126,6 +137,5 @@ export class FirestoreService {
     });
 
     await batch.commit();
-
   }
 }

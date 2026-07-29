@@ -5,7 +5,7 @@ export async function POST() {
 
     const sync = new SyncService();
 
-    await sync.sincronizar("UmTLYC7W7WhqfMzPtce5");
+    await sync.sincronizar("inst-001");
 
     return NextResponse.json({
         sucesso: true
