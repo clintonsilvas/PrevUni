@@ -5,6 +5,8 @@ export interface Instituicao {
   cnpj: string;
   cidade: string;
   estado: string;
+  api: string;
+  dominio:string;
 }
 
 export interface Coordernador {
