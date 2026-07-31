@@ -1,0 +1,78 @@
+.course-card {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  background-color: var(--white);
+  border: 1px solid var(--neutral-100B);
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 2px rgba(35, 38, 51, 0.04);
+}
+
+.course-card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.course-card-info h3 {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--neutral-40B);
+  line-height: 1.3;
+}
+
+.course-card-info p {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--neutral-70B);
+  margin-top: 2px;
+}
+
+.course-card-badges {
+  display: flex;
+  gap: 8px;
+}
+
+.course-card-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+  border: 1px solid transparent;
+}
+
+.course-card-badge-green {
+  background-color: var(--green-10);
+  color: var(--green-60);
+  border-color: var(--green-60);
+}
+
+.course-card-badge-blue {
+  background-color: var(--blue-10S);
+  color: var(--primary-color);
+  border-color: var(--blue-40S);
+}
+
+.course-card-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border-radius: 999px;
+  border: 1px solid var(--neutral-70B);
+  color: var(--neutral-40B);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.course-card-button:hover {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--white);
+}
