@@ -1,0 +1,141 @@
+.container{
+
+    position:relative;
+
+}
+
+.avatarButton{
+
+    background:none;
+
+    border:none;
+
+    cursor:pointer;
+
+    padding:0;
+
+}
+
+.avatar{
+
+    width:42px;
+
+    height:42px;
+
+    border-radius:50%;
+
+    object-fit:cover;
+
+}
+
+.menu{
+
+    position:absolute;
+
+    top:56px;
+
+    right:0;
+
+    width:220px;
+
+    background:#fff;
+
+    border-radius:14px;
+
+    box-shadow:0 8px 30px rgba(0,0,0,.12);
+
+    border:1px solid #E5E7EB;
+
+    overflow:hidden;
+
+    z-index:1000;
+
+}
+
+.userInfo{
+
+    padding:18px;
+
+    display:flex;
+
+    flex-direction:column;
+
+    gap:4px;
+
+}
+
+.userInfo strong{
+
+    color:#232633;
+
+    font-size:15px;
+
+}
+
+.userInfo span{
+
+    color:#7C86A2;
+
+    font-size:13px;
+
+}
+
+.menu hr{
+
+    border:none;
+
+    border-top:1px solid #ECECEC;
+
+}
+
+.menu a{
+
+    display:block;
+
+    padding:14px 18px;
+
+    text-decoration:none;
+
+    color:#495580;
+
+    font-weight:600;
+
+    transition:.2s;
+
+}
+
+.menu a:hover{
+
+    background:#EEF2FA;
+
+}
+
+.menu button{
+
+    width:100%;
+
+    border:none;
+
+    background:none;
+
+    cursor:pointer;
+
+    text-align:left;
+
+    padding:14px 18px;
+
+    font-size:15px;
+
+    color:#E53935;
+
+    font-weight:600;
+
+    transition:.2s;
+
+}
+
+.menu button:hover{
+
+    background:#FFF2F2;
+
+}

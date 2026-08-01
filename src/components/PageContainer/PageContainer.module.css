@@ -1,0 +1,33 @@
+.container{
+
+    width:100%;
+
+    min-height:calc(100vh - 72px);
+
+    background:#EEF2FA;
+
+    padding:32px;
+
+    box-sizing:border-box;
+
+}
+
+@media(max-width:900px){
+
+    .container{
+
+        padding:20px;
+
+    }
+
+}
+
+@media(max-width:600px){
+
+    .container{
+
+        padding:16px;
+
+    }
+
+}
