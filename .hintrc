@@ -8,7 +8,9 @@
       {
         "ignore": [
           "text-wrap",
-          "text-wrap: balance"
+          "text-wrap: balance",
+          "min-height: auto",
+          "backdrop-filter"
         ]
       }
     ],

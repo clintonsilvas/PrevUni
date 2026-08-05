@@ -1,0 +1,737 @@
+.page {
+  min-height: 100vh;
+  background: #ffffff;
+  color: #232633;
+}
+
+
+/* HEADER */
+
+.header {
+  width: 100%;
+  height: 80px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 7%;
+
+  border-bottom: 1px solid #eef0f5;
+
+  box-sizing: border-box;
+}
+
+.logoLink {
+  display: flex;
+  align-items: center;
+}
+
+.logo {
+  width: 150px;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+.nav a {
+  color: #66708d;
+
+  text-decoration: none;
+
+  font-size: 14px;
+
+  font-weight: 600;
+
+  transition: .2s;
+}
+
+.nav a:hover,
+.nav .active {
+  color: #2563eb;
+}
+
+
+/* HERO */
+
+.hero {
+  padding: 80px 9%;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f8faff 0%,
+      #eef2fa 100%
+    );
+
+  border-bottom: 1px solid #e6e9f1;
+}
+
+.hero > div {
+  max-width: 850px;
+}
+
+.badge {
+  color: #5b82ff;
+
+  font-size: 12px;
+
+  font-weight: 800;
+
+  letter-spacing: 1.5px;
+}
+
+.hero h1 {
+  margin: 20px 0;
+
+  font-size: clamp(40px, 5vw, 64px);
+
+  line-height: 1.05;
+
+  letter-spacing: -2px;
+}
+
+.hero h1 span {
+  color: #5b82ff;
+}
+
+.hero p {
+  max-width: 700px;
+
+  color: #6b7799;
+
+  font-size: 18px;
+
+  line-height: 1.7;
+}
+
+
+/* DOCUMENTATION LAYOUT */
+
+.documentation {
+  display: grid;
+
+  grid-template-columns: 230px minmax(0, 850px);
+
+  justify-content: center;
+
+  gap: 80px;
+
+  padding: 80px 6%;
+}
+
+
+/* SIDEBAR */
+
+.sidebar {
+  position: sticky;
+
+  top: 30px;
+
+  align-self: start;
+
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 14px;
+}
+
+.sidebar strong {
+  margin-bottom: 8px;
+
+  color: #232633;
+
+  font-size: 13px;
+}
+
+.sidebar a {
+  color: #7c86a2;
+
+  text-decoration: none;
+
+  font-size: 14px;
+
+  transition: .2s;
+}
+
+.sidebar a:hover {
+  color: #2563eb;
+}
+
+
+/* CONTENT */
+
+.content {
+  min-width: 0;
+}
+
+.content section {
+  padding: 20px 0 90px;
+
+  scroll-margin-top: 30px;
+}
+
+.sectionLabel {
+  color: #5b82ff;
+
+  font-size: 11px;
+
+  font-weight: 800;
+
+  letter-spacing: 1.5px;
+}
+
+.content h2 {
+  margin: 14px 0 20px;
+
+  font-size: 36px;
+
+  line-height: 1.15;
+
+  letter-spacing: -1px;
+}
+
+.content h3 {
+  margin-top: 28px;
+
+  font-size: 20px;
+}
+
+.content p {
+  color: #68738f;
+
+  font-size: 16px;
+
+  line-height: 1.75;
+}
+
+
+/* ENDPOINT */
+
+.endpoint {
+  display: flex;
+
+  align-items: center;
+
+  gap: 14px;
+
+  margin: 28px 0;
+
+  padding: 18px 20px;
+
+  border: 1px solid #dfe5f1;
+
+  border-radius: 12px;
+
+  background: #f8faff;
+
+  overflow-x: auto;
+}
+
+.method {
+  flex-shrink: 0;
+
+  padding: 6px 10px;
+
+  border-radius: 7px;
+
+  background: #e8f7ef;
+
+  color: #188052;
+
+  font-size: 11px;
+
+  font-weight: 800;
+}
+
+.endpoint code {
+  color: #33405f;
+
+  font-size: 14px;
+}
+
+
+/* INFO */
+
+.infoBox {
+  margin-top: 25px;
+
+  padding: 20px 22px;
+
+  border-left: 4px solid #5b82ff;
+
+  background: #f4f7ff;
+
+  border-radius: 0 12px 12px 0;
+}
+
+.infoBox strong {
+  color: #33405f;
+}
+
+.infoBox p {
+  margin: 8px 0;
+}
+
+.infoBox code {
+  color: #2563eb;
+
+  font-size: 13px;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* CODE */
+
+.codeBlock {
+  margin-top: 28px;
+
+  overflow: hidden;
+
+  border-radius: 16px;
+
+  background: #171b27;
+
+  box-shadow: 0 15px 40px rgba(20, 30, 60, .10);
+}
+
+.codeHeader {
+  height: 42px;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  padding: 0 18px;
+
+  color: #8f98b2;
+
+  border-bottom: 1px solid #292e3c;
+
+  font-size: 11px;
+
+  font-weight: 700;
+}
+
+.codeBlock pre {
+  margin: 0;
+
+  padding: 26px;
+
+  overflow-x: auto;
+
+  color: #dce3f5;
+
+  font-family:
+    "Courier New",
+    monospace;
+
+  font-size: 13px;
+
+  line-height: 1.7;
+}
+
+
+/* DATA CARDS */
+
+.dataCard {
+  margin-top: 25px;
+
+  padding: 26px;
+
+  border: 1px solid #e3e7f0;
+
+  border-radius: 16px;
+
+  background: #ffffff;
+}
+
+.dataCard h3 {
+  margin: 0 0 8px;
+
+  color: #232633;
+}
+
+.dataCard p {
+  margin-top: 0;
+}
+
+.codeBlockSmall {
+  margin-top: 20px;
+
+  overflow: hidden;
+
+  border-radius: 12px;
+
+  background: #f7f9fd;
+
+  border: 1px solid #e4e8f1;
+}
+
+.codeBlockSmall pre {
+  margin: 0;
+
+  padding: 20px;
+
+  overflow-x: auto;
+
+  color: #3e4863;
+
+  font-family:
+    "Courier New",
+    monospace;
+
+  font-size: 13px;
+
+  line-height: 1.7;
+}
+
+
+/* RULES */
+
+.rules {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 13px;
+
+  margin-top: 28px;
+
+  padding-left: 22px;
+}
+
+.rules li {
+  color: #68738f;
+
+  line-height: 1.6;
+}
+
+
+/* DNS */
+
+.domainExample {
+  margin: 30px 0;
+
+  padding: 25px;
+
+  border-radius: 16px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #f1f5ff,
+      #f8faff
+    );
+
+  border: 1px solid #dce4f7;
+}
+
+.domainExample div {
+  display: flex;
+
+  flex-direction: column;
+
+  gap: 8px;
+}
+
+.domainExample small {
+  color: #7c86a2;
+
+  font-size: 12px;
+
+  font-weight: 700;
+
+  text-transform: uppercase;
+
+  letter-spacing: .8px;
+}
+
+.domainExample strong {
+  color: #2563eb;
+
+  font-size: 20px;
+
+  word-break: break-word;
+}
+
+
+/* DNS TABLE */
+
+.dnsTable {
+  margin-top: 25px;
+
+  overflow: hidden;
+
+  border: 1px solid #e1e6ef;
+
+  border-radius: 14px;
+}
+
+.dnsRow {
+  display: grid;
+
+  grid-template-columns: 100px 1fr 2fr;
+
+  padding: 16px 20px;
+
+  gap: 20px;
+
+  border-bottom: 1px solid #e8ebf2;
+}
+
+.dnsRow:last-child {
+  border-bottom: none;
+}
+
+.dnsRow:first-child {
+  background: #f7f9fd;
+}
+
+.dnsRow strong {
+  color: #4d5874;
+
+  font-size: 12px;
+}
+
+.dnsRow code {
+  color: #33405f;
+
+  font-size: 13px;
+
+  overflow-wrap: anywhere;
+}
+
+
+/* WARNING */
+
+.warningBox {
+  margin-top: 25px;
+
+  padding: 20px 22px;
+
+  background: #fff8e8;
+
+  border: 1px solid #f4e3b5;
+
+  border-radius: 12px;
+}
+
+.warningBox strong {
+  color: #8b6914;
+}
+
+.warningBox p {
+  margin-bottom: 0;
+
+  color: #796735;
+}
+
+
+/* FINAL CTA */
+
+.finalCta {
+  margin-top: 20px;
+
+  padding: 50px 35px;
+
+  text-align: center;
+
+  border-radius: 20px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #eef2ff,
+      #f8faff
+    );
+}
+
+.finalCta h2 {
+  margin-top: 0;
+}
+
+.finalCta p {
+  max-width: 600px;
+
+  margin: 0 auto 28px;
+}
+
+
+/* BUTTON */
+
+.primaryButton {
+  display: inline-flex;
+
+  align-items: center;
+  justify-content: center;
+
+  min-height: 52px;
+
+  padding: 0 24px;
+
+  border-radius: 30px;
+
+  background: #2563eb;
+
+  color: #ffffff;
+
+  text-decoration: none;
+
+  font-weight: 700;
+
+  box-shadow:
+    0 10px 25px rgba(37, 99, 235, .18);
+}
+
+
+/* FOOTER */
+
+.footer {
+  display: flex;
+
+  justify-content: space-between;
+
+  align-items: center;
+
+  gap: 40px;
+
+  padding: 45px 9%;
+
+  border-top: 1px solid #e6e9f1;
+}
+
+.footer img {
+  width: 130px;
+}
+
+.footer p {
+  color: #7c86a2;
+
+  font-size: 13px;
+}
+
+.footerLinks {
+  display: flex;
+
+  gap: 24px;
+}
+
+.footerLinks a {
+  color: #66708d;
+
+  text-decoration: none;
+
+  font-size: 14px;
+
+  font-weight: 600;
+}
+
+
+/* RESPONSIVO */
+
+@media (max-width: 900px) {
+
+  .documentation {
+    grid-template-columns: 1fr;
+
+    padding: 60px 7%;
+  }
+
+  .sidebar {
+    position: static;
+
+    display: grid;
+
+    grid-template-columns: repeat(2, 1fr);
+
+    gap: 12px;
+
+    padding-bottom: 30px;
+
+    border-bottom: 1px solid #e6e9f1;
+  }
+
+  .sidebar strong {
+    grid-column: 1 / -1;
+  }
+
+}
+
+
+@media (max-width: 650px) {
+
+  .header {
+    height: auto;
+
+    padding: 20px;
+  }
+
+  .nav {
+    display: none;
+  }
+
+  .hero {
+    padding: 60px 20px;
+  }
+
+  .hero h1 {
+    font-size: 42px;
+
+    letter-spacing: -1px;
+  }
+
+  .hero p {
+    font-size: 16px;
+  }
+
+  .documentation {
+    padding: 45px 20px;
+  }
+
+  .sidebar {
+    grid-template-columns: 1fr;
+  }
+
+  .content section {
+    padding-bottom: 65px;
+  }
+
+  .content h2 {
+    font-size: 30px;
+  }
+
+  .codeBlock pre,
+  .codeBlockSmall pre {
+    font-size: 11px;
+  }
+
+  .dnsRow {
+    grid-template-columns: 1fr;
+
+    gap: 6px;
+  }
+
+  .dnsRow:first-child {
+    display: none;
+  }
+
+  .footer {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 40px 20px;
+  }
+
+  .footerLinks {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+}

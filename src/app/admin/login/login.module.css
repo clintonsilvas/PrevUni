@@ -1,0 +1,268 @@
+.container {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: #eef2fa;
+}
+
+/* =========================
+   LADO DO LOGIN
+========================= */
+
+.left {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+}
+
+.content {
+  width: 100%;
+  max-width: 480px;
+}
+
+.logo {
+  width: 180px;
+  margin-bottom: 56px;
+}
+
+.header {
+  margin-bottom: 40px;
+}
+
+.header h1 {
+  margin: 0 0 12px;
+  color: #232633;
+  font-size: 36px;
+  font-weight: 600;
+}
+
+.header p {
+  margin: 0;
+  color: #6b7799;
+  font-size: 16px;
+  font-weight: 500;
+}
+
+/* =========================
+   FORMULÁRIO
+========================= */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.field label {
+  color: #6b7799;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.field input {
+  width: 100%;
+  height: 64px;
+  padding: 0 20px;
+
+  border: 1px solid #d8dce6;
+  border-radius: 40px;
+
+  background: #ffffff;
+
+  color: #232633;
+  font-size: 16px;
+
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
+}
+
+.field input::placeholder {
+  color: #a1a8ba;
+}
+
+.field input:focus {
+  border-color: #2563eb;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.08);
+}
+
+.loginButton {
+  width: 100%;
+  height: 64px;
+
+  margin-top: 8px;
+
+  border: none;
+  border-radius: 40px;
+
+  background: #2563eb;
+  color: #ffffff;
+
+  font-size: 16px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition: background 0.2s, transform 0.2s;
+}
+
+.loginButton:hover {
+  background: #1d4ed8;
+}
+
+.loginButton:active {
+  transform: scale(0.99);
+}
+
+/* =========================
+   VOLTAR
+========================= */
+
+.back {
+  display: block;
+
+  margin-top: 32px;
+
+  text-align: center;
+
+  color: #6b7799;
+  font-size: 14px;
+  font-weight: 600;
+
+  text-decoration: none;
+}
+
+.back:hover {
+  color: #2563eb;
+}
+
+/* =========================
+   LADO DIREITO
+========================= */
+
+.right {
+  margin: 24px;
+
+  border-radius: 20px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 64px;
+
+  background:
+    linear-gradient(
+      219.69deg,
+      #fff5cc 0%,
+      #668eff 100.82%
+    );
+}
+
+.rightContent {
+  max-width: 500px;
+}
+
+.badge {
+  display: inline-block;
+
+  margin-bottom: 24px;
+  padding: 8px 14px;
+
+  border-radius: 20px;
+
+  background: rgba(255, 255, 255, 0.65);
+
+  color: #495580;
+
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.rightContent h2 {
+  margin: 0 0 20px;
+
+  color: #232633;
+
+  font-size: 42px;
+  line-height: 1.15;
+  font-weight: 600;
+}
+
+.rightContent p {
+  margin: 0;
+
+  color: #495580;
+
+  font-size: 17px;
+  line-height: 1.7;
+  font-weight: 500;
+}
+
+/* =========================
+   RESPONSIVO
+========================= */
+
+@media (max-width: 900px) {
+
+  .container {
+    display: block;
+  }
+
+  .left {
+    min-height: 100vh;
+    padding: 32px 24px;
+  }
+
+  .right {
+    display: none;
+  }
+
+  .content {
+    max-width: 520px;
+  }
+
+  .logo {
+    width: 160px;
+    margin-bottom: 48px;
+  }
+
+  .header h1 {
+    font-size: 32px;
+  }
+}
+
+@media (max-width: 480px) {
+
+  .left {
+    padding: 24px 20px;
+  }
+
+  .logo {
+    width: 140px;
+    margin-bottom: 40px;
+  }
+
+  .header {
+    margin-bottom: 32px;
+  }
+
+  .header h1 {
+    font-size: 28px;
+  }
+
+  .header p {
+    font-size: 15px;
+  }
+
+  .field input,
+  .loginButton {
+    height: 58px;
+  }
+}
