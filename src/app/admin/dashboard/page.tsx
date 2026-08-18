@@ -36,23 +36,18 @@ export default async function AdminDashboard() {
       </header>
 
       <section className={styles.content}>
-
         <div className={styles.sectionHeader}>
-
           <div>
             <h2>
               Instituições
             </h2>
-
             <p>
               Gerencie as instituições conectadas ao PrevUni.
             </p>
           </div>
 
         </div>
-
         <Instituicoes />
-
       </section>
 
     </main>

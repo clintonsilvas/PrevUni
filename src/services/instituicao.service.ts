@@ -3,14 +3,18 @@ import {Instituicao } from "@/interfaces/types"
 
 export class InstituicaoService {
   private firestore = new FirestoreService();
+  private colecao = "instituicoes";
 
   async buscarPorDominio(dominio: string) {
     const resultado = await this.firestore.buscarPorCampo<Instituicao>(
-      "instituicoes",
+      this.colecao,
       "dominio",
       dominio
     );
-
     return resultado.length ? resultado[0] : null;
   }
+
+  async listar(): Promise<Instituicao[]> {
+    return await this.firestore.listar<Instituicao>(this.colecao);
+  }  
 }

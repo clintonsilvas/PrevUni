@@ -1,60 +1,41 @@
 "use client";
 
-import { useState } from "react";
-
+import { useState, useEffect } from "react";
 import ModalInstituicao from "./ModalInstituicao";
-
 import styles from "./dashboard.module.css";
-
-interface Instituicao {
-  id: string;
-  nome: string;
-  sigla: string;
-  dominio: string;
-  api: string;
-  cidade: string;
-  estado: string;
-  ativa: boolean;
-}
-
-const instituicoesMock: Instituicao[] = [
-  {
-    id: "1",
-    nome: "Centro Universitário de exemplo",
-    sigla: "UNIFENAS",
-    dominio: "prevuni.unifenas.br",
-    api: "https://prevuni-api.netlify.app/get-data-prevuni",
-    cidade: "Alfenas",
-    estado: "MG",
-    ativa: true,
-  },
-  {
-    id: "2",
-    nome: "Universidade Exemplo",
-    sigla: "UNIV",
-    dominio: "prevuni.univ.br",
-    api: "https://universidade.br/api/prevuni",
-    cidade: "São Paulo",
-    estado: "SP",
-    ativa: true,
-  },
-];
+import {Instituicao} from "@/interfaces/types"
+import {InstituicaoService} from "@/services/instituicao.service"
 
 export default function Instituicoes() {
+  const [instituicoes, setInstituicoes] = useState<Instituicao[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [modalAberto, setModalAberto] =  useState(false);  
+  
+  useEffect(() => {
+    async function carregar() {
+      try {
+        const service = new InstituicaoService();
+        const dados = await service.listar();
+        setInstituicoes(dados);
+      } catch (error) {
+        console.error("Erro ao buscar instituições:", error);
+      } finally {
+        setCarregando(false);
+      }
+    }
+    carregar();
+  }, []);
 
-  const [modalAberto, setModalAberto] =
-    useState(false);
-
+  if (carregando) {
+    return <p>Carregando instituições...</p>;
+  }
   return (
     <>
-
       <div className={styles.toolbar}>
-
         <div className={styles.total}>
           <strong>
-            {instituicoesMock.length}
+            {instituicoes.length}
           </strong>
-
           <span>
             instituições cadastradas
           </span>
@@ -68,59 +49,33 @@ export default function Instituicoes() {
           <span>+</span>
           Adicionar instituição
         </button>
-
       </div>
 
       <div className={styles.cards}>
-
-        {instituicoesMock.map((instituicao) => (
-
+        {instituicoes.map((instituicao) => (
           <article
             key={instituicao.id}
             className={styles.card}
           >
-
             <div className={styles.cardTop}>
-
               <div className={styles.institutionIcon}>
                 {instituicao.sigla.substring(0, 2)}
               </div>
-
               <div className={styles.cardTitle}>
-
                 <h3>
                   {instituicao.nome}
                 </h3>
-
                 <span>
                   {instituicao.sigla}
                 </span>
-
-              </div>
-
-              <span
-                className={
-                  instituicao.ativa
-                    ? styles.statusActive
-                    : styles.statusInactive
-                }
-              >
-                <span className={styles.statusDot} />
-
-                {instituicao.ativa
-                  ? "Ativa"
-                  : "Inativa"}
-              </span>
-
+              </div>              
             </div>
 
             <div className={styles.info}>
-
               <div>
                 <span>
                   Domínio
                 </span>
-
                 <strong>
                   {instituicao.dominio}
                 </strong>
@@ -150,13 +105,9 @@ export default function Instituicoes() {
               >
                 Gerenciar
               </button>
-
             </div>
-
           </article>
-
         ))}
-
       </div>
 
       {modalAberto && (
