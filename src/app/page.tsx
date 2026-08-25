@@ -1,7 +1,19 @@
 import Link from "next/link";
 import styles from "./home.module.css";
+import { obterDominio } from "@/lib/dominio";
+import { InstituicaoService } from "@/services/instituicao.service";
+import { redirect } from "next/navigation";
 
-export default function Home() {
+export default async function Home() {
+
+  const dominio = await obterDominio();
+
+  const instituicaoService = new InstituicaoService();
+  const instituicao =
+    await instituicaoService.buscarPorDominio(dominio);
+  if (instituicao) {
+    redirect("/login");
+  }
   return (
     <main className={styles.page}>    
       <header className={styles.header}>

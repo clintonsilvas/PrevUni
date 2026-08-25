@@ -3,7 +3,7 @@ import { SessaoService } from "@/services/sessao.service";
 import { CursoService } from "@/services/curso.service";
 import CursosClient from "./CursosClient";
 
-export default async function Cursos() {
+export default async function Dashboard() {
   const sessaoService = new SessaoService();
   const sessao = await sessaoService.obterSessao();
 

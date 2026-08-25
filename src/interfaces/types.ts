@@ -9,6 +9,14 @@ export interface Instituicao {
   dominio:string;
 }
 
+export interface Admin {
+  id: string;
+  instituicaoId: string;
+  nome: string;
+  email: string;
+  matricula: string; //será usada como senha
+}
+
 export interface Coordernador {
   id: string;
   instituicaoId: string;

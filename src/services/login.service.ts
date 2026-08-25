@@ -2,9 +2,7 @@ import { FirestoreService } from "@/services/firestore.service";
 import { Coordernador, Professor } from "@/interfaces/types";
 
 export class LoginService {
-
   private firestore = new FirestoreService();
-
   async login(
     instituicaoId: string,
     email: string,

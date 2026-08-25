@@ -10,8 +10,7 @@ interface HeaderProps {
   usuarioNome: string;
 }
 
-const LINKS = [
-  { label: "Instituições", href: "/instituicoes" },
+const LINKS = [  
   { label: "Cursos", href: "/cursos" },
   { label: "Disciplinas", href: "/disciplinas" },
   { label: "Alunos", href: "/alunos" },

@@ -1,12 +1,12 @@
 import { cookies } from "next/headers";
 import { JwtService } from "./jwt.service";
 import { FirestoreService } from "./firestore.service";
-import { Coordernador, Professor } from "@/interfaces/types";
+import { Coordernador, Professor, Admin } from "@/interfaces/types";
 
 export interface Sessao {
   id: string;
   instituicaoId: string;
-  tipo: "coordenador" | "professor";
+  tipo: "coordenador" | "professor" | "admin";
   nome: string;
   email: string;
 }
@@ -31,22 +31,33 @@ export class SessaoService {
     const { id, instituicaoId, tipo } = payload as {
       id: string;
       instituicaoId: string;
-      tipo: "coordenador" | "professor";
+      tipo: "coordenador" | "professor" | "admin";
     };
 
-    const colecao = tipo === "coordenador" ? "coordenadores" : "professores";
+    const colecao =
+      tipo === "admin"
+        ? "admins"
+        : tipo === "coordenador"
+          ? "coordenadores"
+          : "professores";
 
-    const usuario = await this.firestore.buscar<Coordernador | Professor>(
+    const usuario = await this.firestore.buscar<
+      Coordernador | Professor | Admin
+    >(
       `instituicoes/${instituicaoId}/${colecao}`,
       id
     );
+
+    if (!usuario) {
+      return null;
+    }
 
     return {
       id,
       instituicaoId,
       tipo,
-      nome: usuario?.nome ?? "Usuário",
-      email: usuario?.email ?? "",
+      nome: usuario.nome,
+      email: usuario.email,
     };
   }
 }

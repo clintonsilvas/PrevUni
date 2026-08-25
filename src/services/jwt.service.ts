@@ -24,22 +24,14 @@ export class JwtService {
 
 
   async validarToken(token: string) {
-
     try {
-
       const { payload } = await jwtVerify(
         token,
         secret
       );
-
       return payload;
-
     } catch {
-
       return null;
-
     }
-
   }
-
 }
