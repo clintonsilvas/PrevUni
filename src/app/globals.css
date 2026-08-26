@@ -18,7 +18,10 @@
   --neutral-80B: #abb4cc;
   --neutral-90B: #cfd5e5;
   --neutral-100B: #eff2fa;
-  --white: #fff;  
+  --white: #fff;
+
+  --green-10: #dcfce7;
+  --green-60: #16a34a;
 }
 
 * {  

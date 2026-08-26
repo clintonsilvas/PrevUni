@@ -18,13 +18,10 @@ export default function LoginForm({
   ) {
     e.preventDefault();
     setErro("");
+    const formData = new FormData(e.currentTarget);
+    const email = formData.get("email");
+    const senha = formData.get("senha");
 
-    const formData =
-      new FormData(e.currentTarget);
-    const email =
-      formData.get("email");
-    const senha =
-      formData.get("senha");
     const response = await fetch(
       "/api/login",
       {
@@ -33,11 +30,13 @@ export default function LoginForm({
           "Content-Type": "application/json",
         },
 
-        body: JSON.stringify({          instituicaoId,          email, senha,
+        body: JSON.stringify({
+          instituicaoId,
+          email,
+          senha,
         }),
       }
     );
-
     const data =
       await response.json();
     if (!response.ok) {
@@ -46,7 +45,7 @@ export default function LoginForm({
       );
       return;
     }
-    router.push("/dashboard");
+    router.push("/cursos");
   }
   return (
     <form

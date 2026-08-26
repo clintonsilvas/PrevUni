@@ -32,6 +32,7 @@ export async function middleware(
 
 export const config = {
   matcher:[
-    "/dashboard/:path*"
+    "/dashboard/:path*",
+    "/cursos/:path*"
   ]
 };

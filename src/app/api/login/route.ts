@@ -8,10 +8,7 @@ export async function POST(request: NextRequest) {
     const {instituicaoId, email, senha} = await request.json();
 
     const loginService = new LoginService();
-
     const usuario = await loginService.login(instituicaoId,email,senha);
-
-
     const jwtService = new JwtService();
 
     const token = await jwtService.gerarToken({

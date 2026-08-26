@@ -1,0 +1,206 @@
+.app-header {
+  background-color: var(--white);
+  border-bottom: 1px solid var(--neutral-100B);
+  position: relative;
+}
+
+.app-header-top {
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  padding: 16px 40px;
+  position: relative;
+}
+
+.app-header-logo img {
+  height: 24px;
+}
+
+.app-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  flex: 1;
+}
+
+.app-header-link {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--neutral-60B);
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.app-header-link:hover {
+  color: var(--neutral-40B);
+}
+
+.app-header-link-active {
+  color: var(--primary-color);
+  font-weight: 700;
+}
+
+.app-header-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--neutral-90B);
+  border-radius: 999px;
+  padding: 8px 16px;
+  min-width: 220px;
+}
+
+.app-header-search input {
+  border: none;
+  outline: none;
+  font-size: 14px;
+  flex: 1;
+  min-width: 0;
+}
+
+.app-header-search button {
+  border: none;
+  background: none;
+  color: var(--neutral-60B);
+  display: flex;
+  cursor: pointer;
+}
+
+.app-header-avatar {
+  width: 40px;
+  height: 40px;
+  min-width: 40px;
+  border-radius: 999px;
+  border: none;
+  background-color: var(--blue-10S);
+  color: var(--primary-color);
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.app-header-menu-button {
+  display: none;
+  border: none;
+  background: none;
+  color: var(--neutral-40B);
+  cursor: pointer;
+}
+
+.app-header-options {
+  position: absolute;
+  top: 64px;
+  right: 40px;
+  background-color: var(--white);
+  border: 1px solid var(--neutral-100B);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(35, 38, 51, 0.12);
+  overflow: hidden;
+  z-index: 20;
+}
+
+.app-header-options button {
+  display: block;
+  width: 100%;
+  padding: 12px 20px;
+  border: none;
+  background: none;
+  text-align: left;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--neutral-40B);
+  cursor: pointer;
+}
+
+.app-header-options button:hover {
+  background-color: var(--neutral-100B);
+}
+
+.app-header-mobile-nav {
+  display: none;
+}
+
+.app-header-greeting {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .app-header-top {
+    padding: 16px 20px;
+    gap: 12px;
+  }
+
+  .app-header-nav,
+  .app-header-search,
+  .app-header-avatar {
+    display: none;
+  }
+
+  .app-header-logo {
+    flex: 1;
+  }
+
+  .app-header-menu-button {
+    display: flex;
+  }
+
+  .app-header-mobile-nav {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 20px 16px;
+    border-top: 1px solid var(--neutral-100B);
+    gap: 4px;
+  }
+
+  .app-header-mobile-nav .app-header-link {
+    padding: 12px 4px;
+  }
+
+  .app-header-mobile-logout {
+    margin-top: 8px;
+    border: none;
+    background: none;
+    text-align: left;
+    padding: 12px 4px;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--primary-color);
+    cursor: pointer;
+  }
+
+  .app-header-greeting {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 20px 0;
+    position: relative;
+  }
+
+  .app-header-greeting h1 {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--neutral-40B);
+  }
+
+  .app-header-greeting-actions {
+    position: relative;
+  }
+
+  .app-header-greeting-actions button {
+    width: 36px;
+    height: 36px;
+    border-radius: 999px;
+    border: none;
+    background-color: var(--neutral-100B);
+    color: var(--neutral-50B);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+  }
+
+  .app-header-options-mobile {
+    top: 44px;
+    right: 0;
+  }
+}
