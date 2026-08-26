@@ -1,5 +1,5 @@
 "use client";
-
+import Footer from "@/components/Footer/Footer"
 import { useMemo, useState } from "react";
 import Header from "@/components/header/header.component";
 import CourseCard from "@/components/courseCard/courseCard.component";
@@ -173,12 +173,7 @@ function CursosClient({ usuarioNome, cursos }: CursosClientProps) {
         )}
       </main>
 
-      <footer className="cursos-footer">
-        <p>2026 PrevUni - Todos os direitos reservados</p>
-        <div className="cursos-footer-logo">
-          <img src="/logo-prevuni.svg" alt="PrevUni" />
-        </div>
-      </footer>
+      <Footer></Footer>
     </>
   );
 }
