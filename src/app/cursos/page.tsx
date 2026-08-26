@@ -12,7 +12,7 @@ export default async function Dashboard() {
   }
 
   const cursoService = new CursoService();
-  const cursos = await cursoService.listarPorInstituicao(sessao.instituicaoId);
+  const cursos = await cursoService.listarPorSessao(sessao);
 
   return <CursosClient usuarioNome={sessao.nome} cursos={cursos} />;
 }

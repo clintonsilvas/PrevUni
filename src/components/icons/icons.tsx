@@ -125,3 +125,27 @@ export function ChevronDownIcon({ size = 16, className }: IconProps) {
     </svg>
   );
 }
+
+export function CsvIcon({ size = 24, className, alt = "" }: IconProps) {
+  return (
+    <img
+      src="/csv.svg"
+      width={size}
+      height={size}
+      className={className}
+      alt={alt}
+    />
+  );
+}
+
+export function PdfIcon({ size = 24, className, alt = "" }: IconProps) {
+  return (
+    <img
+      src="/pdf.svg"
+      width={size}
+      height={size}
+      className={className}
+      alt={alt}
+    />
+  );
+}
