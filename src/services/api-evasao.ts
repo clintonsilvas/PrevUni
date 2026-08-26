@@ -1,4 +1,5 @@
 export interface DadosAlunoInput {
+  id?: string;
   media_notas: number;
   taxa_aprovacao: number;
   total_ch_cumprida: number;
@@ -7,17 +8,18 @@ export interface DadosAlunoInput {
 }
 
 export interface RespostaPredicao {
+  id: string;
   probabilidade_evasao_percent: number;
   risco_alto: boolean;
 }
 
-export async function consultarRiscoAluno(aluno: DadosAlunoInput): Promise<RespostaPredicao> {
+export async function consultarRiscoAlunos(alunos: DadosAlunoInput[]): Promise<RespostaPredicao[]> {
   const response = await fetch('http://localhost:8000/prever-evasao', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    body: JSON.stringify(aluno),
+    body: JSON.stringify(alunos),
   });
 
   if (!response.ok) {
