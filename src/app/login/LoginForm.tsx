@@ -18,7 +18,7 @@ export default function LoginForm({
   ) {
     e.preventDefault();
     setErro("");
-    const formData =  new FormData(e.currentTarget);
+    const formData = new FormData(e.currentTarget);
     const email = formData.get("email");
     const senha = formData.get("senha");
 
@@ -45,7 +45,7 @@ export default function LoginForm({
       );
       return;
     }
-    router.push("/dashboard");
+    router.push("/cursos");
   }
   return (
     <form

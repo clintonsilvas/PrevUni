@@ -1,0 +1,60 @@
+.export-menu {
+    position: relative;
+    display: inline-flex;
+}
+
+.export-menu-trigger {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    border: 1px solid var(--blue-20S, #ccd9ff);
+    background: var(--blue-10S, #e5ecff);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--primary-color);
+}
+
+.export-menu-trigger:hover {
+    border-color: var(--primary-color);
+}
+
+.export-menu-options {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: 0;
+    background-color: var(--white);
+    border-radius: 16px;
+    box-shadow: 0 8px 24px rgba(35, 38, 51, 0.16);
+    padding: 8px;
+    display: flex;
+    flex-direction: column;
+    min-width: 220px;
+    z-index: 20;
+}
+
+.export-menu-options button {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    padding: 14px 12px;
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--neutral-40B);
+    text-align: left;
+    border-radius: 10px;
+}
+
+.export-menu-options button:hover {
+    background-color: var(--neutral-100B);
+}
+
+.export-menu-options button:first-child {
+    border-bottom: 1px solid var(--neutral-100B);
+    border-radius: 10px 10px 0 0;
+    margin-bottom: 2px;
+}

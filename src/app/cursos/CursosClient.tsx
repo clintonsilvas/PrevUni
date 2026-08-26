@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Header from "@/components/header/header.component";
 import CourseCard from "@/components/courseCard/courseCard.component";
 import Button from "@/components/button/button.component";
+import ExportMenu from "@/components/exportMenu/exportMenu.component";
 import {
   LupaIcon,
   SearchButtonIcon,
@@ -17,19 +18,12 @@ interface CursosClientProps {
   cursos: CursoResumo[];
 }
 
-type Ordenacao =
-  | "az"
-  | "mais-alunos"
-  | "engajamento-alto"
-  | "engajamento-medio"
-  | "engajamento-baixo";
+type Ordenacao = "az" | "mais-alunos" | "mais-disciplinas";
 
 const OPCOES_ORDENACAO: { valor: Ordenacao; label: string }[] = [
   { valor: "az", label: "(A-Z)" },
-  { valor: "mais-alunos", label: "Mais Alunos" },
-  { valor: "engajamento-alto", label: "Engajamento Alto" },
-  { valor: "engajamento-medio", label: "Engajamento Médio" },
-  { valor: "engajamento-baixo", label: "Engajamento Baixo" },
+  { valor: "mais-alunos", label: "Quantidade de Alunos" },
+  { valor: "mais-disciplinas", label: "Quantidade de Disciplinas" },
 ];
 
 function CursosClient({ usuarioNome, cursos }: CursosClientProps) {
@@ -39,7 +33,7 @@ function CursosClient({ usuarioNome, cursos }: CursosClientProps) {
   const cursosFiltrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
 
-    let resultado = cursos.filter((curso) => {
+    const resultado = cursos.filter((curso) => {
       if (!termo) return true;
       return (
         curso.nome.toLowerCase().includes(termo) ||
@@ -47,35 +41,56 @@ function CursosClient({ usuarioNome, cursos }: CursosClientProps) {
       );
     });
 
-    if (ordenacao === "engajamento-alto") {
-      resultado = resultado.filter((curso) => curso.engajamento >= 70);
-    } else if (ordenacao === "engajamento-medio") {
-      resultado = resultado.filter(
-        (curso) => curso.engajamento >= 40 && curso.engajamento < 70
-      );
-    } else if (ordenacao === "engajamento-baixo") {
-      resultado = resultado.filter((curso) => curso.engajamento < 40);
-    }
-
-    resultado = [...resultado].sort((a, b) => {
+    return [...resultado].sort((a, b) => {
       if (ordenacao === "mais-alunos") {
         return b.quantidadeAlunos - a.quantidadeAlunos;
       }
-      if (ordenacao.startsWith("engajamento")) {
-        return b.engajamento - a.engajamento;
+      if (ordenacao === "mais-disciplinas") {
+        return b.quantidadeDisciplinas - a.quantidadeDisciplinas;
       }
       return a.nome.localeCompare(b.nome, "pt-BR");
     });
-
-    return resultado;
   }, [busca, cursos, ordenacao]);
+
+  const colunasExport = useMemo(
+    () => [
+      { chave: "nome", label: "Curso" },
+      { chave: "coordenadorNome", label: "Coordenador" },
+      { chave: "quantidadeDisciplinas", label: "Disciplinas" },
+      { chave: "quantidadeAlunos", label: "Alunos" },
+      { chave: "quantidadeAlunosAtivos", label: "Alunos Ativos" },
+      { chave: "engajamento", label: "Engajamento (%)" },
+    ],
+    []
+  );
+
+  const dadosExport = useMemo(
+    () =>
+      cursosFiltrados.map((curso) => ({
+        nome: curso.nome,
+        coordenadorNome: curso.coordenadorNome,
+        quantidadeDisciplinas: curso.quantidadeDisciplinas,
+        quantidadeAlunos: curso.quantidadeAlunos,
+        quantidadeAlunosAtivos: curso.quantidadeAlunosAtivos,
+        engajamento: curso.engajamento,
+      })),
+    [cursosFiltrados]
+  );
 
   return (
     <>
       <Header usuarioNome={usuarioNome} />
 
       <main className="cursos-page">
-        <h1 className="cursos-title">Cursos</h1>
+        <div className="cursos-title-row">
+          <h1 className="cursos-title">Cursos</h1>
+
+          <ExportMenu
+            nomeArquivo="cursos"
+            colunas={colunasExport}
+            dados={dadosExport}
+          />
+        </div>
 
         <div className="cursos-search">
           <div className="cursos-search-input">
