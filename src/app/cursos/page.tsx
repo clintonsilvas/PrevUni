@@ -1,6 +1,5 @@
 import { redirect } from "next/navigation";
 import { SessaoService } from "@/services/sessao.service";
-import { CursoService } from "@/services/curso.service";
 import CursosClient from "./CursosClient";
 
 export default async function Dashboard() {
@@ -11,8 +10,5 @@ export default async function Dashboard() {
     redirect("/login");
   }
 
-  const cursoService = new CursoService();
-  const cursos = await cursoService.listarPorSessao(sessao);
-
-  return <CursosClient usuarioNome={sessao.nome} cursos={cursos} />;
+  return <CursosClient usuarioNome={sessao.nome} />;
 }
