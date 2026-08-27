@@ -13,8 +13,12 @@ export interface RespostaPredicao {
   risco_alto: boolean;
 }
 
+const API_URL = process.env.NODE_ENV === 'development'
+  ? 'http://127.0.0.1:8000'
+  : '/api/evasao';
+
 export async function consultarRiscoAlunos(alunos: DadosAlunoInput[]): Promise<RespostaPredicao[]> {
-  const response = await fetch('http://localhost:8000/prever-evasao', {
+  const response = await fetch(`${API_URL}/prever-evasao`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

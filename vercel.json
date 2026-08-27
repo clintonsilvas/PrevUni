@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/evasao/:path*",
+      "destination": "/api/evasao/index.py"
+    }
+  ]
+}
