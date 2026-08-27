@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Header from "@/components/header/header.component";
 import CourseCard from "@/components/courseCard/courseCard.component";
 import Button from "@/components/button/button.component";
@@ -15,7 +16,6 @@ import "./cursos.style.css";
 
 interface CursosClientProps {
   usuarioNome: string;
-  cursos: CursoResumo[];
 }
 
 type Ordenacao = "az" | "mais-alunos" | "mais-disciplinas";
@@ -26,9 +26,48 @@ const OPCOES_ORDENACAO: { valor: Ordenacao; label: string }[] = [
   { valor: "mais-disciplinas", label: "Quantidade de Disciplinas" },
 ];
 
-function CursosClient({ usuarioNome, cursos }: CursosClientProps) {
+function CursosClient({ usuarioNome }: CursosClientProps) {
+  const router = useRouter();
+
+  const [cursos, setCursos] = useState<CursoResumo[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
   const [ordenacao, setOrdenacao] = useState<Ordenacao>("az");
+
+  useEffect(() => {
+    async function buscarCursos() {
+      setCarregando(true);
+      setErro(null);
+
+      try {
+        const resposta = await fetch("/api/cursos");
+
+        if (resposta.status === 401) {
+          router.push("/login");
+          return;
+        }
+
+        const json = await resposta.json();
+
+        if (!resposta.ok || !json.success) {
+          throw new Error(
+            json.message ?? "Não foi possível carregar os cursos."
+          );
+        }
+
+        setCursos(json.data);
+      } catch {
+        setErro(
+          "Não foi possível carregar os cursos. Tente novamente em instantes."
+        );
+      } finally {
+        setCarregando(false);
+      }
+    }
+
+    buscarCursos();
+  }, [router]);
 
   const cursosFiltrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
@@ -160,16 +199,26 @@ function CursosClient({ usuarioNome, cursos }: CursosClientProps) {
           </label>
         </div>
 
-        <div className="cursos-grid">
-          {cursosFiltrados.map((curso) => (
-            <CourseCard key={curso.id} curso={curso} />
-          ))}
-        </div>
+        {carregando && <p className="cursos-status">Carregando cursos...</p>}
 
-        {cursosFiltrados.length === 0 && (
-          <p className="cursos-empty">
-            Nenhum curso encontrado para essa busca.
-          </p>
+        {!carregando && erro && (
+          <p className="cursos-status cursos-status-erro">{erro}</p>
+        )}
+
+        {!carregando && !erro && (
+          <>
+            <div className="cursos-grid">
+              {cursosFiltrados.map((curso) => (
+                <CourseCard key={curso.id} curso={curso} />
+              ))}
+            </div>
+
+            {cursosFiltrados.length === 0 && (
+              <p className="cursos-empty">
+                Nenhum curso encontrado para essa busca.
+              </p>
+            )}
+          </>
         )}
       </main>
 
