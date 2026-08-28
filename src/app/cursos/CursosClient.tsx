@@ -16,6 +16,7 @@ import "./cursos.style.css";
 
 interface CursosClientProps {
   usuarioNome: string;
+  tipoUsuario?: "coordenador" | "professor" | "admin";
 }
 
 type Ordenacao = "az" | "mais-alunos" | "mais-disciplinas";
@@ -26,7 +27,7 @@ const OPCOES_ORDENACAO: { valor: Ordenacao; label: string }[] = [
   { valor: "mais-disciplinas", label: "Quantidade de Disciplinas" },
 ];
 
-function CursosClient({ usuarioNome }: CursosClientProps) {
+function CursosClient({ usuarioNome, tipoUsuario }: CursosClientProps) {
   const router = useRouter();
 
   const [cursos, setCursos] = useState<CursoResumo[]>([]);
@@ -118,7 +119,7 @@ function CursosClient({ usuarioNome }: CursosClientProps) {
 
   return (
     <>
-      <Header usuarioNome={usuarioNome} />
+      <Header usuarioNome={usuarioNome} tipoUsuario={tipoUsuario} />
 
       <main className="cursos-page">
         <div className="cursos-title-row">

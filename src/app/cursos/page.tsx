@@ -10,5 +10,7 @@ export default async function Dashboard() {
     redirect("/login");
   }
 
-  return <CursosClient usuarioNome={sessao.nome} />;
+  return (
+    <CursosClient usuarioNome={sessao.nome} tipoUsuario={sessao.tipo} />
+  );
 }
