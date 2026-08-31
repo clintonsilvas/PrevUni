@@ -15,7 +15,7 @@ export interface RespostaPredicao {
 
 const API_URL = process.env.NODE_ENV === 'development'
   ? 'http://127.0.0.1:8000'
-  : '/api/evasao';
+  : 'https://prevuni.vercel.app';
 
 export async function consultarRiscoAlunos(alunos: DadosAlunoInput[]): Promise<RespostaPredicao[]> {
   const response = await fetch(`${API_URL}/prever-evasao`, {
@@ -27,6 +27,7 @@ export async function consultarRiscoAlunos(alunos: DadosAlunoInput[]): Promise<R
   });
 
   if (!response.ok) {
+    console.error(`Erro na requisição: ${response.status} ${response.statusText}`);
     throw new Error('Erro ao conectar com o serviço de IA');
   }
 
