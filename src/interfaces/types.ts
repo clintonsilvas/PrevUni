@@ -13,7 +13,7 @@ export interface Admin {
   id: string;
   instituicaoId: string;
   nome: string;
-  email: string;
+  email: string; 
   matricula: string; //será usada como senha
 }
 

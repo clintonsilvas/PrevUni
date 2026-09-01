@@ -1,6 +1,5 @@
 import { obterDominio } from "@/lib/dominio";
 import { InstituicaoService } from "@/services/instituicao.service";
-
 import LoginForm from "./LoginForm";
 
 import styles from "./login.module.css";
@@ -17,7 +16,6 @@ export default async function Login() {
     return <h1>Instituição não encontrada.</h1>;
   }
   return (
-
     <div className={styles.container}>
       <div className={styles.left}>
         <div className={styles.textform}>
@@ -32,8 +30,6 @@ export default async function Login() {
             <p>Insira seus dados abaixo!</p>
           </div>
         </div>
-
-
         <LoginForm
           instituicaoId={instituicao.id}
           styles={styles}

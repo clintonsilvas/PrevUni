@@ -31,3 +31,9 @@
   box-sizing: border-box;
 }
 
+html, body {  
+  min-height: 100vh;
+  overflow-x: hidden; /* Evita rolagem lateral apenas */
+  overflow-y: auto;   /* Libera a rolagem vertical */
+}
+

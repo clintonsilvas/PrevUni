@@ -1,7 +1,9 @@
 "use client";
 
+import Footer from "@/components/Footer/Footer";
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+
 import Header from "@/components/header/header.component";
 import CourseCard from "@/components/courseCard/courseCard.component";
 import Button from "@/components/button/button.component";
@@ -223,12 +225,7 @@ function CursosClient({ usuarioNome, tipoUsuario }: CursosClientProps) {
         )}
       </main>
 
-      <footer className="cursos-footer">
-        <p>2026 PrevUni - Todos os direitos reservados</p>
-        <div className="cursos-footer-logo">
-          <img src="/logo-prevuni.svg" alt="PrevUni" />
-        </div>
-      </footer>
+      <Footer></Footer>
     </>
   );
 }

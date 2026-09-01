@@ -1,7 +1,7 @@
 .container {
   display: grid;
   grid-template-columns: repeat(12, 1fr);
-  height: 100vh;
+  min-height: 100vh !important;
   background-color: #EEF2FA;
   gap: 16px;
   padding: 24px;  
@@ -128,10 +128,30 @@
   text-decoration: none;
   font-weight: 600;
 }
+.later {
+  display: flex;
+  flex-direction: row;
+  gap: 12px;
+}
+.field {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  gap: 4px;
+}
+
+/* Inverte a posição do painel: usado na tela de Cadastro */
+.inverso .left {
+  grid-column: 7 / span 5;  
+}
+
+.inverso .right {
+  grid-column: 1 / span 5 ;
+}
 
 
 @media (max-width: 768px) {
-    .container {
+  .container {
     display: flex;
     padding: 16px;
   }
@@ -154,3 +174,4 @@
   }
 
 }
+

@@ -9,7 +9,7 @@ export class JwtService {
   async gerarToken(payload: {
     id: string;
     instituicaoId: string;
-    tipo: "coordenador" | "professor";
+    tipo: "coordenador" | "professor" | "admin";
   }) {
 
     return await new SignJWT(payload)
