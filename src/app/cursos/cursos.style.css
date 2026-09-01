@@ -124,6 +124,16 @@
   gap: 16px;
 }
 
+.cursos-status {
+  margin-top: 24px;
+  color: var(--neutral-60B);
+  text-align: center;
+}
+
+.cursos-status-erro {
+  color: #b02a1e;
+}
+
 .cursos-empty {
   margin-top: 24px;
   color: var(--neutral-60B);

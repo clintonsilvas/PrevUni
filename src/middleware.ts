@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { JwtService } from "@/services/jwt.service";
 
+const REGRAS_DE_ACESSO: { rota: string; papeisPermitidos: string[] }[] = [
+  { rota: "/coordenadores", papeisPermitidos: ["admin"] },
+  { rota: "/professores", papeisPermitidos: ["admin", "coordenador"] },
+];
 
 export async function middleware(
   request: NextRequest
@@ -18,21 +22,37 @@ export async function middleware(
 
   const jwt = new JwtService();
 
-  const valido = await jwt.validarToken(token);
+  const sessao = await jwt.validarToken(token);
 
-
-  if (!valido) {
+  if (!sessao) {
     return NextResponse.redirect(
       new URL("/login", request.url)
     );
   }
+
+  const regraViolada = REGRAS_DE_ACESSO.find(
+    (regra) =>
+      request.nextUrl.pathname.startsWith(regra.rota) &&
+      !regra.papeisPermitidos.includes(sessao.tipo as string)
+  );
+
+  if (regraViolada) {
+    return NextResponse.redirect(
+      new URL("/cursos", request.url)
+    );
+  }
+
   return NextResponse.next();
 }
 
 
 export const config = {
-  matcher:[
+  matcher: [
     "/dashboard/:path*",
-    "/cursos/:path*"
+    "/cursos/:path*",
+    "/alunos/:path*",
+    "/disciplinas/:path*",
+    "/coordenadores/:path*",
+    "/professores/:path*"
   ]
 };

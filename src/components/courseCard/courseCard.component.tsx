@@ -31,7 +31,10 @@ function CourseCard({ curso }: CourseCardProps) {
         </span>
       </div>
 
-      <Link href={`/cursos/${curso.id}`} className="course-card-button">
+      <Link
+        href={`/disciplinas?cursoId=${curso.id}`}
+        className="course-card-button"
+      >
         Acessar
       </Link>
     </div>

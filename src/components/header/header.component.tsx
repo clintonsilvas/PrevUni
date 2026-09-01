@@ -11,17 +11,29 @@ interface HeaderProps {
   tipoUsuario?: "coordenador" | "professor" | "admin";
 }
 
-const LINKS = [  
+const LINKS = [
   { label: "Cursos", href: "/cursos" },
   { label: "Disciplinas", href: "/disciplinas" },
   { label: "Alunos", href: "/alunos" },
-  { label: "Coordenadores", href: "/coordenadores" },
-  { label: "Professores", href: "/professores" },
+  {
+    label: "Coordenadores",
+    href: "/coordenadores",
+    visivelPara: ["admin"],
+  },
+  {
+    label: "Professores",
+    href: "/professores",
+    visivelPara: ["admin", "coordenador"],
+  },
 ];
 
-function Header({ usuarioNome }: HeaderProps) {
+function Header({ usuarioNome, tipoUsuario }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
+
+  const links = LINKS.filter(
+    (link) => !link.visivelPara || link.visivelPara.includes(tipoUsuario ?? "")
+  );
 
   const [menuAberto, setMenuAberto] = useState(false);
   const [opcoesAbertas, setOpcoesAbertas] = useState(false);
@@ -49,7 +61,7 @@ function Header({ usuarioNome }: HeaderProps) {
         </Link>
 
         <nav className="app-header-nav">
-          {LINKS.map((link) => (
+          {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -95,7 +107,7 @@ function Header({ usuarioNome }: HeaderProps) {
 
       {menuAberto && (
         <nav className="app-header-mobile-nav">
-          {LINKS.map((link) => (
+          {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
