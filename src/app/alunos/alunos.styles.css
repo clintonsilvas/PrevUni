@@ -1,0 +1,314 @@
+.alunos-page {
+  width: 100%;
+  padding: 32px 5%;
+}
+
+/* Título */
+
+.alunos-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 28px;
+}
+
+.alunos-title {
+  margin: 0;
+  font-size: 32px;
+  font-weight: 700;
+}
+
+/* Busca */
+
+.alunos-search {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 24px;
+}
+
+.alunos-search-input {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  flex: 1;
+  height: 46px;
+
+  padding: 0 14px;
+
+  border: 1px solid #d9d9d9;
+  border-radius: 8px;
+
+  background: #fff;
+}
+
+.alunos-search-input input {
+  width: 100%;
+  height: 100%;
+
+  border: none;
+  outline: none;
+
+  font-size: 15px;
+  background: transparent;
+}
+
+.alunos-search-button button {
+  height: 46px;
+  padding: 0 24px;
+
+  border: none;
+  border-radius: 8px;
+
+  background: #000;
+  color: #fff;
+
+  font-size: 15px;
+  font-weight: 600;
+
+  cursor: pointer;
+}
+
+.alunos-search-submit-mobile {
+  display: none;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Toolbar */
+
+.alunos-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  margin-bottom: 24px;
+}
+
+.alunos-count {
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.alunos-sort-desktop {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.alunos-sort-desktop > span {
+  margin-right: 4px;
+  font-size: 14px;
+}
+
+.alunos-sort-pill {
+  padding: 7px 14px;
+
+  border: 1px solid #ddd;
+  border-radius: 20px;
+
+  background: #fff;
+
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.alunos-sort-pill-active {
+  background: #000;
+  color: #fff;
+  border-color: #000;
+}
+
+/* Mobile ordenação */
+
+.alunos-sort-mobile {
+  display: none;
+}
+
+/* Grid */
+
+.alunos-grid {
+  display: grid;
+
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(280px, 1fr)
+  );
+
+  gap: 18px;
+}
+
+/* Card */
+
+.aluno-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+
+  padding: 20px;
+
+  border: 1px solid #e5e5e5;
+  border-radius: 12px;
+
+  background: #fff;
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.aluno-card:hover {
+  transform: translateY(-2px);
+
+  box-shadow:
+    0 4px 14px rgba(0, 0, 0, 0.08);
+}
+
+.aluno-card-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  width: 48px;
+  height: 48px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #f1f1f1;
+
+  font-size: 22px;
+}
+
+.aluno-card-info {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+
+  min-width: 0;
+}
+
+.aluno-card-info h2 {
+  margin: 0;
+
+  font-size: 17px;
+  font-weight: 700;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aluno-card-info p {
+  margin: 0;
+
+  color: #666;
+
+  font-size: 13px;
+
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.aluno-card-info span {
+  color: #444;
+  font-size: 13px;
+}
+
+/* Estado vazio */
+
+.alunos-empty {
+  margin-top: 40px;
+
+  text-align: center;
+
+  color: #666;
+  font-size: 15px;
+}
+
+/* Responsivo */
+
+@media (max-width: 768px) {
+  .alunos-page {
+    padding: 24px 5%;
+  }
+
+  .alunos-title {
+    font-size: 26px;
+  }
+
+  .alunos-search-button {
+    display: none;
+  }
+
+  .alunos-search-submit-mobile {
+    display: block;
+  }
+
+  .alunos-toolbar {
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .alunos-sort-desktop {
+    display: none;
+  }
+
+  .alunos-sort-mobile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .alunos-sort-mobile > span {
+    font-size: 13px;
+  }
+
+  .alunos-sort-mobile-select {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .alunos-sort-mobile-select select {
+    appearance: none;
+
+    height: 34px;
+
+    padding: 0 28px 0 10px;
+
+    border: 1px solid #ddd;
+    border-radius: 7px;
+
+    background: #fff;
+
+    font-size: 13px;
+  }
+
+  .alunos-sort-mobile-select svg {
+    position: absolute;
+    right: 8px;
+
+    pointer-events: none;
+  }
+
+  .alunos-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 480px) {
+  .alunos-toolbar {
+    flex-direction: column;
+  }
+
+  .alunos-sort-mobile {
+    width: 100%;
+    justify-content: space-between;
+  }
+}

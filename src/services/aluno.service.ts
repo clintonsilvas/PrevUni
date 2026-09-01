@@ -7,7 +7,7 @@ export interface AlunoCompleto {
   curso: Curso | null;
   coordenador: Coordernador | null;
   disciplinas: Disciplina[];
-
+  matriculas: Matricula[]; 
 }
 
 function montarAlunosCompletos(
