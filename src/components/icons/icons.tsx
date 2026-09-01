@@ -149,3 +149,15 @@ export function PdfIcon({ size = 24, className, alt = "" }: IconProps) {
     />
   );
 }
+
+export function AlunoIcon({ size = 24, className, alt = "" }: IconProps) {
+  return (
+    <img
+      src="/Aluno.svg"
+      width={size}
+      height={size}
+      className={className}
+      alt={alt}
+    />
+  );
+}

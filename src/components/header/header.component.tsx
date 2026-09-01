@@ -8,6 +8,7 @@ import "./header.style.css";
 
 interface HeaderProps {
   usuarioNome: string;
+  tipoUsuario?: "coordenador" | "professor" | "admin";
 }
 
 const LINKS = [  
