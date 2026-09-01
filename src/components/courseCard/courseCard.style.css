@@ -57,10 +57,19 @@
   border-color: var(--blue-40S);
 }
 
+/* BOTÕES */
+.course-card-actions {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
 .course-card-button {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   min-height: 48px;
   border-radius: 999px;
   border: 1px solid var(--neutral-70B);

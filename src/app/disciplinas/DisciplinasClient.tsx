@@ -14,6 +14,7 @@ import {
 } from "@/components/icons/icons";
 import { DisciplinaResumo } from "@/services/disciplina.service";
 import "./disciplinas.style.css";
+import Footer from "@/components/Footer/Footer";
 
 interface DisciplinasClientProps {
     usuarioNome: string;
@@ -252,12 +253,7 @@ function DisciplinasClient({ usuarioNome, tipoUsuario }: DisciplinasClientProps)
                 )}
             </main>
 
-            <footer className="disciplinas-footer">
-                <p>2026 PrevUni - Todos os direitos reservados</p>
-                <div className="disciplinas-footer-logo">
-                    <img src="/logo-prevuni.svg" alt="PrevUni" />
-                </div>
-            </footer>
+            <Footer />
         </>
     );
 }

@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import AlunoCard from "@/components/alunoCard/alunoCard.component"; 
+import AlunoCard from "@/components/alunoCard/alunoCard.component";
 import Header from "@/components/header/header.component";
 import Footer from "@/components/Footer/Footer";
 import Button from "@/components/button/button.component";
@@ -47,12 +48,16 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
   const router = useRouter();
   const searchParams = useSearchParams();
   const cursoIdParam = searchParams.get("cursoId");
+  const disciplinaIdParam = searchParams.get("disciplinaId");
 
   const [alunos, setAlunos] = useState<AlunoCompleto[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
   const [ordenacao, setOrdenacao] = useState<Ordenacao>("az");
+
+  // Nome alternativo da disciplina vindo da API caso nenhum aluno seja encontrado
+  const [nomeDisciplinaApi, setNomeDisciplinaApi] = useState<string | null>(null);
 
   // Busca via API padronizada
   useEffect(() => {
@@ -85,24 +90,63 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
     buscarAlunos();
   }, [router]);
 
-  // Identifica o nome do curso filtrado pelo ID na URL
+  // Busca o nome da disciplina na API se houver disciplinaIdParam
+  useEffect(() => {
+    if (!disciplinaIdParam) return;
+
+    async function buscarNomeDisciplina() {
+      try {
+        const res = await fetch("/api/disciplinas");
+        const json = await res.json();
+        if (json.success) {
+          const disc = json.data.find((d: { id: string; nome: string }) => d.id === disciplinaIdParam);
+          if (disc) setNomeDisciplinaApi(disc.nome);
+        }
+      } catch {
+        // Falha silenciosa
+      }
+    }
+
+    buscarNomeDisciplina();
+  }, [disciplinaIdParam]);
+
+  // Identifica o nome do curso filtrado
   const nomeCursoFiltrado = useMemo(() => {
     if (!cursoIdParam) return null;
     const alunoComCurso = alunos.find((item) => item.curso?.id === cursoIdParam);
     return alunoComCurso?.curso?.nome ?? "Curso Selecionado";
   }, [alunos, cursoIdParam]);
 
-  // Filtro por texto e por cursoId da URL
+  // Identifica o nome da disciplina filtrada (prioriza os alunos, fallback para a API de disciplinas)
+  const nomeDisciplinaFiltrada = useMemo(() => {
+    if (!disciplinaIdParam) return null;
+    for (const item of alunos) {
+      const discEncontrada = item.disciplinas.find(
+        (d) => d.id === disciplinaIdParam
+      );
+      if (discEncontrada) return discEncontrada.nome;
+    }
+    return nomeDisciplinaApi ?? "Disciplina Selecionada";
+  }, [alunos, disciplinaIdParam, nomeDisciplinaApi]);
+
+  // Filtro por texto, cursoId ou disciplinaId
   const alunosFiltrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
 
-    const resultado = alunos.filter(({ aluno, curso }) => {
-      // Filtro da URL por cursoId
+    const resultado = alunos.filter(({ aluno, curso, disciplinas }) => {
+      // Filtro por cursoId
       if (cursoIdParam && curso?.id !== cursoIdParam) {
         return false;
       }
+      // Filtro por disciplinaId
+      if (
+        disciplinaIdParam &&
+        !disciplinas.some((disc) => disc.id === disciplinaIdParam)
+      ) {
+        return false;
+      }
 
-      // Filtro do campo de busca
+      // Filtro de busca
       if (!termo) return true;
       return (
         aluno.nome.toLowerCase().includes(termo) ||
@@ -117,16 +161,12 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
       }
       return a.aluno.nome.localeCompare(b.aluno.nome, "pt-BR");
     });
-  }, [alunos, busca, ordenacao, cursoIdParam]);
-
-  const limparFiltroCurso = () => {
-    router.push("/alunos");
-  };
+  }, [alunos, busca, ordenacao, cursoIdParam, disciplinaIdParam]);
 
   const colunasExport = useMemo(
     () => [
       { chave: "nome", label: "Aluno" },
-      { chave: "email", label: "Email" },      
+      { chave: "email", label: "Email" },
     ],
     []
   );
@@ -134,8 +174,8 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
   const dadosExport = useMemo(
     () =>
       alunosFiltrados.map((aluno) => ({
-        nome: aluno.aluno.nome,   
-        email: aluno.aluno.email,   
+        nome: aluno.aluno.nome,
+        email: aluno.aluno.email,
       })),
     [alunosFiltrados]
   );
@@ -154,15 +194,16 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
           />
         </div>
 
-        {/* Banner do Filtro de Curso vindo da URL */}
-        {cursoIdParam && (
-          <div className="alunos-filtro-aviso" style={{ display: "flex", alignItems: "center", gap: "10px", marginBottom: "16px" }}>
-            <span>Mostrando alunos do curso: <strong>{nomeCursoFiltrado}</strong></span>
-            <Button
-              style="secondary"
-              content="Limpar filtro"
-              onClickButton={limparFiltroCurso}
-            />
+        {/* Banner de Filtro padronizado igual Disciplinas */}
+        {(cursoIdParam || disciplinaIdParam) && (
+          <div className="alunos-filtro-ativo">
+            <span>
+              Mostrando alunos {cursoIdParam ? "do curso:" : "da disciplina:"}{" "}
+              <strong>
+                {cursoIdParam ? nomeCursoFiltrado : nomeDisciplinaFiltrada}
+              </strong>
+            </span>
+            <Link href="/alunos">Limpar filtro</Link>
           </div>
         )}
 
@@ -181,7 +222,7 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
             <Button
               style="primary"
               content="Pesquisar"
-              onClickButton={() => {}}
+              onClickButton={() => { }}
             />
           </div>
 
