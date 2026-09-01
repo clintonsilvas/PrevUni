@@ -32,7 +32,7 @@ function DisciplinaCard({ disciplina }: DisciplinaCardProps) {
             </div>
 
             <Link
-                href={`/disciplinas/${disciplina.id}`}
+                href={`/alunos?disciplinaId=${disciplina.id}`}
                 className="disciplina-card-button"
             >
                 Acessar

@@ -225,7 +225,7 @@ function CursosClient({ usuarioNome, tipoUsuario }: CursosClientProps) {
         )}
       </main>
 
-      <Footer></Footer>
+      <Footer />
     </>
   );
 }

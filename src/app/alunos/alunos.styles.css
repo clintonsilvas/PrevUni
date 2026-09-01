@@ -1,10 +1,8 @@
 .alunos-page {
   background-color: var(--neutral-100B);
   margin: 0px 16px;
-
   border-radius: 16px;
   border: 1px solid #e0e9ff;
-
   padding: 32px 40px 48px;
   min-height: calc(100vh - 73px - 48px);
 }
@@ -24,8 +22,34 @@
   margin-bottom: 0;
 }
 
+/* Filtro ativo idêntico ao de disciplinas */
+.alunos-filtro-ativo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background-color: var(--blue-10S);
+  border: 1px solid var(--blue-20S);
+  color: var(--primary-color);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.alunos-filtro-ativo strong {
+  color: var(--neutral-40B);
+}
+
+.alunos-filtro-ativo a {
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
 .alunos-search {
-   display: flex;
+  display: flex;
   padding: 12px 12px 12px 24px;
   justify-content: space-between;
   align-items: center;
@@ -61,7 +85,6 @@
   display: none;
 }
 
-
 .alunos-toolbar {
   display: flex;
   align-items: center;
@@ -84,7 +107,7 @@
   flex-wrap: wrap;
 }
 
-.alunos-sort-desktop > span {
+.alunos-sort-desktop>span {
   font-size: 14px;
   color: var(--neutral-60B);
   margin-right: 4px;
@@ -108,7 +131,6 @@
   color: var(--primary-color);
 }
 
-
 .alunos-sort-pill-active {
   background-color: #fff3c4;
   border-color: #fff3c4;
@@ -116,13 +138,12 @@
 }
 
 /* Mobile ordenação */
-
 .alunos-sort-mobile {
   display: none;
 }
 
 .alunos-grid {
-  display: row;  
+  display: row;
   justify-content: center;
   gap: 30px;
 }
@@ -135,7 +156,6 @@
 }
 
 /* Responsivo */
-
 @media (max-width: 768px) {
   .alunos-page {
     padding: 24px 5%;
@@ -168,7 +188,7 @@
     gap: 8px;
   }
 
-  .alunos-sort-mobile > span {
+  .alunos-sort-mobile>span {
     font-size: 13px;
   }
 
@@ -182,7 +202,7 @@
     appearance: none;
     height: 34px;
     padding: 0 28px 0 10px;
-    border: 1px solid #ddd;    
+    border: 1px solid #ddd;
     border-radius: 7px;
     background: #fff;
     font-size: 13px;
@@ -192,5 +212,5 @@
     position: absolute;
     right: 8px;
     pointer-events: none;
-  }  
+  }
 }

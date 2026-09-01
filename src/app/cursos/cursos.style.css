@@ -140,34 +140,6 @@
   text-align: center;
 }
 
-.cursos-footer {
-  text-align: center;
-  padding: 24px 20px;
-  color: var(--neutral-70B);
-  font-size: 13px;
-  border-top: 1px solid var(--neutral-100B);
-  background-color: var(--white);
-}
-
-.cursos-footer {
-  width: 100%;
-  height: 22px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  opacity: 1;
-}
-
-.cursos-footer-logo {
-  display: flex;
-  align-items: center;
-}
-
-.cursos-footer-logo img,
-.cursos-footer-logo svg {
-  height: 22px;
-  width: auto;
-}
 
 @media (max-width: 1200px) {
   .cursos-grid {
