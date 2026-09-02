@@ -1,5 +1,5 @@
 import { FirestoreService } from "./firestore.service";
-import {Instituicao } from "@/interfaces/types"
+import { Instituicao } from "@/interfaces/types"
 
 export class InstituicaoService {
   private firestore = new FirestoreService();
@@ -14,7 +14,11 @@ export class InstituicaoService {
     return resultado.length ? resultado[0] : null;
   }
 
+  async buscarPorId(id: string): Promise<Instituicao | null> {
+    return await this.firestore.buscar<Instituicao>(this.colecao, id);
+  }
+
   async listar(): Promise<Instituicao[]> {
     return await this.firestore.listar<Instituicao>(this.colecao);
-  }  
+  }
 }

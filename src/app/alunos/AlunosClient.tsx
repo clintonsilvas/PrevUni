@@ -56,6 +56,9 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
   const [busca, setBusca] = useState("");
   const [ordenacao, setOrdenacao] = useState<Ordenacao>("az");
 
+  // Nome alternativo do curso vindo da API caso nenhum aluno seja encontrado
+  const [nomeCursoApi, setNomeCursoApi] = useState<string | null>(null);
+
   // Nome alternativo da disciplina vindo da API caso nenhum aluno seja encontrado
   const [nomeDisciplinaApi, setNomeDisciplinaApi] = useState<string | null>(null);
 
@@ -90,6 +93,26 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
     buscarAlunos();
   }, [router]);
 
+  // Busca o nome do curso na API se houver cursoIdParam
+  useEffect(() => {
+    if (!cursoIdParam) return;
+
+    async function buscarNomeCurso() {
+      try {
+        const res = await fetch("/api/cursos");
+        const json = await res.json();
+        if (json.success) {
+          const curso = json.data.find((c: { id: string; nome: string }) => c.id === cursoIdParam);
+          if (curso) setNomeCursoApi(curso.nome);
+        }
+      } catch {
+        // Falha silenciosa
+      }
+    }
+
+    buscarNomeCurso();
+  }, [cursoIdParam]);
+
   // Busca o nome da disciplina na API se houver disciplinaIdParam
   useEffect(() => {
     if (!disciplinaIdParam) return;
@@ -110,12 +133,12 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
     buscarNomeDisciplina();
   }, [disciplinaIdParam]);
 
-  // Identifica o nome do curso filtrado
+  // Identifica o nome do curso filtrado (prioriza os alunos, fallback para a API de cursos)
   const nomeCursoFiltrado = useMemo(() => {
     if (!cursoIdParam) return null;
     const alunoComCurso = alunos.find((item) => item.curso?.id === cursoIdParam);
-    return alunoComCurso?.curso?.nome ?? "Curso Selecionado";
-  }, [alunos, cursoIdParam]);
+    return alunoComCurso?.curso?.nome ?? nomeCursoApi ?? "Curso não encontrado";
+  }, [alunos, cursoIdParam, nomeCursoApi]);
 
   // Identifica o nome da disciplina filtrada (prioriza os alunos, fallback para a API de disciplinas)
   const nomeDisciplinaFiltrada = useMemo(() => {
@@ -126,7 +149,7 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
       );
       if (discEncontrada) return discEncontrada.nome;
     }
-    return nomeDisciplinaApi ?? "Disciplina Selecionada";
+    return nomeDisciplinaApi ?? "Disciplina não encontrada";
   }, [alunos, disciplinaIdParam, nomeDisciplinaApi]);
 
   // Filtro por texto, cursoId ou disciplinaId

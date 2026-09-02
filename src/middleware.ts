@@ -53,6 +53,7 @@ export const config = {
     "/alunos/:path*",
     "/disciplinas/:path*",
     "/coordenadores/:path*",
-    "/professores/:path*"
+    "/professores/:path*",
+    "/meus-dados/:path*"
   ]
 };
