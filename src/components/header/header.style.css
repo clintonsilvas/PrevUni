@@ -99,7 +99,8 @@
   z-index: 20;
 }
 
-.app-header-options button {
+.app-header-options button,
+.app-header-options a {
   display: block;
   width: 100%;
   padding: 12px 20px;
@@ -110,9 +111,11 @@
   font-weight: 600;
   color: var(--neutral-40B);
   cursor: pointer;
+  text-decoration: none;
 }
 
-.app-header-options button:hover {
+.app-header-options button:hover,
+.app-header-options a:hover {
   background-color: var(--neutral-100B);
 }
 

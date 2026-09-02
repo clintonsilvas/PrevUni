@@ -100,6 +100,9 @@ function Header({ usuarioNome, tipoUsuario }: HeaderProps) {
 
         {opcoesAbertas && (
           <div className="app-header-options">
+            <Link href="/meus-dados" onClick={() => setOpcoesAbertas(false)}>
+              Meus dados
+            </Link>
             <button onClick={sair}>Sair</button>
           </div>
         )}
@@ -140,6 +143,9 @@ function Header({ usuarioNome, tipoUsuario }: HeaderProps) {
 
           {opcoesAbertas && (
             <div className="app-header-options app-header-options-mobile">
+              <Link href="/meus-dados" onClick={() => setOpcoesAbertas(false)}>
+                Meus dados
+              </Link>
               <button onClick={sair}>Sair</button>
             </div>
           )}
