@@ -10,15 +10,11 @@ export interface DadosAlunoInput {
 export interface RespostaPredicao {
   id: string;
   probabilidade_evasao_percent: number;
-  risco_alto: boolean;
+  nivel_risco: 'baixo' | 'moderado' | 'alto';
 }
 
-const API_URL = process.env.NODE_ENV === 'development'
-  ? 'http://127.0.0.1:8000'
-  : 'https://prevuni.vercel.app';
-
 export async function consultarRiscoAlunos(alunos: DadosAlunoInput[]): Promise<RespostaPredicao[]> {
-  const response = await fetch(`${API_URL}/prever-evasao`, {
+  const response = await fetch('https://prevuni.vercel.app/prever-evasao', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
