@@ -1,5 +1,5 @@
 import { FirestoreService } from "./firestore.service";
-import { Curso, Coordernador, Disciplina, Aluno, Matricula } from "@/interfaces/types";
+import { Curso, Coordernador, Disciplina, Aluno, Matricula, DadosEvasao } from "@/interfaces/types";
 import { Sessao } from "./sessao.service";
 
 export interface AlunoCompleto {
@@ -100,41 +100,41 @@ export class AlunoService {
    * coordenador tem visão completa dos alunos que coordena.
    */
   async listarParaCoordenador(
-  instituicaoId: string,
-  coordenadorId: string
-): Promise<AlunoCompleto[]> {
+    instituicaoId: string,
+    coordenadorId: string
+  ): Promise<AlunoCompleto[]> {
 
-  const base = `instituicoes/${instituicaoId}`;
+    const base = `instituicoes/${instituicaoId}`;
 
-  const [cursos, coordenadores, disciplinas, alunos, matriculas] =
-    await Promise.all([
-      this.firestore.listar<Curso>(`${base}/cursos`),
-      this.firestore.listar<Coordernador>(`${base}/coordenadores`),
-      this.firestore.listar<Disciplina>(`${base}/disciplinas`),
-      this.firestore.listar<Aluno>(`${base}/alunos`),
-      this.firestore.listar<Matricula>(`${base}/matriculas`),
-    ]);
+    const [cursos, coordenadores, disciplinas, alunos, matriculas] =
+      await Promise.all([
+        this.firestore.listar<Curso>(`${base}/cursos`),
+        this.firestore.listar<Coordernador>(`${base}/coordenadores`),
+        this.firestore.listar<Disciplina>(`${base}/disciplinas`),
+        this.firestore.listar<Aluno>(`${base}/alunos`),
+        this.firestore.listar<Matricula>(`${base}/matriculas`),
+      ]);
 
-  const cursosDoCoordenador = cursos.filter(
-    curso => curso.coordenadorId === coordenadorId
-  );
+    const cursosDoCoordenador = cursos.filter(
+      curso => curso.coordenadorId === coordenadorId
+    );
 
-  const cursoIds = new Set(
-    cursosDoCoordenador.map(curso => curso.id)
-  );
+    const cursoIds = new Set(
+      cursosDoCoordenador.map(curso => curso.id)
+    );
 
-  const alunosDoCoordenador = alunos.filter(
-    aluno => cursoIds.has(aluno.cursoId)
-  );
+    const alunosDoCoordenador = alunos.filter(
+      aluno => cursoIds.has(aluno.cursoId)
+    );
 
-  return montarAlunosCompletos(
-    alunosDoCoordenador,
-    cursosDoCoordenador,
-    coordenadores,
-    disciplinas,
-    matriculas
-  );
-}
+    return montarAlunosCompletos(
+      alunosDoCoordenador,
+      cursosDoCoordenador,
+      coordenadores,
+      disciplinas,
+      matriculas
+    );
+  }
 
   /**
    * Cursos que contêm ao menos uma disciplina lecionada pelo professor.
