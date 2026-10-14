@@ -4,7 +4,7 @@ import { logger } from "firebase-functions";
 
 export const preverEvasaoDiariamente = onSchedule(
   {
-    schedule: "55 16 * * *",
+    schedule: "15 22 * * *",
     timeZone: "America/Sao_Paulo",    
     timeoutSeconds: 540,
   },
