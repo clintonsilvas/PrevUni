@@ -1,5 +1,6 @@
 import "./alunoCard.style.css";
 import { AlunoIcon } from "../icons/icons";
+import { ProbabilidadeEvasao} from "../ProbabilidadeEvasaoAluno/ProbabilidadeEvasao"
 
 export interface AlunoCardProps {
   aluno: {
@@ -42,7 +43,7 @@ export default function AlunoCard({
 
       <div className="aluno-card-right">
         <div className="aluno-card-evasao">
-          <span>09%</span>
+          <ProbabilidadeEvasao alunoId={aluno.id} />
         </div>
         <button className="aluno-card-button">Acessar</button>
       </div>

@@ -170,4 +170,15 @@ export class EvasaoService {
       ),
     };
   }
+
+  async buscarUltimaEvasao(
+    instituicaoId: string,
+    alunoId: string
+  ): Promise<Evasao | null> {
+    return this.firestore.buscarUltimo<Evasao>(
+      `instituicoes/${instituicaoId}/evasao`,
+      "alunoId",
+      alunoId
+    );
+  }
 }
