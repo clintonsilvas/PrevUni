@@ -20,11 +20,13 @@ const LINKS = [
     href: "/coordenadores",
     visivelPara: ["admin"],
   },
-  {
+  /*
+{
     label: "Professores",
     href: "/professores",
     visivelPara: ["admin", "coordenador"],
   },
+*/ 
 ];
 
 function Header({ usuarioNome, tipoUsuario }: HeaderProps) {

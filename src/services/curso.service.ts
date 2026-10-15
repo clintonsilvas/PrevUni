@@ -218,4 +218,6 @@ export class CursoService {
     // admin (ou qualquer outro tipo futuro): visão completa
     return this.listarPorInstituicao(sessao.instituicaoId);
   }
+
+  
 }

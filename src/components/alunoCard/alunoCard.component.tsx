@@ -1,6 +1,5 @@
 import "./alunoCard.style.css";
 import { AlunoIcon } from "../icons/icons";
-import { ProbabilidadeEvasao} from "../ProbabilidadeEvasaoAluno/ProbabilidadeEvasao"
 
 export interface AlunoCardProps {
   aluno: {
@@ -16,6 +15,12 @@ export interface AlunoCardProps {
     id: string;
     nome: string;
   }[];
+  evasao?:{
+    id: string;    
+    alunoId: string;
+    probabilidadeEvasaoPercent: number;
+    nivelRisco: "baixo" | "medio" | "alto";
+  }  
   onClick?: () => void;
 }
 
@@ -23,6 +28,7 @@ export default function AlunoCard({
   aluno,
   curso,
   disciplinas = [],
+  evasao,
   onClick,
 }: AlunoCardProps) {
   const qtdDisciplinas = disciplinas.length;
@@ -43,7 +49,19 @@ export default function AlunoCard({
 
       <div className="aluno-card-right">
         <div className="aluno-card-evasao">
-          <ProbabilidadeEvasao alunoId={aluno.id} />
+          <p>
+            Probabilidade de Evasão:{" "}
+            {evasao
+              ? `${evasao.probabilidadeEvasaoPercent}%`
+              : "Não calculada"}
+          </p>
+
+          <p>
+            Risco:{" "}
+            {evasao
+              ? evasao.nivelRisco
+              : "Não calculado"}
+          </p>
         </div>
         <button className="aluno-card-button">Acessar</button>
       </div>

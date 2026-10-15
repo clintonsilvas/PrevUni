@@ -6,7 +6,7 @@ const REGRAS_DE_ACESSO: { rota: string; papeisPermitidos: string[] }[] = [
   { rota: "/professores", papeisPermitidos: ["admin", "coordenador"] },
 ];
 
-export async function middleware(
+export async function proxy(
   request: NextRequest
 ) {
 

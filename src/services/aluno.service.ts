@@ -65,28 +65,28 @@ export class AlunoService {
   
 
   async listarAlunosCompletos(
-  instituicaoId: string
-): Promise<AlunoCompleto[]> {
+    instituicaoId: string
+  ): Promise<AlunoCompleto[]> {
 
-  const base = `instituicoes/${instituicaoId}`;
+    const base = `instituicoes/${instituicaoId}`;
 
-  const [cursos, coordenadores, disciplinas, alunos, matriculas] =
-    await Promise.all([
-      this.firestore.listar<Curso>(`${base}/cursos`),
-      this.firestore.listar<Coordernador>(`${base}/coordenadores`),
-      this.firestore.listar<Disciplina>(`${base}/disciplinas`),
-      this.firestore.listar<Aluno>(`${base}/alunos`),
-      this.firestore.listar<Matricula>(`${base}/matriculas`),
-    ]);
+    const [cursos, coordenadores, disciplinas, alunos, matriculas] =
+      await Promise.all([
+        this.firestore.listar<Curso>(`${base}/cursos`),
+        this.firestore.listar<Coordernador>(`${base}/coordenadores`),
+        this.firestore.listar<Disciplina>(`${base}/disciplinas`),
+        this.firestore.listar<Aluno>(`${base}/alunos`),
+        this.firestore.listar<Matricula>(`${base}/matriculas`),
+      ]);
 
-  return montarAlunosCompletos(
-    alunos,
-    cursos,
-    coordenadores,
-    disciplinas,
-    matriculas
-  );
-}
+    return montarAlunosCompletos(
+      alunos,
+      cursos,
+      coordenadores,
+      disciplinas,
+      matriculas
+    );
+  }
   async listarParaAdmin(
     instituicaoId: string
   ): Promise<AlunoCompleto[]> {
@@ -205,5 +205,13 @@ export class AlunoService {
     }
   }
 
-  
+  async buscarDadosAluno(
+    instituicaoId: string,
+    alunoId: string
+  ): Promise<Aluno | null> {
+    return this.firestore.buscar<Aluno>(
+      `instituicoes/${instituicaoId}/evasao`,      
+      alunoId      
+    );
+  }
 }

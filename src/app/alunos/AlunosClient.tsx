@@ -38,6 +38,12 @@ interface AlunoCompleto {
   }[];
   matriculas: unknown[];
 }
+interface Evasao {
+  id: string;
+  alunoId: string;
+  probabilidadeEvasaoPercent: number;
+  nivelRisco: "baixo" | "medio" | "alto";
+}
 
 interface AlunosClientProps {
   usuarioNome: string;
@@ -51,6 +57,7 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
   const disciplinaIdParam = searchParams.get("disciplinaId");
 
   const [alunos, setAlunos] = useState<AlunoCompleto[]>([]);
+  const [evasoes, setEvasoes] = useState<Evasao[]>([]);
   const [carregando, setCarregando] = useState(true);
   const [erro, setErro] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
@@ -70,6 +77,7 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
 
       try {
         const resposta = await fetch("/api/alunos");
+        
 
         if (resposta.status === 401) {
           router.push("/login");
@@ -92,6 +100,35 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
 
     buscarAlunos();
   }, [router]);
+
+    useEffect(() => {
+    async function buscarEvasoes() {
+      try {
+        const url = cursoIdParam
+          ? `/api/cursos/evasao?cursoId=${cursoIdParam}`
+          : "/api/alunos/evasao";
+
+        const resposta = await fetch(url);
+
+      const json = await resposta.json();
+
+      console.log("STATUS:", resposta.status);
+      console.log("URL:", url);
+      console.log("RESPOSTA EVASÃO:", json);
+
+      if (!resposta.ok || !json.success) {
+        throw new Error(json.message ?? "Erro ao buscar evasões");
+      }
+
+      setEvasoes(json.data);
+      } catch (error) {
+        console.error("Erro ao buscar evasões:", error);
+        setEvasoes([]);
+      }
+    }
+
+    buscarEvasoes();
+  }, [cursoIdParam]);
 
   // Busca o nome do curso na API se houver cursoIdParam
   useEffect(() => {
@@ -312,14 +349,22 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
         {!carregando && !erro && (
           <>
             <div className="alunos-grid">
-              {alunosFiltrados.map((item) => (
-                <AlunoCard
-                  key={item.aluno.id}
-                  aluno={item.aluno}
-                  curso={item.curso}
-                  disciplinas={item.disciplinas}
-                />
-              ))}
+              {alunosFiltrados.map((item) => {
+                const evasao = evasoes.find(
+                  (e) => e.alunoId === item.aluno.id
+                );
+
+                return (
+                  <AlunoCard
+                    key={item.aluno.id}
+                    aluno={item.aluno}
+                    curso={item.curso}
+                    disciplinas={item.disciplinas}
+                    evasao={evasao}
+                    onClick={() => router.push(`/alunos/${item.aluno.id}`)}
+                  />
+                );
+              })}
             </div>
 
             {alunosFiltrados.length === 0 && (

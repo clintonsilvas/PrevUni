@@ -142,26 +142,48 @@ export class FirestoreService {
     await batch.commit();
   }
   async buscarUltimo<T>(
-  caminho: string,
-  campo: string,
-  valor: string
-): Promise<T | null> {
-  const consulta = query(
-    collection(db, caminho),
-    where(campo, "==", valor),
-    orderBy("data", "desc"),
-    limit(1)
-  );
+    caminho: string,
+    campo: string,
+    valor: string
+  ): Promise<T | null> {
+    const consulta = query(
+      collection(db, caminho),
+      where(campo, "==", valor),
+      orderBy("data", "desc"),
+      limit(1)
+    );
 
-  const snapshot = await getDocs(consulta);
+    const snapshot = await getDocs(consulta);
 
-  if (snapshot.empty) return null;
+    if (snapshot.empty) return null;
 
-  const documento = snapshot.docs[0];
+    const documento = snapshot.docs[0];
 
-  return {
-    id: documento.id,
-    ...documento.data(),
-  } as T;
-}
+    return {
+      id: documento.id,
+      ...documento.data(),
+    } as T;
+  }
+  async buscarPorLista<T>(
+    caminho: string,
+    campo: string,
+    valores: string[]
+  ): Promise<T[]> {
+    if (valores.length === 0) return [];
+    
+    const tamanhoBloco = 30;
+    const resultados: T[] = [];
+
+    for (let i = 0; i < valores.length; i += tamanhoBloco) {
+      const bloco = valores.slice(i, i + tamanhoBloco);
+      const q = query(collection(db, caminho), where(campo, "in", bloco));
+      const snapshot = await getDocs(q);
+
+      resultados.push(
+        ...snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as T))
+      );
+    }
+
+    return resultados;
+  }
 }
