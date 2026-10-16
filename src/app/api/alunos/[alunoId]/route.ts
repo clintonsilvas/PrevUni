@@ -4,12 +4,13 @@ import { AlunoService } from "@/services/aluno.service";
 import { SessaoService } from "@/services/sessao.service";
 
 export async function GET(
+  request: Request,
   { params }: { params: Promise<{ alunoId: string }> }
 ) {
-  try {  
+  try {
     const sessao = await new SessaoService().obterSessao();
 
-     if (!sessao) {
+    if (!sessao) {
       return NextResponse.json(
         { erro: "Não autenticado" },
         { status: 401 }
@@ -18,23 +19,19 @@ export async function GET(
 
     const { alunoId } = await params;
 
-    const resultado = new AlunoService().buscarDadosAluno(
+    const resultado = await new AlunoService().buscarDadosAluno(
       sessao.instituicaoId,
       alunoId
-    );    
-
+    );
 
     return NextResponse.json(resultado);
   } catch (error) {
-    console.error(
-      "Erro na buscar dados aluno",
-      error
-    );
+    console.error("Erro na buscar dados aluno", error);
 
     return NextResponse.json(
       {
         sucesso: false,
-        erro: "Erro:",
+        erro: "Erro",
       },
       { status: 500 }
     );

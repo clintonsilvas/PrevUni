@@ -209,8 +209,11 @@ export class AlunoService {
     instituicaoId: string,
     alunoId: string
   ): Promise<Aluno | null> {
+    console.log("instituicaoId:", instituicaoId);
+  console.log("alunoId:", alunoId);
+
     return this.firestore.buscar<Aluno>(
-      `instituicoes/${instituicaoId}/evasao`,      
+      `instituicoes/${instituicaoId}/alunos`,      
       alunoId      
     );
   }

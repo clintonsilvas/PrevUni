@@ -67,4 +67,5 @@ export class PrevisaoService {
 
     return Array.from(mapa.values());
   }
+  
 }
