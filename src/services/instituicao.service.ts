@@ -20,5 +20,52 @@ export class InstituicaoService {
 
   async listar(): Promise<Instituicao[]> {
     return await this.firestore.listar<Instituicao>(this.colecao);
+  } 
+
+  async criar(
+    dados: Omit<Instituicao, "id">
+  ): Promise<Instituicao> {
+
+    const id = crypto.randomUUID();
+
+    const instituicao: Instituicao = {
+      id,
+      ...dados,
+    };
+
+    await this.firestore.salvar(
+      this.colecao,
+      id,
+      instituicao
+    );
+
+    return instituicao;
+  }
+
+  async atualizar(
+    id: string,
+    dados: Partial<Omit<Instituicao, "id">>
+  ): Promise<Instituicao> {
+
+    const instituicaoExistente =
+      await this.buscarPorId(id);
+
+    if (!instituicaoExistente) {
+      throw new Error("Instituição não encontrada.");
+    }
+
+    const instituicaoAtualizada: Instituicao = {
+      ...instituicaoExistente,
+      ...dados,
+      id,
+    };
+
+    await this.firestore.salvar(
+      this.colecao,
+      id,
+      instituicaoAtualizada
+    );
+
+    return instituicaoAtualizada;
   }
 }
