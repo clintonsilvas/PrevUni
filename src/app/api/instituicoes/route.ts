@@ -1,10 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { InstituicaoService } from "@/services/instituicao.service";
-import { obterAdminAutenticado } from "@/lib/admin-auth";
+import { verificarAdminApi } from "@/lib/admin-auth-api";
 
 export async function GET() {
   try {
-    const admin = await obterAdminAutenticado();
+    const admin = await verificarAdminApi();
 
     if (!admin) {
       return NextResponse.json(
@@ -32,7 +32,7 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
-    const admin = await obterAdminAutenticado();
+    const admin = await verificarAdminApi();
 
     if (!admin) {
       return NextResponse.json(

@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import ModalInstituicao from "./ModalInstituicao";
+import ModalIntegracao from "./ModalIntegracao";
 import styles from "./dashboard.module.css";
 import {Instituicao} from "@/interfaces/types"
 import { useRouter } from "next/navigation";
@@ -10,8 +11,10 @@ export default function Instituicoes() {
   const router = useRouter();
   const [instituicoes, setInstituicoes] = useState<Instituicao[]>([]);
   const [carregando, setCarregando] = useState(true);
-  const [modalAberto, setModalAberto] =  useState(false);  
+  const [modalInstituicaoAberto, setModalInstituicaoAberto] = useState(false);
+  const [modalIntegracaoAberto, setModalIntegracaoAberto] = useState(false);
   const [instituicaoEditando, setInstituicaoEditando] = useState<Instituicao | null>(null);
+  const [instituicaoIntegracao, setInstituicaoIntegracao] = useState<Instituicao | null>(null);
   const [erro, setErro] = useState<string | null>(null);
 
   useEffect(() => {
@@ -54,10 +57,10 @@ export default function Instituicoes() {
         <button
           type="button"
           className={styles.addButton}
-          onClick={() => {setModalAberto(true);
+          onClick={() => {
             setInstituicaoEditando(null);
-          }
-          }
+            setModalInstituicaoAberto(true);
+          }}
         >
           <span>+</span>
           Adicionar instituição
@@ -111,13 +114,23 @@ export default function Instituicoes() {
               <span className={styles.api}>
                 API configurada
               </span>
+              <button
+                type="button"
+                className={styles.manageButton}
+                onClick={() => {
+                  setInstituicaoIntegracao(instituicao);
+                  setModalIntegracaoAberto(true);
+                }}
+              >
+                Verificar Integracao
+              </button>
 
               <button
                 type="button"
                 className={styles.manageButton}
                 onClick={() => {
                   setInstituicaoEditando(instituicao);
-                  setModalAberto(true);
+                  setModalInstituicaoAberto(true);
                 }}
               >
                 Gerenciar
@@ -127,11 +140,11 @@ export default function Instituicoes() {
         ))}
       </div>
 
-      {modalAberto && (
+      {modalInstituicaoAberto && (
         <ModalInstituicao
           instituicao={instituicaoEditando}
           fechar={() => {
-            setModalAberto(false);
+            setModalInstituicaoAberto(false)
             setInstituicaoEditando(null);
           }}
           salvo={async () => {
@@ -149,8 +162,17 @@ export default function Instituicoes() {
             }
 
             setInstituicoes(json.data);
-            setModalAberto(false);
+            setModalInstituicaoAberto(false);
             setInstituicaoEditando(null);
+          }}
+        />
+      )}
+      {modalIntegracaoAberto && (
+        <ModalIntegracao
+          instituicao={instituicaoIntegracao}
+          fechar={() => {
+            setModalIntegracaoAberto(false);
+            setInstituicaoIntegracao(null);
           }}
         />
       )}
