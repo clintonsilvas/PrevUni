@@ -1,0 +1,129 @@
+
+.container {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  height: 480px;
+  border: 1px solid #e2e5e9;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border-bottom: 1px solid #e2e5e9;
+}
+
+.header h2 {
+  margin: 0;
+  font-size: 18px;
+}
+
+.header p {
+  margin: 5px 0 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.status {
+  padding: 5px 9px;
+  border-radius: 20px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 12px;
+}
+
+.mensagens {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.mensagemIA,
+.mensagemUsuario {
+  max-width: 85%;
+  padding: 11px 13px;
+  border-radius: 12px;
+  overflow-wrap: anywhere;
+}
+
+.mensagemIA {
+  align-self: flex-start;
+  background: #f1f5f9;
+  color: #1f2937;
+}
+
+.mensagemUsuario {
+  align-self: flex-end;
+  background: #2563eb;
+  color: #fff;
+}
+
+.autor {
+  display: block;
+  margin-bottom: 5px;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.mensagemIA p,
+.mensagemUsuario p {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+}
+
+.formulario {
+  display: flex;
+  gap: 8px;
+  padding: 12px;
+  border-top: 1px solid #e2e5e9;
+}
+
+.formulario input {
+  flex: 1;
+  min-width: 0;
+  padding: 11px;
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  outline: none;
+}
+
+.formulario input:focus {
+  border-color: #2563eb;
+}
+
+.formulario button {
+  padding: 0 16px;
+  border: none;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #fff;
+  cursor: pointer;
+}
+
+.formulario button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+@media (max-width: 480px) {
+  .container {
+    height: 430px;
+  }
+
+  .mensagemIA,
+  .mensagemUsuario {
+    max-width: 95%;
+  }
+}

@@ -3,6 +3,7 @@ import { HistoricoEvasao } from "@/components/HistoricoEvasao/HistoricoEvasao";
 
 import Footer from "@/components/Footer/Footer";
 import Header from "@/components/header/header.component";
+import { AssistenteAluno } from "./AssistenteAluno";
 import { SessaoService } from "@/services/sessao.service";
 import { redirect } from "next/navigation";
 
@@ -34,6 +35,8 @@ export default async function AlunoPage({ params }: PageProps) {
           <div className={styles.historicoEvasao}>
             <HistoricoEvasao alunoId={alunoId} />
           </div>
+
+          <AssistenteAluno alunoId={alunoId} />
         </main>
       <Footer></Footer>
     </>    

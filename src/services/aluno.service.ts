@@ -208,13 +208,66 @@ export class AlunoService {
   async buscarDadosAluno(
     instituicaoId: string,
     alunoId: string
-  ): Promise<Aluno | null> {
-    console.log("instituicaoId:", instituicaoId);
-  console.log("alunoId:", alunoId);
-
+  ): Promise<Aluno | null> {   
     return this.firestore.buscar<Aluno>(
       `instituicoes/${instituicaoId}/alunos`,      
       alunoId      
     );
+  }
+
+  async buscarAlunoCompletoPorId(
+    instituicaoId: string,
+    alunoId: string
+  ): Promise<AlunoCompleto | null> {
+    const base = `instituicoes/${instituicaoId}`;
+
+    const aluno = await this.firestore.buscar<Aluno>(
+      `${base}/alunos`,
+      alunoId
+    );
+
+    if (!aluno) return null;
+
+    const [matriculas, curso] = await Promise.all([
+      this.firestore.buscarPorCampo<Matricula>(
+        `${base}/matriculas`,
+        "alunoId",
+        alunoId
+      ),
+      this.firestore.buscar<Curso>(
+        `${base}/cursos`,
+        aluno.cursoId
+      ),
+    ]);
+
+    const disciplinaIds = [...new Set(
+      matriculas.map(m => m.disciplinaId)
+    )];
+
+    const disciplinas = (
+      await Promise.all(
+        disciplinaIds.map(id =>
+          this.firestore.buscar<Disciplina>(
+            `${base}/disciplinas`,
+            id
+          )
+        )
+      )
+    ).filter((d): d is Disciplina => d !== null);
+
+    const coordenador = curso
+      ? await this.firestore.buscar<Coordernador>(
+          `${base}/coordenadores`,
+          curso.coordenadorId
+        )
+      : null;
+
+    return montarAlunosCompletos(
+      [aluno],
+      curso ? [curso] : [],
+      coordenador ? [coordenador] : [],
+      disciplinas,
+      matriculas
+    )[0] ?? null;
   }
 }
