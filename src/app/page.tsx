@@ -8,9 +8,13 @@ export default async function Home() {
 
   const dominio = await obterDominio();
 
+  console.log("Domínio recebido:", dominio);
+
   const instituicaoService = new InstituicaoService();
   const instituicao =
     await instituicaoService.buscarPorDominio(dominio);
+
+  console.log("Instituição encontrada:", instituicao);
   if (instituicao) {
     redirect("/login");
   }
