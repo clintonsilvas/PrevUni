@@ -96,21 +96,6 @@
   background: #1d4ed8;
 }
 
-.googleButton {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;  
-  border: 1px solid #8F98B2;
-  color: #495580;
-  font-size: 16px ;
-  font-weight: 600;
-}
-
-.googleButton img {
-  width: 20px;
-  height: 20px;
-}
 .divider {
   margin: 32px 0 24px;
   border: none;
@@ -175,3 +160,74 @@
 
 }
 
+.errorContainer {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 30px 20px;
+  background: #f8fafc;
+  text-align: center;
+}
+
+.errorContainer .logo {
+  width: 150px;
+  margin-bottom: 45px;
+}
+
+.errorContent {
+  max-width: 520px;
+}
+
+.errorContent h1 {
+  font-size: 28px;
+  color: #1e293b;
+  margin-bottom: 18px;
+}
+
+.errorContent p {
+  color: #64748b;
+  font-size: 15px;
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.errorActions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 30px;
+  flex-wrap: wrap;
+}
+
+.primaryButton,
+.secondaryButton {
+  padding: 12px 22px;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: 0.2s;
+}
+
+.primaryButton {
+  background: #2563eb;
+  color: white;
+  border: none;
+}
+
+.primaryButton:hover {
+  background: #1d4ed8;
+}
+
+.secondaryButton {
+  background: white;
+  color: #475569;
+  border: 1px solid #cbd5e1;
+}
+
+.secondaryButton:hover {
+  background: #f1f5f9;
+}

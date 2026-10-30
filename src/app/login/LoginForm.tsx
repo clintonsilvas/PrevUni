@@ -79,17 +79,7 @@ export default function LoginForm({
           className={styles.loginButton}
         >
           Entrar
-        </button>
-        <button
-          type="button"
-          className={styles.googleButton}
-        >
-          <img
-            src="/google.svg"
-            alt=""
-          />
-          Entrar com Google
-        </button>
+        </button>        
       </div>
     </form>
   );
