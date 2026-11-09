@@ -195,3 +195,74 @@
         padding: 20px;
     }
 }
+
+/* Skeleton de carregamento */
+
+.skeleton {
+    background: linear-gradient(
+        90deg,
+        #edf0f5 25%,
+        #f7f8fa 50%,
+        #edf0f5 75%
+    );
+    background-size: 200% 100%;
+    animation: skeleton-loading 1.5s infinite;
+    border-radius: 8px;
+}
+
+.skeleton-card {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.skeleton-titulo {
+    width: 45%;
+    height: 16px;
+}
+
+.skeleton-avatar {
+    width: 76px;
+    height: 76px;
+    border-radius: 50%;
+    align-self: center;
+}
+
+.skeleton-linha {
+    width: 100%;
+    height: 40px;
+}
+
+.skeleton-icone {
+    width: 44px;
+    height: 44px;
+    min-width: 44px;
+    border-radius: 12px;
+}
+
+.skeleton-conteudo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.skeleton-numero {
+    width: 55px;
+    height: 24px;
+}
+
+.skeleton-texto {
+    width: 85px;
+    height: 13px;
+}
+
+@keyframes skeleton-loading {
+    from {
+        background-position: 200% 0;
+    }
+
+    to {
+        background-position: -200% 0;
+    }
+}
