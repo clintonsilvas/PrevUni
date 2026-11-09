@@ -34,6 +34,7 @@ export class PrevisaoService {
 
     return this.ultimaEvasaoPorAluno(evasoes);
   }
+
   async buscarHistoricoEvasaoAlunos(
     instituicaoId: string
   ): Promise<Evasao[]> {
@@ -57,10 +58,10 @@ export class PrevisaoService {
     for (const evasao of evasoes) {
       const atual = mapa.get(evasao.alunoId);
 
-      if (
-        !atual ||
-        new Date(evasao.data).getTime() > new Date(atual.data).getTime()
-      ) {
+      const dataNova = evasao.data.toMillis();
+      const dataAtual = atual ? atual.data.toMillis() : 0;
+
+      if (!atual || dataNova > dataAtual) {
         mapa.set(evasao.alunoId, evasao);
       }
     }

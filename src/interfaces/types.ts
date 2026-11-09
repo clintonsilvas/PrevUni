@@ -1,3 +1,4 @@
+import { Timestamp } from "firebase/firestore";
 export interface Instituicao {
   id: string;
   nome: string;
@@ -111,7 +112,7 @@ export interface Evasao {
   probabilidadeEvasaoPercent: number;
   nivelRisco: "baixo" | "medio" | "alto";
 
-  data: Date;
+  data: Timestamp;
 
   // Guarda os dados que foram enviados para a RNA
   dadosEntrada: {
