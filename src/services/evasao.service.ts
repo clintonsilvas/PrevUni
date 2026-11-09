@@ -1,5 +1,6 @@
 import { FirestoreService } from "./firestore.service";
 import { DadosEvasao, Evasao, Aluno, Curso, Disciplina, Matricula } from "@/interfaces/types";
+import { Timestamp } from "firebase/firestore";
 
 interface ResultadoRNA {
   id: string;
@@ -49,7 +50,7 @@ export class EvasaoService {
           alunoId: resultado.id,
           probabilidadeEvasaoPercent:  resultado.probabilidade_evasao_percent,
           nivelRisco: resultado.nivel_risco,
-          data: new Date(),
+          data: Timestamp.now(),
           dadosEntrada: {
             media_notas: entrada?.media_notas ?? 0,
             taxa_aprovacao: entrada?.taxa_aprovacao ?? 0,
@@ -86,9 +87,7 @@ export class EvasaoService {
     return registros
       .filter((registro) => registro.alunoId === alunoId)
       .sort(
-        (a, b) =>
-          new Date(b.data).getTime() -
-          new Date(a.data).getTime()
+    (a, b) => b.data.toMillis() - a.data.toMillis()
       );
   }
 
