@@ -77,7 +77,7 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
 
       try {
         const resposta = await fetch("/api/alunos");
-        
+
 
         if (resposta.status === 401) {
           router.push("/login");
@@ -101,7 +101,7 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
     buscarAlunos();
   }, [router]);
 
-    useEffect(() => {
+  useEffect(() => {
     async function buscarEvasoes() {
       try {
         const url = cursoIdParam
@@ -110,17 +110,17 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
 
         const resposta = await fetch(url);
 
-      const json = await resposta.json();
+        const json = await resposta.json();
 
-      console.log("STATUS:", resposta.status);
-      console.log("URL:", url);
-      console.log("RESPOSTA EVASÃO:", json);
+        console.log("STATUS:", resposta.status);
+        console.log("URL:", url);
+        console.log("RESPOSTA EVASÃO:", json);
 
-      if (!resposta.ok || !json.success) {
-        throw new Error(json.message ?? "Erro ao buscar evasões");
-      }
+        if (!resposta.ok || !json.success) {
+          throw new Error(json.message ?? "Erro ao buscar evasões");
+        }
 
-      setEvasoes(json.data);
+        setEvasoes(json.data);
       } catch (error) {
         console.error("Erro ao buscar evasões:", error);
         setEvasoes([]);
@@ -227,19 +227,30 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
     () => [
       { chave: "nome", label: "Aluno" },
       { chave: "email", label: "Email" },
+      { chave: "evasao", label: "Probabilidade de Evasão" },
+      { chave: "risco", label: "Risco" },
     ],
     []
   );
 
   const dadosExport = useMemo(
     () =>
-      alunosFiltrados.map((aluno) => ({
-        nome: aluno.aluno.nome,
-        email: aluno.aluno.email,
-      })),
-    [alunosFiltrados]
-  );
+      alunosFiltrados.map((item) => {
+        const evasao = evasoes.find((e) => e.alunoId === item.aluno.id);
 
+        return {
+          nome: item.aluno.nome,
+          email: item.aluno.email,
+          evasao: evasao
+            ? `${evasao.probabilidadeEvasaoPercent.toFixed(2)}%`
+            : "-",
+          risco: evasao
+            ? evasao.nivelRisco.charAt(0).toUpperCase() + evasao.nivelRisco.slice(1)
+            : "-",
+        };
+      }),
+    [alunosFiltrados, evasoes]
+  );
   return (
     <>
       <Header usuarioNome={usuarioNome} tipoUsuario={tipoUsuario} />
