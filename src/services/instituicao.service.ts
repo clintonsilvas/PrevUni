@@ -20,7 +20,7 @@ export class InstituicaoService {
 
   async listar(): Promise<Instituicao[]> {
     return await this.firestore.listar<Instituicao>(this.colecao);
-  } 
+  }
 
   async criar(
     dados: Omit<Instituicao, "id">
@@ -111,7 +111,7 @@ export class InstituicaoService {
         typeof instituicao.sigla !== "string" ||
         typeof instituicao.cnpj !== "string" ||
         typeof instituicao.cidade !== "string" ||
-        typeof instituicao.estado !== "string" ||        
+        typeof instituicao.estado !== "string" ||
         typeof instituicao.dominio !== "string"
       ) {
         return {
@@ -223,7 +223,7 @@ export class InstituicaoService {
           typeof aluno.email !== "string" ||
           typeof aluno.cursoId !== "string" ||
           typeof aluno.periodoAtual !== "number" ||
-          typeof aluno.status !== "string" ||
+          // typeof aluno.status !== "string" ||
           typeof aluno.dataIngresso !== "string" &&
           !(aluno.dataIngresso instanceof Date)
         ) {
@@ -233,15 +233,15 @@ export class InstituicaoService {
           };
         }
 
-        if (
-          aluno.status !== "ativo" &&
-          aluno.status !== "inativo"
-        ) {
-          return {
-            valida: false,
-            mensagem: "Status de aluno inválido.",
-          };
-        }
+        // if (
+        //   aluno.status !== "ativo" &&
+        //   aluno.status !== "inativo"
+        // ) {
+        //   return {
+        //     valida: false,
+        //     mensagem: "Status de aluno inválido.",
+        //   };
+        // }
       }
 
       // Matrículas
