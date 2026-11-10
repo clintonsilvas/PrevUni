@@ -242,7 +242,7 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
           nome: item.aluno.nome,
           email: item.aluno.email,
           evasao: evasao
-            ? `${evasao.probabilidadeEvasaoPercent.toFixed(2)}%`
+            ? `${(evasao.probabilidadeEvasaoPercent ?? 0).toFixed(2)}%`
             : "-",
           risco: evasao
             ? evasao.nivelRisco.charAt(0).toUpperCase() + evasao.nivelRisco.slice(1)
