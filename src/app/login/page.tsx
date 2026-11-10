@@ -9,8 +9,8 @@ export default async function Login() {
 
   const dominio = await obterDominio();
   const instituicaoService = new InstituicaoService();
-  const instituicao =
-    await instituicaoService.buscarPorDominio(dominio);
+  const instituicao =  await instituicaoService.buscarPorDominio(dominio);
+  console.log(instituicao?.id)
 
     if (!instituicao) {
     return (
