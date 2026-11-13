@@ -1,0 +1,157 @@
+.container {
+  width: 100%;
+  padding: 28px;
+  background: var(--white);
+  border: 1px solid var(--neutral-90B);
+  border-radius: 16px;
+  box-sizing: border-box;
+  color: var(--neutral-40B);
+}
+
+.cabecalho {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.avatar {
+  width: 60px;
+  height: 60px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 14px;
+  background: var(--blue-10S);
+  color: var(--primary-color);
+  font-size: 26px;
+  font-weight: 700;
+}
+
+.identificacao {
+  flex: 1;
+  min-width: 180px;
+}
+
+.identificacao h2 {
+  margin: 0 0 5px;
+  font-size: 21px;
+  font-weight: 700;
+  color: var(--neutral-40B);
+}
+
+.identificacao p {
+  margin: 0 0 7px;
+  font-size: 14px;
+  color: var(--neutral-50B);
+  overflow-wrap: anywhere;
+}
+
+.id {
+  font-size: 12px;
+  color: var(--neutral-60B);
+}
+
+.status {
+  padding: 7px 13px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.ativo {
+  background: var(--green-10);
+  color: var(--green-60);
+}
+
+.inativo {
+  background: var(--neutral-100B);
+  color: var(--neutral-50B);
+}
+
+.divisor {
+  height: 1px;
+  margin: 26px 0;
+  background: var(--neutral-90B);
+}
+
+.secaoTitulo {
+  margin-bottom: 20px;
+}
+
+.secaoTitulo h3 {
+  margin: 0 0 6px;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--blue-40B);
+}
+
+.secaoTitulo p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--neutral-60B);
+}
+
+.grade {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.campo {
+  min-width: 0;
+  padding: 16px;
+  border: 1px solid var(--neutral-100B);
+  border-radius: 10px;
+  background: #fafbff;
+}
+
+.campo span {
+  display: block;
+  margin-bottom: 9px;
+  font-size: 12px;
+  color: var(--neutral-60B);
+}
+
+.campo strong {
+  display: block;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--neutral-40B);
+  overflow-wrap: anywhere;
+}
+
+.estado {
+  padding: 24px;
+  border: 1px solid var(--neutral-90B);
+  border-radius: 12px;
+  color: var(--neutral-50B);
+  background: var(--white);
+  font-size: 14px;
+}
+
+@media (max-width: 800px) {
+  .grade {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .container {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .grade {
+    grid-template-columns: 1fr;
+  }
+
+  .cabecalho {
+    align-items: flex-start;
+  }
+
+  .status {
+    margin-left: 0;
+  }
+}

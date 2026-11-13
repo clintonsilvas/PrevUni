@@ -1,0 +1,153 @@
+.navbar{
+    width:100%;
+    height:72px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 24px;
+    background:#fff;
+    position: sticky;
+    box-sizing:border-box;
+}
+
+.left{
+    display:flex;
+    align-items:center;
+    gap:48px;
+}
+
+.logo{
+    width:150px;
+}
+
+.links{
+    display:flex;
+    align-items:center;
+    gap:40px;
+}
+
+.links a{
+    text-decoration:none;
+    color:#6B7799;
+    font-size:14px;
+    font-weight:600;
+    transition:.2s;
+}
+
+.links a:hover{
+    color:#2563EB;
+}
+
+.active{
+    color:#2563EB !important;
+}
+
+.right{
+    display:flex;
+    align-items:center;
+    gap:18px;
+}
+
+.search{
+    display:flex;
+    align-items:center;
+    overflow:hidden;
+    border-radius:40px;
+    border: 1px solid #E0E9FF;    
+}
+
+.search input{
+    width:220px;
+    border:none;
+    background:transparent;
+    outline:none;
+    padding:12px 18px;
+    font-size:14px;
+}
+
+input::placeholder{
+    font-weight: 500;
+    color: #8F98B2;
+}
+
+.search button{
+    width:44px;
+    height:44px;
+    border:none;
+    background: #fff;    
+}
+.search img{
+    padding: 2px;
+}
+
+.avatar{
+    width:42px;
+    height:42px;
+    border-radius:50%;
+    object-fit:cover;
+    cursor:pointer;
+}
+
+.menuButton{
+    display:none;
+    background:none;
+    border:none;
+    font-size:32px;
+    cursor:pointer;
+}
+
+.mobileMenu{
+    display:none;
+}
+
+@media(max-width:900px){
+    .navbar{
+        height:auto;
+        flex-wrap:wrap;
+        padding:16px;
+    }
+
+    .left{
+        width:100%;
+        justify-content:space-between;
+    }
+
+    .links{
+        display:none;
+    }
+    .right{
+        display:none;
+    }
+
+    .menuButton{
+        display:block;
+        position:absolute;
+        right:16px;
+        top:18px;
+    }
+
+    .mobileMenu{
+        width:100%;
+        display:none;
+        flex-direction:column;
+        margin-top:24px;
+        gap:10px;
+    }
+
+    .mobileMenu a{
+        text-decoration:none;
+        color:#495580;
+        font-weight:600;
+        padding:12px;
+        border-radius:8px;
+    }
+
+    .mobileMenu a:hover{
+        background:#EEF2FA;
+    }
+
+    .open{
+        display:flex;
+    }
+
+}

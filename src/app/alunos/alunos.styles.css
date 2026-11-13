@@ -1,0 +1,216 @@
+.alunos-page {
+  background-color: var(--neutral-100B);
+  margin: 0px 16px;
+  border-radius: 16px;
+  border: 1px solid #e0e9ff;
+  padding: 32px 40px 48px;
+  min-height: calc(100vh - 73px - 48px);
+}
+
+.alunos-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.alunos-title {
+  font-size: 32px;
+  font-weight: 700;
+  color: var(--neutral-40B);
+  margin-bottom: 0;
+}
+
+/* Filtro ativo idêntico ao de disciplinas */
+.alunos-filtro-ativo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  background-color: var(--blue-10S);
+  border: 1px solid var(--blue-20S);
+  color: var(--primary-color);
+  border-radius: 12px;
+  padding: 10px 16px;
+  font-size: 14px;
+  margin-bottom: 16px;
+}
+
+.alunos-filtro-ativo strong {
+  color: var(--neutral-40B);
+}
+
+.alunos-filtro-ativo a {
+  color: var(--primary-color);
+  font-weight: 600;
+  text-decoration: underline;
+  white-space: nowrap;
+}
+
+.alunos-search {
+  display: flex;
+  padding: 12px 12px 12px 24px;
+  justify-content: space-between;
+  align-items: center;
+  align-self: stretch;
+  gap: 16px;
+  background-color: var(--white);
+  border: 1px solid #e0e9ff;
+  border-radius: 110.992px;
+  margin-bottom: 24px;
+}
+
+.alunos-search-button button {
+  min-height: 40px;
+  padding: 8px 24px;
+}
+
+.alunos-search-input {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  color: var(--neutral-60B);
+}
+
+.alunos-search-input input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+}
+
+.alunos-search-submit-mobile {
+  display: none;
+}
+
+.alunos-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.alunos-count {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--neutral-50B);
+}
+
+.alunos-sort-desktop {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.alunos-sort-desktop>span {
+  font-size: 14px;
+  color: var(--neutral-60B);
+  margin-right: 4px;
+}
+
+.alunos-sort-pill {
+  border: 1px solid var(--neutral-90B);
+  background-color: var(--white);
+  color: var(--neutral-60B);
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+
+.alunos-sort-pill:hover {
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.alunos-sort-pill-active {
+  background-color: #fff3c4;
+  border-color: #fff3c4;
+  color: var(--neutral-40B);
+}
+
+/* Mobile ordenação */
+.alunos-sort-mobile {
+  display: none;
+}
+
+.alunos-grid {
+  display: row;
+  justify-content: center;
+  gap: 30px;
+}
+
+.alunos-empty {
+  margin-top: 40px;
+  text-align: center;
+  color: #666;
+  font-size: 15px;
+}
+
+/* Responsivo */
+@media (max-width: 768px) {
+  .alunos-page {
+    padding: 24px 5%;
+  }
+
+  .alunos-title {
+    font-size: 26px;
+  }
+
+  .alunos-search-button {
+    display: none;
+  }
+
+  .alunos-search-submit-mobile {
+    display: block;
+  }
+
+  .alunos-toolbar {
+    align-items: flex-start;
+    gap: 16px;
+  }
+
+  .alunos-sort-desktop {
+    display: none;
+  }
+
+  .alunos-sort-mobile {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .alunos-sort-mobile>span {
+    font-size: 13px;
+  }
+
+  .alunos-sort-mobile-select {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .alunos-sort-mobile-select select {
+    appearance: none;
+    height: 34px;
+    padding: 0 28px 0 10px;
+    border: 1px solid #ddd;
+    border-radius: 7px;
+    background: #fff;
+    font-size: 13px;
+  }
+
+  .alunos-sort-mobile-select svg {
+    position: absolute;
+    right: 8px;
+    pointer-events: none;
+  }
+}

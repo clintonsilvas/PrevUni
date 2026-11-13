@@ -3,13 +3,13 @@ import { SignJWT, jwtVerify } from "jose";
 const secret = new TextEncoder().encode(
   process.env.JWT_SECRET
 );
-console.log("JWT SECRET:", process.env.JWT_SECRET);
+console.log("JWT_SECRET está carregada?", Boolean(process.env.JWT_SECRET));
 export class JwtService {
 
   async gerarToken(payload: {
     id: string;
     instituicaoId: string;
-    tipo: "coordenador" | "professor";
+    tipo: "coordenador" | "professor" | "admin";
   }) {
 
     return await new SignJWT(payload)
@@ -24,22 +24,14 @@ export class JwtService {
 
 
   async validarToken(token: string) {
-
     try {
-
       const { payload } = await jwtVerify(
         token,
         secret
       );
-
       return payload;
-
     } catch {
-
       return null;
-
     }
-
   }
-
 }

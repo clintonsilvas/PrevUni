@@ -1,0 +1,30 @@
+.conteudo {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.8fr) minmax(0, 1.5fr);
+  gap: 24px;
+  align-items: start;
+  width: 100%;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 32px;
+  box-sizing: border-box;
+}
+
+.dadosAluno,
+.historicoEvasao {
+  min-width: 0;
+}
+
+@media (max-width: 900px) {
+  .conteudo {
+    grid-template-columns: 1fr;
+    padding: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .conteudo {
+    padding: 12px;
+    gap: 16px;
+  }
+}

@@ -17,6 +17,15 @@ export class SyncService {
         throw new Error("Instituição não encontrada.");
       }
 
+      await this.firestore.salvar(
+        "instituicoes",
+        instituicaoId,
+        {
+          statusSincronizacao: "em_andamento",
+          ultimaTentativaSincronizacao: new Date(),
+        }
+      );
+
       const dados = await this.api.getDados(instituicao.api);
       
 
@@ -48,13 +57,31 @@ export class SyncService {
       console.log(`Instituição ${instituicao.sigla} sincronizada.`);
     } catch (error) {
       console.error(error);
-
+      
       await this.firestore.salvar("instituicoes", instituicaoId, {
         statusSincronizacao: "erro",
         ultimaTentativaSincronizacao: new Date(),
       });
 
       throw error;
+    }
+  }
+
+  async sincronizarvarias(instituicoes: Instituicao[]): Promise<void> {
+    const resultados = await Promise.allSettled(
+      instituicoes.map((instituicao) =>
+        this.sincronizar(instituicao.id)
+      )
+    );
+
+    const falhas = resultados.filter(
+      (resultado) => resultado.status === "rejected"
+    );
+
+    if (falhas.length > 0) {
+      throw new Error(
+        `${falhas.length} de ${instituicoes.length} sincronizações falharam.`
+      );
     }
   }
 }

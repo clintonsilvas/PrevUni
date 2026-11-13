@@ -1,0 +1,7 @@
+allowBuilds:
+  '@firebase/util': true
+  protobufjs: true
+  sharp: true
+  unrs-resolver: true
+minimumReleaseAgeExclude:
+  - openai@7.45.1

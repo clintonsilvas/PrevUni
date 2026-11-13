@@ -1,3 +1,4 @@
+import { Timestamp } from "firebase/firestore";
 export interface Instituicao {
   id: string;
   nome: string;
@@ -7,6 +8,14 @@ export interface Instituicao {
   estado: string;
   api: string;
   dominio:string;
+}
+
+export interface Admin {
+  id: string;
+  instituicaoId: string;
+  nome: string;
+  email: string; 
+  matricula: string; //será usada como senha
 }
 
 export interface Coordernador {
@@ -59,9 +68,9 @@ export interface Matricula {
   alunoId: string;
   disciplinaId: string;
   semestre: string;
-  situacao: "aprovado" | "matriculado" | "pendente";
+  situacao: "aprovado" | "matriculado" | "pendente" | "reprovado";
   cargaHorariaCumprida: number;
-  nota: number | null; // caso for null, o aluno ainda não cursou essa disciplina
+  nota: number | null; 
 }
 
 export interface PrevUniData {
@@ -86,3 +95,31 @@ Essas são as regras:
 * Uma disciplina pode ter uma mais matrículas
 * Uma matrícula deve ter um aluno
 */
+
+export interface DadosEvasao {
+  id: string;
+  media_notas: number;
+  taxa_aprovacao: number;
+  total_ch_cumprida: number;
+  total_reprovacoes_pendencias: number;
+  percentual_conclusao_curso: number;
+}
+
+export interface Evasao {
+  id: string;
+  alunoId: string;
+
+  probabilidadeEvasaoPercent: number;
+  nivelRisco: "baixo" | "medio" | "alto";
+
+  data: Timestamp;
+
+  // Guarda os dados que foram enviados para a RNA
+  dadosEntrada: {
+    media_notas: number;
+    taxa_aprovacao: number;
+    total_ch_cumprida: number;
+    total_reprovacoes_pendencias: number;
+    percentual_conclusao_curso: number;
+  };
+}

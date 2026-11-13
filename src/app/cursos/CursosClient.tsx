@@ -1,9 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import Footer from "@/components/Footer/Footer";
+import { useEffect, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import Header from "@/components/header/header.component";
 import CourseCard from "@/components/courseCard/courseCard.component";
 import Button from "@/components/button/button.component";
+import ExportMenu from "@/components/exportMenu/exportMenu.component";
 import {
   LupaIcon,
   SearchButtonIcon,
@@ -14,32 +18,64 @@ import "./cursos.style.css";
 
 interface CursosClientProps {
   usuarioNome: string;
-  cursos: CursoResumo[];
+  tipoUsuario?: "coordenador" | "professor" | "admin";
 }
 
-type Ordenacao =
-  | "az"
-  | "mais-alunos"
-  | "engajamento-alto"
-  | "engajamento-medio"
-  | "engajamento-baixo";
+type Ordenacao = "az" | "mais-alunos" | "mais-disciplinas";
 
 const OPCOES_ORDENACAO: { valor: Ordenacao; label: string }[] = [
   { valor: "az", label: "(A-Z)" },
-  { valor: "mais-alunos", label: "Mais Alunos" },
-  { valor: "engajamento-alto", label: "Engajamento Alto" },
-  { valor: "engajamento-medio", label: "Engajamento Médio" },
-  { valor: "engajamento-baixo", label: "Engajamento Baixo" },
+  { valor: "mais-alunos", label: "Quantidade de Alunos" },
+  { valor: "mais-disciplinas", label: "Quantidade de Disciplinas" },
 ];
 
-function CursosClient({ usuarioNome, cursos }: CursosClientProps) {
+function CursosClient({ usuarioNome, tipoUsuario }: CursosClientProps) {
+  const router = useRouter();
+
+  const [cursos, setCursos] = useState<CursoResumo[]>([]);
+  const [carregando, setCarregando] = useState(true);
+  const [erro, setErro] = useState<string | null>(null);
   const [busca, setBusca] = useState("");
   const [ordenacao, setOrdenacao] = useState<Ordenacao>("az");
+
+  useEffect(() => {
+    async function buscarCursos() {
+      setCarregando(true);
+      setErro(null);
+
+      try {
+        const resposta = await fetch("/api/cursos");
+
+        if (resposta.status === 401) {
+          router.push("/login");
+          return;
+        }
+
+        const json = await resposta.json();
+
+        if (!resposta.ok || !json.success) {
+          throw new Error(
+            json.message ?? "Não foi possível carregar os cursos."
+          );
+        }
+
+        setCursos(json.data);
+      } catch {
+        setErro(
+          "Não foi possível carregar os cursos. Tente novamente em instantes."
+        );
+      } finally {
+        setCarregando(false);
+      }
+    }
+
+    buscarCursos();
+  }, [router]);
 
   const cursosFiltrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
 
-    let resultado = cursos.filter((curso) => {
+    const resultado = cursos.filter((curso) => {
       if (!termo) return true;
       return (
         curso.nome.toLowerCase().includes(termo) ||
@@ -47,35 +83,56 @@ function CursosClient({ usuarioNome, cursos }: CursosClientProps) {
       );
     });
 
-    if (ordenacao === "engajamento-alto") {
-      resultado = resultado.filter((curso) => curso.engajamento >= 70);
-    } else if (ordenacao === "engajamento-medio") {
-      resultado = resultado.filter(
-        (curso) => curso.engajamento >= 40 && curso.engajamento < 70
-      );
-    } else if (ordenacao === "engajamento-baixo") {
-      resultado = resultado.filter((curso) => curso.engajamento < 40);
-    }
-
-    resultado = [...resultado].sort((a, b) => {
+    return [...resultado].sort((a, b) => {
       if (ordenacao === "mais-alunos") {
         return b.quantidadeAlunos - a.quantidadeAlunos;
       }
-      if (ordenacao.startsWith("engajamento")) {
-        return b.engajamento - a.engajamento;
+      if (ordenacao === "mais-disciplinas") {
+        return b.quantidadeDisciplinas - a.quantidadeDisciplinas;
       }
       return a.nome.localeCompare(b.nome, "pt-BR");
     });
-
-    return resultado;
   }, [busca, cursos, ordenacao]);
+
+  const colunasExport = useMemo(
+    () => [
+      { chave: "nome", label: "Curso" },
+      { chave: "coordenadorNome", label: "Coordenador" },
+      { chave: "quantidadeDisciplinas", label: "Disciplinas" },
+      { chave: "quantidadeAlunos", label: "Alunos" },
+      { chave: "quantidadeAlunosAtivos", label: "Alunos Ativos" },
+      { chave: "engajamento", label: "Engajamento (%)" },
+    ],
+    []
+  );
+
+  const dadosExport = useMemo(
+    () =>
+      cursosFiltrados.map((curso) => ({
+        nome: curso.nome,
+        coordenadorNome: curso.coordenadorNome,
+        quantidadeDisciplinas: curso.quantidadeDisciplinas,
+        quantidadeAlunos: curso.quantidadeAlunos,
+        quantidadeAlunosAtivos: curso.quantidadeAlunosAtivos,
+        engajamento: curso.engajamento,
+      })),
+    [cursosFiltrados]
+  );
 
   return (
     <>
-      <Header usuarioNome={usuarioNome} />
+      <Header usuarioNome={usuarioNome} tipoUsuario={tipoUsuario} />
 
       <main className="cursos-page">
-        <h1 className="cursos-title">Cursos</h1>
+        <div className="cursos-title-row">
+          <h1 className="cursos-title">Cursos</h1>
+
+          <ExportMenu
+            nomeArquivo="cursos"
+            colunas={colunasExport}
+            dados={dadosExport}
+          />
+        </div>
 
         <div className="cursos-search">
           <div className="cursos-search-input">
@@ -145,25 +202,30 @@ function CursosClient({ usuarioNome, cursos }: CursosClientProps) {
           </label>
         </div>
 
-        <div className="cursos-grid">
-          {cursosFiltrados.map((curso) => (
-            <CourseCard key={curso.id} curso={curso} />
-          ))}
-        </div>
+        {carregando && <p className="cursos-status">Carregando cursos...</p>}
 
-        {cursosFiltrados.length === 0 && (
-          <p className="cursos-empty">
-            Nenhum curso encontrado para essa busca.
-          </p>
+        {!carregando && erro && (
+          <p className="cursos-status cursos-status-erro">{erro}</p>
+        )}
+
+        {!carregando && !erro && (
+          <>
+            <div className="cursos-grid">
+              {cursosFiltrados.map((curso) => (
+                <CourseCard key={curso.id} curso={curso} />
+              ))}
+            </div>
+
+            {cursosFiltrados.length === 0 && (
+              <p className="cursos-empty">
+                Nenhum curso encontrado para essa busca.
+              </p>
+            )}
+          </>
         )}
       </main>
 
-      <footer className="cursos-footer">
-        <p>2026 PrevUni - Todos os direitos reservados</p>
-        <div className="cursos-footer-logo">
-          <img src="/logo-prevuni.svg" alt="PrevUni" />
-        </div>
-      </footer>
+      <Footer />
     </>
   );
 }

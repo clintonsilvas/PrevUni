@@ -8,20 +8,34 @@ import "./header.style.css";
 
 interface HeaderProps {
   usuarioNome: string;
+  tipoUsuario?: "coordenador" | "professor" | "admin";
 }
 
 const LINKS = [
-  { label: "Instituições", href: "/instituicoes" },
   { label: "Cursos", href: "/cursos" },
   { label: "Disciplinas", href: "/disciplinas" },
   { label: "Alunos", href: "/alunos" },
-  { label: "Coordenadores", href: "/coordenadores" },
-  { label: "Professores", href: "/professores" },
+  {
+    label: "Coordenadores",
+    href: "/coordenadores",
+    visivelPara: ["admin"],
+  },
+  /*
+{
+    label: "Professores",
+    href: "/professores",
+    visivelPara: ["admin", "coordenador"],
+  },
+*/ 
 ];
 
-function Header({ usuarioNome }: HeaderProps) {
+function Header({ usuarioNome, tipoUsuario }: HeaderProps) {
   const pathname = usePathname();
   const router = useRouter();
+
+  const links = LINKS.filter(
+    (link) => !link.visivelPara || link.visivelPara.includes(tipoUsuario ?? "")
+  );
 
   const [menuAberto, setMenuAberto] = useState(false);
   const [opcoesAbertas, setOpcoesAbertas] = useState(false);
@@ -49,7 +63,7 @@ function Header({ usuarioNome }: HeaderProps) {
         </Link>
 
         <nav className="app-header-nav">
-          {LINKS.map((link) => (
+          {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -88,6 +102,9 @@ function Header({ usuarioNome }: HeaderProps) {
 
         {opcoesAbertas && (
           <div className="app-header-options">
+            <Link href="/meus-dados" onClick={() => setOpcoesAbertas(false)}>
+              Meus dados
+            </Link>
             <button onClick={sair}>Sair</button>
           </div>
         )}
@@ -95,7 +112,7 @@ function Header({ usuarioNome }: HeaderProps) {
 
       {menuAberto && (
         <nav className="app-header-mobile-nav">
-          {LINKS.map((link) => (
+          {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
@@ -128,6 +145,9 @@ function Header({ usuarioNome }: HeaderProps) {
 
           {opcoesAbertas && (
             <div className="app-header-options app-header-options-mobile">
+              <Link href="/meus-dados" onClick={() => setOpcoesAbertas(false)}>
+                Meus dados
+              </Link>
               <button onClick={sair}>Sair</button>
             </div>
           )}

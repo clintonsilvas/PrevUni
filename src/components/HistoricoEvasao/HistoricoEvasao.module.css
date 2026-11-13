@@ -1,0 +1,333 @@
+.container {
+  width: 100%;
+  padding: 24px;
+  box-sizing: border-box;
+  background: var(--white);
+  border: 1px solid var(--neutral-90B);
+  border-radius: 16px;
+  color: var(--neutral-40B);
+}
+
+.cabecalho,
+.detalhesCabecalho {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.titulo {
+  margin: 0;
+  color: var(--blue-40B);
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.subtitulo {
+  margin: 8px 0 0;
+  color: var(--neutral-60B);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.total {
+  padding: 7px 11px;
+  border-radius: 8px;
+  background: var(--blue-10S);
+  color: var(--blue-50B);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.graficoWrapper {
+  margin-top: 26px;
+  padding: 18px 12px 10px;
+  border: 1px solid var(--neutral-100B);
+  border-radius: 12px;
+  background: #fafbff;
+}
+
+.legenda {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 12px 12px;
+  color: var(--neutral-50B);
+  font-size: 12px;
+}
+
+.legendaPonto {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--primary-color);
+}
+
+.graficoScroll {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.grafico {
+  display: block;
+  width: 100%;
+  min-width: 460px;
+  overflow: visible;
+}
+
+.gradeLinha {
+  stroke: var(--neutral-90B);
+  stroke-width: 1;
+  stroke-dasharray: 4 4;
+}
+
+.textoEixo {
+  fill: var(--neutral-60B);
+  font-size: 11px;
+}
+
+.linhaGrafico {
+  fill: none;
+  stroke: var(--primary-color);
+  stroke-width: 3;
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.areaGrafico {
+  fill: var(--blue-20S);
+  opacity: 0.4;
+}
+
+.ponto {
+  fill: var(--white);
+  stroke: var(--primary-color);
+  stroke-width: 2.5;
+  cursor: pointer;
+  transition: r 0.15s ease;
+}
+
+.ponto:hover,
+.ponto:focus {
+  fill: var(--blue-30S);
+  outline: none;
+}
+
+.pontoSelecionado {
+  fill: var(--primary-color);
+  stroke: var(--white);
+  stroke-width: 3;
+  cursor: pointer;
+}
+
+.pontoSelecionado:focus {
+  outline: none;
+  stroke: var(--blue-40S);
+  stroke-width: 5;
+}
+
+.valorPonto {
+  fill: var(--blue-50B);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.instrucao {
+  margin: 10px 0 0;
+  color: var(--neutral-60B);
+  font-size: 12px;
+  text-align: center;
+}
+
+.detalhes {
+  margin-top: 24px;
+  padding-top: 22px;
+  border-top: 1px solid var(--neutral-90B);
+}
+
+.rotulo {
+  color: var(--neutral-60B);
+  font-size: 12px;
+}
+
+.detalhesCabecalho h4 {
+  margin: 7px 0 0;
+  color: var(--neutral-40B);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.risco {
+  padding: 7px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.riscoBaixo {
+  background: var(--green-10);
+  color: var(--green-60);
+}
+
+.riscoMedio {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.riscoAlto {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.riscoDesconhecido {
+  background: var(--neutral-100B);
+  color: var(--neutral-50B);
+}
+
+.resumo {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 20px;
+}
+
+.resumo > div {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 18px;
+  border: 1px solid var(--neutral-100B);
+  border-radius: 10px;
+  background: #fafbff;
+}
+
+.resumo span {
+  color: var(--neutral-60B);
+  font-size: 12px;
+}
+
+.resumo strong {
+  color: var(--neutral-40B);
+  font-size: 17px;
+}
+
+.resumo .probabilidade {
+  color: var(--primary-color);
+  font-size: 26px;
+  font-weight: 750;
+}
+
+.tituloDados {
+  margin: 24px 0 14px;
+  color: var(--blue-40B);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.gradeDados {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.campo {
+  min-width: 0;
+  padding: 15px;
+  border: 1px solid var(--neutral-100B);
+  border-radius: 10px;
+}
+
+.campo span {
+  display: block;
+  margin-bottom: 9px;
+  color: var(--neutral-60B);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.campo strong {
+  color: var(--neutral-40B);
+  font-size: 15px;
+  overflow-wrap: anywhere;
+}
+
+.mensagem {
+  margin: 20px 0 0;
+  color: var(--neutral-60B);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.skeletonTitulo,
+.skeletonTexto,
+.skeletonGrafico {
+  border-radius: 8px;
+  background: var(--neutral-100B);
+  animation: pulsar 1.3s ease-in-out infinite alternate;
+}
+
+.skeletonTitulo {
+  width: 220px;
+  height: 22px;
+}
+
+.skeletonTexto {
+  width: 310px;
+  max-width: 90%;
+  height: 13px;
+  margin-top: 12px;
+}
+
+.skeletonGrafico {
+  height: 250px;
+  margin-top: 24px;
+}
+
+@keyframes pulsar {
+  from {
+    opacity: 0.5;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (max-width: 700px) {
+  .container {
+    padding: 18px;
+  }
+
+  .gradeDados {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .resumo {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 440px) {
+  .gradeDados {
+    grid-template-columns: 1fr;
+  }
+
+  .graficoWrapper {
+    padding-right: 6px;
+    padding-left: 6px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeletonTitulo,
+  .skeletonTexto,
+  .skeletonGrafico {
+    animation: none;
+  }
+
+  .ponto {
+    transition: none;
+  }
+}

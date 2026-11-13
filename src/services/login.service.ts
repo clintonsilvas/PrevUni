@@ -1,19 +1,18 @@
 import { FirestoreService } from "@/services/firestore.service";
 import { Coordernador, Professor } from "@/interfaces/types";
+import { Admin } from "@/interfaces/types";
 
 export class LoginService {
-
   private firestore = new FirestoreService();
-
   async login(
     instituicaoId: string,
     email: string,
     senha: string
   ) {
 
-    let tipo: "coordenador" | "professor" = "coordenador";
+    let tipo: "coordenador" | "professor" | "admin" = "coordenador";
 
-    let usuario = await this.firestore.buscarPorCampo<Coordernador>(
+    let usuario= await this.firestore.buscarPorCampo<Coordernador>(
       `instituicoes/${instituicaoId}/coordenadores`,
       "email",
       email
@@ -29,6 +28,15 @@ export class LoginService {
         email
       );
 
+    }
+    if(!usuario.length){
+      tipo = "admin"
+
+      usuario = await this.firestore.buscarPorCampo<Admin>(
+        `instituicoes/${instituicaoId}/admins`,
+        "email",
+        email
+      );
     }
 
     if (!usuario.length) {

@@ -1,23 +1,46 @@
 .cursos-page {
   background-color: var(--neutral-100B);
+  margin: 0px 16px;
+
+  border-radius: 16px;
+  border: 1px solid #e0e9ff;
+
   padding: 32px 40px 48px;
-  min-height: calc(100vh - 73px);
+  min-height: calc(100vh - 73px - 48px);
+
+}
+
+.cursos-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .cursos-title {
   font-size: 32px;
   font-weight: 700;
   color: var(--neutral-40B);
-  margin-bottom: 24px;
+  margin-bottom: 0;
 }
 
 .cursos-search {
   display: flex;
+  padding: 12px 12px 12px 24px;
+  justify-content: space-between;
+  align-items: center;
+  align-self: stretch;
   gap: 16px;
   background-color: var(--white);
-  padding: 8px;
-  border-radius: 999px;
+  border: 1px solid #e0e9ff;
+  border-radius: 110.992px;
   margin-bottom: 24px;
+}
+
+.cursos-search-button button {
+  min-height: 40px;
+  padding: 8px 24px;
 }
 
 .cursos-search-input {
@@ -25,7 +48,6 @@
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 0 16px;
   color: var(--neutral-60B);
 }
 
@@ -34,7 +56,6 @@
   border: none;
   outline: none;
   font-size: 15px;
-  min-height: 48px;
 }
 
 .cursos-search-submit-mobile {
@@ -103,40 +124,22 @@
   gap: 16px;
 }
 
+.cursos-status {
+  margin-top: 24px;
+  color: var(--neutral-60B);
+  text-align: center;
+}
+
+.cursos-status-erro {
+  color: #b02a1e;
+}
+
 .cursos-empty {
   margin-top: 24px;
   color: var(--neutral-60B);
   text-align: center;
 }
 
-.cursos-footer {
-  text-align: center;
-  padding: 24px 20px;
-  color: var(--neutral-70B);
-  font-size: 13px;
-  border-top: 1px solid var(--neutral-100B);
-  background-color: var(--white);
-}
-
-.cursos-footer {
-  width: 100%;
-  height: 22px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  opacity: 1;
-}
-
-.cursos-footer-logo {
-  display: flex;
-  align-items: center;
-}
-
-.cursos-footer-logo img,
-.cursos-footer-logo svg {
-  height: 22px;
-  width: auto;
-}
 
 @media (max-width: 1200px) {
   .cursos-grid {
@@ -153,6 +156,11 @@
 @media (max-width: 768px) {
   .cursos-page {
     padding: 20px;
+  }
+
+  .cursos-title-row {
+    justify-content: flex-end;
+    margin-bottom: 16px;
   }
 
   .cursos-title {
