@@ -14,7 +14,7 @@ interface DadosEntrada {
 interface PrevisaoEvasao {
   id: string;
   alunoId: string;
-  probabilidadeEvasaoPercent: number;
+  probabilidadeEvasaoPercent: number | null;
   nivelRisco: string;
   dadosEntrada?: DadosEntrada;
   data: string | Date | {
@@ -131,22 +131,27 @@ export function HistoricoEvasao({ alunoId }: Props) {
     const areaLargura = largura - margem.left - margem.right;
     const areaAltura = altura - margem.top - margem.bottom;
 
-    const pontos = historico.map((item, index) => {
-      const valor = Math.min(
-        100,
-        Math.max(0, item.probabilidadeEvasaoPercent)
-      );
+    const pontos = historico
+      .filter(
+        (item): item is typeof item & { probabilidadeEvasaoPercent: number } =>
+          item.probabilidadeEvasaoPercent !== null
+      )
+      .map((item, index) => {
+        const valor = Math.min(
+          100,
+          Math.max(0, item.probabilidadeEvasaoPercent)
+        );
 
-      const x =
-        margem.left +
-        (historico.length === 1
-          ? areaLargura / 2
-          : (index / (historico.length - 1)) * areaLargura);
+        const x =
+          margem.left +
+          (historico.length === 1
+            ? areaLargura / 2
+            : (index / (historico.length - 1)) * areaLargura);
 
-      const y = margem.top + (1 - valor / 100) * areaAltura;
+        const y = margem.top + (1 - valor / 100) * areaAltura;
 
-      return { item, x, y, valor };
-    });
+        return { item, x, y, valor };
+      });
 
     return {
       largura,
@@ -198,9 +203,8 @@ export function HistoricoEvasao({ alunoId }: Props) {
     switch (risco.toLowerCase()) {
       case "baixo":
         return styles.riscoBaixo;
-      case "medio":
-      case "médio":
-        return styles.riscoMedio;
+      case "moderado":
+        return styles.riscoModerado;
       case "alto":
         return styles.riscoAlto;
       default:
@@ -266,15 +270,11 @@ export function HistoricoEvasao({ alunoId }: Props) {
 
             {historico.length > 1 && (
               <path
-                d={`${grafico.linha} L ${
-                  grafico.pontos[grafico.pontos.length - 1].x
-                } ${
-                  grafico.altura - grafico.margem.bottom
-                } L ${
-                  grafico.pontos[0].x
-                } ${
-                  grafico.altura - grafico.margem.bottom
-                } Z`}
+                d={`${grafico.linha} L ${grafico.pontos[grafico.pontos.length - 1].x
+                  } ${grafico.altura - grafico.margem.bottom
+                  } L ${grafico.pontos[0].x
+                  } ${grafico.altura - grafico.margem.bottom
+                  } Z`}
                 className={styles.areaGrafico}
               />
             )}
@@ -368,7 +368,7 @@ export function HistoricoEvasao({ alunoId }: Props) {
             <div>
               <span>Probabilidade de evasão</span>
               <strong className={styles.probabilidade}>
-                {selecionado.probabilidadeEvasaoPercent.toLocaleString(
+                {selecionado.probabilidadeEvasaoPercent?.toLocaleString(
                   "pt-BR",
                   { maximumFractionDigits: 2 }
                 )}%

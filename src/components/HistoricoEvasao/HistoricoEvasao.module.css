@@ -172,7 +172,7 @@
   color: var(--green-60);
 }
 
-.riscoMedio {
+.riscoModerado {
   background: #fef3c7;
   color: #92400e;
 }
@@ -194,7 +194,7 @@
   margin-top: 20px;
 }
 
-.resumo > div {
+.resumo>div {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -290,6 +290,7 @@
   from {
     opacity: 0.5;
   }
+
   to {
     opacity: 1;
   }
@@ -321,6 +322,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+
   .skeletonTitulo,
   .skeletonTexto,
   .skeletonGrafico {

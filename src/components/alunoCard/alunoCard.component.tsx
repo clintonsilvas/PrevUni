@@ -15,12 +15,12 @@ export interface AlunoCardProps {
     id: string;
     nome: string;
   }[];
-  evasao?:{
-    id: string;    
+  evasao?: {
+    id: string;
     alunoId: string;
-    probabilidadeEvasaoPercent: number;
-    nivelRisco: "baixo" | "medio" | "alto";
-  }  
+    probabilidadeEvasaoPercent: number | null;
+    nivelRisco: "baixo" | "moderado" | "alto" | "sem_historico";
+  }
   onClick?: () => void;
 }
 
@@ -34,7 +34,7 @@ export default function AlunoCard({
   const qtdDisciplinas = disciplinas.length;
 
   return (
-    <div className="aluno-card" onClick={onClick}> 
+    <div className="aluno-card" onClick={onClick}>
       <div className="aluno-card-left">
         <AlunoIcon size={32} />
         <div className="aluno-card-text">

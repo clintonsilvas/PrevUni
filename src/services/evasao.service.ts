@@ -12,7 +12,7 @@ import { Timestamp } from "firebase/firestore";
 interface ResultadoRNA {
   id: string;
   probabilidade_evasao_percent: number;
-  nivel_risco: "baixo" | "medio" | "alto";
+  nivel_risco: "baixo" | "moderado" | "alto" | "sem_historico";
 }
 
 export class EvasaoService {
@@ -101,58 +101,40 @@ export class EvasaoService {
    */
   async calcularDadosAluno(
     aluno: Aluno,
-    curso: Curso | null,
+    curso: Curso,
     disciplinas: Disciplina[],
     matriculas: Matricula[]
   ): Promise<DadosEvasao> {
-    // CORREÇÃO: comparação por String() para não falhar por diferença de tipo
-    const matriculasDoAluno = matriculas.filter(
-      (m) => String(m.alunoId) === String(aluno.id)
+    const concluidas = matriculas.filter(
+      (m) => m.alunoId === aluno.id && m.situacao !== "matriculado"
     );
 
-    const disciplinasDoCurso = curso
-      ? disciplinas.filter((d) => String(d.cursoId) === String(curso.id))
-      : [];
-
-    // 1. Média das notas não nulas (CORREÇÃO: != null cobre undefined também)
-    const notasValidas = matriculasDoAluno
-      .filter((m) => m.nota != null)
-      .map((m) => Number(m.nota));
-
+    const notasValidas = concluidas
+      .filter((m) => m.nota !== null)
+      .map((m) => m.nota as number);
     const mediaNotas =
       notasValidas.length > 0
-        ? notasValidas.reduce((soma, nota) => soma + nota, 0) /
-        notasValidas.length
+        ? notasValidas.reduce((soma, nota) => soma + nota, 0) / notasValidas.length
         : 0;
 
-    const matriculasConcluidas = matriculasDoAluno.filter(
-      (m) => m.situacao === "aprovado" || m.situacao === "reprovado"
-    );
-
-    const totalAprovacoes = matriculasDoAluno.filter(
-      (m) => m.situacao === "aprovado"
-    ).length;
-
+    const totalAprovacoes = concluidas.filter((m) => m.situacao === "aprovado").length;
     const taxaAprovacao =
-      matriculasConcluidas.length > 0
-        ? totalAprovacoes / matriculasConcluidas.length
-        : 0;
+      concluidas.length > 0 ? totalAprovacoes / concluidas.length : 0;
 
-    const totalChCumprida = matriculasDoAluno
-      .filter((m) => m.situacao === "aprovado")
-      .reduce((soma, m) => soma + (m.cargaHorariaCumprida ?? 0), 0);
-
-    const totalReprovacoesPendencias = matriculasDoAluno.filter(
-      (m) => m.situacao === "reprovado" || m.situacao === "pendente"
-    ).length;
-
-    const cargaHorariaTotalCurso = disciplinasDoCurso.reduce(
-      (soma, d) => soma + (d.cargaHoraria ?? 0),
+    const totalChCumprida = concluidas.reduce(
+      (soma, m) => soma + m.cargaHorariaCumprida,
       0
     );
 
+    const totalReprovacoesPendencias = concluidas.filter(
+      (m) => m.situacao === "reprovado" || m.situacao === "pendente"
+    ).length;
+
+    const semestresConcluidos = new Set(concluidas.map((m) => m.semestre)).size;
     const percentualConclusaoCurso =
-      cargaHorariaTotalCurso > 0 ? totalChCumprida / cargaHorariaTotalCurso : 0;
+      curso.quantidadePeriodos > 0
+        ? Math.min(semestresConcluidos / curso.quantidadePeriodos, 1)
+        : 0;
 
     return {
       id: aluno.id,
