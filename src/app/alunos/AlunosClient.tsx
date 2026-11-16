@@ -14,11 +14,17 @@ import {
 } from "@/components/icons/icons";
 import "./alunos.styles.css";
 
-type Ordenacao = "az" | "mais-disciplinas";
+type Ordenacao =
+  | "az"
+  | "mais-disciplinas"
+  | "maior-risco"
+  | "menor-risco";
 
 const OPCOES_ORDENACAO: { valor: Ordenacao; label: string }[] = [
   { valor: "az", label: "(A-Z)" },
   { valor: "mais-disciplinas", label: "Quantidade de Disciplinas" },
+  { valor: "maior-risco", label: "Maior Risco" },
+  { valor: "menor-risco", label: "Menor Risco" },
 ];
 
 interface AlunoCompleto {
@@ -77,7 +83,6 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
 
       try {
         const resposta = await fetch("/api/alunos");
-
 
         if (resposta.status === 401) {
           router.push("/login");
@@ -170,6 +175,13 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
     buscarNomeDisciplina();
   }, [disciplinaIdParam]);
 
+  // Mapa alunoId -> evasão (evita .find repetido, importante com muitos alunos)
+  const evasaoPorAluno = useMemo(() => {
+    const mapa = new Map<string, Evasao>();
+    evasoes.forEach((e) => mapa.set(e.alunoId, e));
+    return mapa;
+  }, [evasoes]);
+
   // Identifica o nome do curso filtrado (prioriza os alunos, fallback para a API de cursos)
   const nomeCursoFiltrado = useMemo(() => {
     if (!cursoIdParam) return null;
@@ -189,7 +201,7 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
     return nomeDisciplinaApi ?? "Disciplina não encontrada";
   }, [alunos, disciplinaIdParam, nomeDisciplinaApi]);
 
-  // Filtro por texto, cursoId ou disciplinaId
+  // Filtro por texto, cursoId ou disciplinaId + ordenação
   const alunosFiltrados = useMemo(() => {
     const termo = busca.trim().toLowerCase();
 
@@ -219,9 +231,22 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
       if (ordenacao === "mais-disciplinas") {
         return b.disciplinas.length - a.disciplinas.length;
       }
+
+      if (ordenacao === "maior-risco" || ordenacao === "menor-risco") {
+        const pa = evasaoPorAluno.get(a.aluno.id)?.probabilidadeEvasaoPercent;
+        const pb = evasaoPorAluno.get(b.aluno.id)?.probabilidadeEvasaoPercent;
+
+        // Alunos sem dado de evasão sempre vão para o final
+        if (pa == null && pb == null) return 0;
+        if (pa == null) return 1;
+        if (pb == null) return -1;
+
+        return ordenacao === "maior-risco" ? pb - pa : pa - pb;
+      }
+
       return a.aluno.nome.localeCompare(b.aluno.nome, "pt-BR");
     });
-  }, [alunos, busca, ordenacao, cursoIdParam, disciplinaIdParam]);
+  }, [alunos, busca, ordenacao, cursoIdParam, disciplinaIdParam, evasaoPorAluno]);
 
   const colunasExport = useMemo(
     () => [
@@ -236,7 +261,7 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
   const dadosExport = useMemo(
     () =>
       alunosFiltrados.map((item) => {
-        const evasao = evasoes.find((e) => e.alunoId === item.aluno.id);
+        const evasao = evasaoPorAluno.get(item.aluno.id);
 
         return {
           nome: item.aluno.nome,
@@ -249,8 +274,9 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
             : "-",
         };
       }),
-    [alunosFiltrados, evasoes]
+    [alunosFiltrados, evasaoPorAluno]
   );
+
   return (
     <>
       <Header usuarioNome={usuarioNome} tipoUsuario={tipoUsuario} />
@@ -361,9 +387,7 @@ export default function AlunosClient({ usuarioNome, tipoUsuario }: AlunosClientP
           <>
             <div className="alunos-grid">
               {alunosFiltrados.map((item) => {
-                const evasao = evasoes.find(
-                  (e) => e.alunoId === item.aluno.id
-                );
+                const evasao = evasaoPorAluno.get(item.aluno.id);
 
                 return (
                   <AlunoCard
