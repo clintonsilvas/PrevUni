@@ -7,14 +7,14 @@ export interface Instituicao {
   cidade: string;
   estado: string;
   api: string;
-  dominio:string;
+  dominio: string;
 }
 
 export interface Admin {
   id: string;
   instituicaoId: string;
   nome: string;
-  email: string; 
+  email: string;
   matricula: string; //será usada como senha
 }
 
@@ -70,7 +70,7 @@ export interface Matricula {
   semestre: string;
   situacao: "aprovado" | "matriculado" | "pendente" | "reprovado";
   cargaHorariaCumprida: number;
-  nota: number | null; 
+  nota: number | null;
 }
 
 export interface PrevUniData {
@@ -109,8 +109,8 @@ export interface Evasao {
   id: string;
   alunoId: string;
 
-  probabilidadeEvasaoPercent: number;
-  nivelRisco: "baixo" | "medio" | "alto";
+  probabilidadeEvasaoPercent: number | null;
+  nivelRisco: "baixo" | "moderado" | "alto" | "sem_historico";
 
   data: Timestamp;
 

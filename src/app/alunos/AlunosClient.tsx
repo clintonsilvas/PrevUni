@@ -47,8 +47,8 @@ interface AlunoCompleto {
 interface Evasao {
   id: string;
   alunoId: string;
-  probabilidadeEvasaoPercent: number;
-  nivelRisco: "baixo" | "medio" | "alto";
+  probabilidadeEvasaoPercent: number | null;
+  nivelRisco: "baixo" | "moderado" | "alto" | "sem_historico";
 }
 
 interface AlunosClientProps {
